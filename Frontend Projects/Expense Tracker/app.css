@@ -1,0 +1,380 @@
+/* login css here  */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  background: #1e1e1e;
+  color: white;
+  font-family: Arial, Helvetica, sans-serif;
+  overflow-x: hidden;
+}
+
+#forms-container {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+.login-page .heading {
+  width: 300px;
+  align-items: center;
+  text-align: center;
+  margin-top: 50px;
+  line-height: 0px;
+  & h1 {
+    font-size: 56px;
+    width: 100%;
+    padding: 10px 20px;
+    & span {
+      font-size: 28px;
+    }
+  }
+  & h2 {
+    font-size: 50px;
+    & span {
+      color: rgb(27, 84, 241);
+    }
+  }
+}
+
+.details-section {
+  width: 100%;
+  height: 100vh;
+  padding-top: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  overflow: hidden;
+}
+.details-section form {
+  width: 30%;
+  margin-top: 80px;
+  & input {
+    width: 100%;
+    padding: 10px 20px;
+    font-size: 28px;
+    margin-bottom: 20px;
+    border: none;
+    outline: none;
+    border-radius: 10px;
+    background-color: #ffffff61;
+    box-shadow: inset 0px 2px 4px black, 0px 2px 4px black;
+    color: black;
+    transition: all 0.3s ease-in-out;
+    &::placeholder {
+      color: rgb(181, 181, 181);
+    }
+    &:hover {
+      background: rgb(152, 151, 151);
+    }
+    &:focus-within {
+      background: white;
+    }
+  }
+  & button {
+    width: 50%;
+    padding: 10px 20px;
+    font-size: 28px;
+    transition: all 0.1s ease-in-out;
+    border: none;
+    outline: none;
+    border-radius: 10px;
+    background-color: rgba(27, 84, 241, 0.699);
+    box-shadow: inset 2px 2px 4px white, 0px 2px 4px black;
+    cursor: pointer;
+    margin-top: 40px;
+    &:hover {
+      background-color: rgb(27, 84, 241);
+      color: white;
+    }
+    &:active {
+      scale: 0.9;
+    }
+  }
+}
+
+#signup-form {
+  /* margin-top: 30px; */
+  position: relative;
+  transform: translateY(100%);
+  transition: all 0.5s ease-in-out;
+  -webkit-transition: all 0.5s ease-in-out;
+  -moz-transition: all 0.5s ease-in-out;
+  -ms-transition: all 0.5s ease-in-out;
+  -o-transition: all 0.5s ease-in-out;
+}
+
+#login-form {
+  margin-top: 150px;
+  transform-origin: top;
+  transition: all 0.1s ease-in-out;
+  -webkit-transition: all 0.1s ease-in-out;
+  -moz-transition: all 0.1s ease-in-out;
+  -ms-transition: all 0.1s ease-in-out;
+  -o-transition: all 0.1s ease-in-out;
+}
+
+.signin {
+  position: absolute;
+  bottom: 0;
+  display: none;
+  padding: 10px 20px;
+  font-size: 36px;
+  transition: all 0.3s ease;
+  &:hover {
+    color: black;
+  }
+  cursor: pointer;
+}
+
+.signup {
+  cursor: pointer;
+  position: absolute;
+  bottom: 0;
+  padding: 10px 20px;
+  font-size: 36px;
+  transition: all 0.3s ease;
+  &:hover {
+    color: black;
+  }
+}
+.details-section::before {
+  content: "";
+  display: block;
+  width: 50vw;
+  height: 60px;
+  background-color: rgb(27, 84, 241);
+  position: absolute;
+  bottom: 0px;
+  border-radius: 100% 100% 0 0;
+  -webkit-border-radius: 100% 100% 0 0;
+  -moz-border-radius: 100% 100% 0 0;
+  -ms-border-radius: 100% 100% 0 0;
+  -o-border-radius: 100% 100% 0 0;
+}
+
+/* Add to style.css */
+.details-section .error {
+  border: 1px solid red;
+  color: red;
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0% {
+    /* Start position */
+    transform: translateX(0);
+    -webkit-transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-10px);
+    -webkit-transform: translateX(-10px);
+  }
+  50% {
+    transform: translateX(-10px);
+    -webkit-transform: translateX(-10px);
+  } /* Added missing closing brace */
+  75% {
+    transform: translateX(10px);
+    -webkit-transform: translateX(10px);
+  }
+  100% {
+    transform: translateX(0);
+    -webkit-transform: translateX(0);
+  }
+}
+
+/* Dashboard CSS  */
+
+#dashboard {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+}
+
+#dashboard .sidebar {
+  max-width: 300px;
+  width: 100%;
+  height: 100vh;
+  background-color: #fff;
+  color: black;
+  display: flex;
+  flex-direction: column;
+  align-items: left;
+  justify-content: space-between;
+  position: fixed;
+  left: 0;
+  & img {
+    width: 30px;
+  }
+}
+#dashboard .sidebar header {
+  font-size: 20px;
+  margin-top: 70px;
+  & span {
+    color: rgb(27, 84, 241);
+  }
+}
+
+#dashboard .sidebar .nav {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  & ul {
+    width: 100%;
+    & li {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      width: 90%;
+      padding: 20px 30px;
+      font-size: 28px;
+      margin-bottom: 20px;
+      transition: all 0.3s ease-in-out;
+      cursor: pointer;
+      &:hover {
+        background-color: rgb(27, 84, 241);
+        border-radius: 0px 50px 50px 0px;
+        color: white;
+        box-shadow: 0px 4px 4px rgb(144, 174, 255), 0px 8px 8px black,
+          inset 10px 8px 40px 4px black;
+        img {
+          filter: brightness(0) invert(1); /* Makes image white on hover */
+        }
+      }
+    }
+  }
+}
+
+#dashboard .logOut {
+  width: 90%;
+  display: flex;
+  padding: 20px 3px;
+  margin-bottom: 30px;
+  align-items: center;
+  transition: all 0.3s ease-in-out;
+  cursor: pointer;
+  &:hover {
+    background-color: rgb(27, 84, 241);
+    border-radius: 0px 50px 50px 0px;
+    color: white;
+    box-shadow: 0px 4px 4px rgb(144, 174, 255), 0px 8px 8px black,
+      inset 10px 8px 40px 4px black;
+  }
+  & span {
+    margin-left: 30px;
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    font-size: 24px;
+  }
+}
+
+.main-dash #dash-header {
+  width: 100vw;
+  margin-left: 600px;
+  & h1 {
+    width: 100%;
+    color: white;
+    text-align: left;
+    padding: 10px 20px;
+  }
+}
+
+.main-dash .expenses-total {
+  margin-top: 50px;
+  width: 70%;
+  margin-left: 600px;
+  display: grid;
+  grid-template-columns: 3fr 600px 1fr;
+}
+.main-dash .expenses-total > div {
+  margin-left: 20px;
+  display: flex;
+  flex-direction: column;
+  background-color: #fff;
+  color: black;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 4px rgb(58, 94, 255);
+}
+
+.main-dash .expense .heading {
+  display: flex;
+  justify-content: space-between;
+  font-size: 24px;
+  & button {
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: none;
+    outline: none;
+    box-shadow: 0px 2px 4px black;
+    background-color: rgb(158, 175, 255);
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    &:hover {
+      background-color: rgb(27, 84, 241);
+      border-radius: 50px;
+      color: white;
+      box-shadow: 0px 4px 4px rgb(144, 174, 255), 0px 8px 8px black,
+        inset 10px 8px 40px 4px black;
+    }
+    &:active {
+      scale: 0.9;
+    }
+  }
+}
+.main-dash .expense .details {
+  display: flex;
+  gap: 30px;
+  margin-top: 50px;
+  justify-content: space-evenly;
+  perspective: 500px; /* Creates 3D viewing space */
+  transform-style: preserve-3d;
+  & div {
+    color: white;
+    width: 200px;
+    background: linear-gradient(180deg, rgb(73, 0, 156), rgb(144, 174, 255));
+    padding: 20px;
+    border-radius: 40px;
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    justify-content: center;
+    gap: 30px;
+    transition: all 0.3s ease-in-out;
+    &:hover {
+      
+       animation: SpaceFloat 2.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite;
+      transform: translateZ(10px);
+      box-shadow: 0px 4px 4px rgb(65, 115, 255), 0px 10px 4px black,        0px 2px 10px black;
+      
+}
+
+    & h4 {
+      font-weight: 400;
+    }
+  }
+}
+
+@keyframes SpaceFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+    
+}
+}
+
+

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+    <script src="app.js" defer></script>
+    <title>Guess The Number by CodeDevPro</title>
+  </head>
+  <body>
+    <div class="app-container">
+      <header><h1>Guess The Number</h1></header>
+      <div class="subtitle">
+        <p>I am thinking of a number between 0 to 100. Can you guess it?</p>
+      </div>
+      <form action="" id="form" disabled="true">
+        <h4>Your Guess(0-100)</h4>
+        <input
+          id="input"
+          required
+          type="number"
+          placeholder="Enter a Number"
+          max="100"
+          min="0"
+        />
+        <p>Enter the number between 0 and 100</p>
+        <button id="submit" form="form">Submit Guess</button>
+      <button type="button" id="new-game" disabled>New Game</button>
+      </form>
+      
+      <div id="result-box">
+        <span>Your Result :</span>
+      </div>
+      <p id="all-guess">Your Guesses :</p>
+    </div>
+  </body>
+</html>

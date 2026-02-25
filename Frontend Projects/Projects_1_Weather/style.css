@@ -1,0 +1,126 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  justify-content: center;
+  overflow: hidden;
+}
+video {
+  position: fixed;
+  top: 0;
+  left: 0;
+  min-width: 100vw;
+  min-height: 100vh;
+  width: auto;
+  height: auto;
+  z-index: -1;
+  object-fit: contain;
+}
+.app-container {
+  max-width: 600px;
+  width: 100%;
+  padding: 50px;
+}
+.app-container .sec {
+  background: #00000073;
+  backdrop-filter: blur(2px);
+  border: 2px solid rgba(255, 255, 255, 0.336);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 20px;
+  border-radius: 10px;
+  height: 600px;
+}
+.app-container .sec .search {
+  width: 80%;
+  position: relative;
+
+  & > Input {
+    width: 100%;
+    padding: 10px 30px;
+    align-items: center;
+    border-radius: 50px;
+    border: none;
+    outline: none;
+    background: #474646;
+    color: white;
+    text-align: center;
+    box-shadow: 0px 2px 4px rgba(255, 255, 255, 0.406);
+  }
+  & > i {
+    position: absolute;
+    color: rgb(255, 255, 255);
+    transform: translate(50%, -50%);
+    left: 0;
+    top: 50%;
+  }
+}
+.sec .search input::placeholder {
+  color: rgba(255, 255, 255, 0.373);
+  text-align: center;
+}
+
+.sec .container .temp {
+  display: flex;
+  flex-direction: column;
+  margin-block: 30px;
+  align-items: center;
+  & > h1 {
+    font-size: 72px;
+  }
+  & > h2 {
+    color: rgb(255, 255, 255);
+    font-size: 24px;
+    font-weight: 400;
+  }
+}
+.sec .container .temp-details {
+  max-width: 100%;
+  display: grid;
+  grid-template-columns: 2fr 2fr;
+  gap: 10px;
+  margin-top: 30px;
+  & > div {
+    background: rgba(0, 0, 0, 0.617);
+    border-radius: 10px;
+    padding-block: 20px;
+    box-shadow: 0px 1px 4px rgba(255, 255, 255, 0.307);
+    align-items: center;
+    text-align: center;
+    & > h3 {
+      margin-top: 10px;
+    }
+  }
+}
+footer {
+  width: 100%;
+  background-color: black;
+  & > h3 {
+    font-size: 43px;
+    color: white;
+    padding: 20px;
+    text-align: center;
+    text-emphasis: triangle rgb(212, 0, 255);
+    text-shadow: 0px 2px 2px white;
+  }
+}
+
+@media (max-width:500px) {
+  footer{
+    position: absolute;
+    background-color: #ffffff00;
+    top: 0;
+    & h3{
+      font-size: 12px;
+    }
+  }
+}

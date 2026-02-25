@@ -1,0 +1,122 @@
+@import url("https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Google Sans", sans-serif;
+}
+
+body {
+  background-color: black;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100vh;
+  overflow: hidden;
+}
+
+header {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  width: 100%;
+  padding: 10px 20px;
+  height: 60px;
+}
+header .logo {
+  color: white;
+  & > i {
+    font-size: clamp(16px, 2vw, 40px);
+  }
+}
+header .mid-sec {
+  display: flex;
+  align-items: center;
+  position: relative;
+  height: 100%;
+  & i {
+    color: rgb(121, 121, 121);
+    font-size: 30px;
+  }
+}
+
+header .mid-sec input {
+  margin-inline: 10px;
+  padding: 10px 16px;
+  border-radius: 20px;
+  border: none;
+  outline: none;
+  color: white;
+  background: #4a4a4a;
+  font-size: 20px;
+  &::placeholder {
+    color: #b3b3b3;
+  }
+}
+header .search {
+  position: relative;
+}
+header .search i {
+  position: absolute;
+  right: 20px;
+  top: 10px;
+  color: #b3b3b3;
+  font-size: 20px;
+  cursor: pointer;
+}
+header .mid-sec .fa-microphone,
+header .mid-sec .fa-home {
+  cursor: pointer;
+  &:active {
+    color: rgb(255, 255, 255);
+    transform: scale(1.2);
+    transition: all 0.1s ease-in-out;
+  }
+  &:hover {
+    color: rgb(255, 255, 255);
+    transition: all 0.3s ease-in-out;
+  }
+}
+
+header .right-sec {
+  display: flex;
+  align-items: center;
+}
+header .right-sec button {
+  padding: 10px 20px;
+  border-radius: 20px;
+  border: none;
+  outline: none;
+  color: white;
+  background: #4a4a4a;
+  font-size: 16px;
+  &:active {
+    color: rgb(255, 255, 255);
+    transform: scale(1.2);
+    transition: all 0.1s ease-in-out;
+  }
+}
+header .right-sec button:hover {
+  background: #dbdbdb;
+  color: black;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+}
+header .right-sec span {
+  margin-inline: 10px;
+}
+header .right-sec span i {
+  color: rgb(121, 121, 121);
+  font-size: 30px;
+}
+header .right-sec span i:hover {
+  color: rgb(255, 255, 255);
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+}
+header .right-sec span i:active {
+  color: rgb(255, 255, 255);
+  cursor: pointer;
+  transform: scale(1.2);
+  transition: all 0.1s ease-in-out;
+}

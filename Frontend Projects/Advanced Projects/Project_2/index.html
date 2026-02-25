@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Money Manager - Dashboard</title>
+    <link rel="stylesheet" href="root.css" />
+    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <script src="main.js" defer></script>
+  </head>
+  <body class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <i class="fas fa-wallet logo-icon"></i>
+          <span class="logo-text">BudgetMaster</span>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <ul class="nav-list">
+          <li class="nav-item active" data-target="dashboard">
+            <a href="#" class="nav-link">
+              <i class="fas fa-home"></i>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li class="nav-item" data-target="transactions">
+            <a href="#" class="nav-link">
+              <i class="fas fa-exchange-alt"></i>
+              <span>Transactions</span>
+            </a>
+          </li>
+          <li class="nav-item" data-target="budgets">
+            <a href="#" class="nav-link">
+              <i class="fas fa-chart-pie"></i>
+              <span>Budgets</span>
+            </a>
+          </li>
+          <li class="nav-item" data-target="goals">
+            <a href="#" class="nav-link">
+              <i class="fas fa-bullseye"></i>
+              <span>Goals</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+      <div class="sidebar-footer">
+        <a href="#" class="nav-link">
+          <i class="fas fa-cog"></i>
+          <span>Settings</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Top Header -->
+      <header class="top-header">
+        <div class="header-search">
+          <i class="fas fa-search search-icon"></i>
+          <input
+            type="text"
+            class="search-input"
+            placeholder="Search transactions..."
+          />
+        </div>
+        <div class="header-actions">
+          <button
+            class="action-btn notifications-btn"
+            aria-label="Notifications"
+          >
+            <i class="fas fa-bell"></i>
+            <span class="badge">3</span>
+          </button>
+          <div class="user-profile">
+            <img
+              src="https://ui-avatars.com/api/?name=John+Doe&background=6366f1&color=fff"
+              alt="User Avatar"
+              class="avatar"
+            />
+            <span class="user-name">John Doe</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Page Sections -->
+      <div class="page-section active" id="dashboard">
+        <div class="dashboard-wrapper">
+          <div class="page-title">
+            <h1>Dashboard Overview</h1>
+            <p>Welcome back! Here's your financial summary.</p>
+          </div>
+
+          <!-- Summary Cards -->
+          <section class="summary-cards">
+            <div class="card summary-card balance">
+              <div class="card-icon"><i class="fas fa-wallet"></i></div>
+              <div class="card-info">
+                <h3>Total Balance</h3>
+                <p class="amount">$24,562.00</p>
+                <span class="trend positive"
+                  ><i class="fas fa-arrow-up"></i> 2.5% vs last month</span
+                >
+              </div>
+            </div>
+            <div class="card summary-card income">
+              <div class="card-icon"><i class="fas fa-arrow-down"></i></div>
+              <div class="card-info">
+                <h3>Total Income</h3>
+                <p class="amount">$8,240.50</p>
+                <span class="trend positive"
+                  ><i class="fas fa-arrow-up"></i> 4.1% vs last month</span
+                >
+              </div>
+            </div>
+            <div class="card summary-card expense">
+              <div class="card-icon"><i class="fas fa-arrow-up"></i></div>
+              <div class="card-info">
+                <h3>Total Expense</h3>
+                <p class="amount">$3,420.20</p>
+                <span class="trend negative"
+                  ><i class="fas fa-arrow-down"></i> 1.2% vs last month</span
+                >
+              </div>
+            </div>
+          </section>
+
+          <!-- Main Dashboard Grid -->
+          <div class="dashboard-grid">
+            <!-- Recent Transactions -->
+            <section class="card recent-transactions">
+              <div class="card-header">
+                <h2>Recent Transactions</h2>
+                <a href="#" class="view-all">View All</a>
+              </div>
+              <div class="transaction-list">
+                <div class="transaction-item">
+                  <div class="transaction-icon bg-grocery">
+                    <i class="fas fa-shopping-cart"></i>
+                  </div>
+                  <div class="transaction-details">
+                    <h4>Whole Foods Market</h4>
+                    <p>Groceries</p>
+                  </div>
+                  <div class="transaction-amount expense">-$120.50</div>
+                </div>
+                <div class="transaction-item">
+                  <div class="transaction-icon bg-salary">
+                    <i class="fas fa-briefcase"></i>
+                  </div>
+                  <div class="transaction-details">
+                    <h4>Tech Corp Inc.</h4>
+                    <p>Salary</p>
+                  </div>
+                  <div class="transaction-amount income">+$4,200.00</div>
+                </div>
+                <div class="transaction-item">
+                  <div class="transaction-icon bg-entertainment">
+                    <i class="fas fa-film"></i>
+                  </div>
+                  <div class="transaction-details">
+                    <h4>Netflix Subscription</h4>
+                    <p>Entertainment</p>
+                  </div>
+                  <div class="transaction-amount expense">-$15.99</div>
+                </div>
+                <div class="transaction-item">
+                  <div class="transaction-icon bg-dining">
+                    <i class="fas fa-utensils"></i>
+                  </div>
+                  <div class="transaction-details">
+                    <h4>Starbucks</h4>
+                    <p>Dining</p>
+                  </div>
+                  <div class="transaction-amount expense">-$8.50</div>
+                </div>
+              </div>
+            </section>
+
+            <!-- Budget Overview -->
+            <section class="card budget-overview">
+              <div class="card-header">
+                <h2>Monthly Budgets</h2>
+                <button class="icon-btn">
+                  <i class="fas fa-ellipsis-h"></i>
+                </button>
+              </div>
+              <div class="budget-list">
+                <div class="budget-item">
+                  <div class="budget-info">
+                    <span class="budget-name">Housing</span>
+                    <span class="budget-amounts">$1,200 / $1,500</span>
+                  </div>
+                  <div class="progress-bar">
+                    <div class="progress-fill warning" style="width: 80%"></div>
+                  </div>
+                </div>
+                <div class="budget-item">
+                  <div class="budget-info">
+                    <span class="budget-name">Food & Dining</span>
+                    <span class="budget-amounts">$350 / $500</span>
+                  </div>
+                  <div class="progress-bar">
+                    <div class="progress-fill primary" style="width: 70%"></div>
+                  </div>
+                </div>
+                <div class="budget-item">
+                  <div class="budget-info">
+                    <span class="budget-name">Transport</span>
+                    <span class="budget-amounts">$120 / $200</span>
+                  </div>
+                  <div class="progress-bar">
+                    <div class="progress-fill success" style="width: 60%"></div>
+                  </div>
+                </div>
+                <div class="budget-item">
+                  <div class="budget-info">
+                    <span class="budget-name">Entertainment</span>
+                    <span class="budget-amounts">$190 / $150</span>
+                  </div>
+                  <div class="progress-bar">
+                    <div class="progress-fill danger" style="width: 126%"></div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+
+      <!-- Transactions Content -->
+      <div class="page-section" id="transactions">
+        <div class="dashboard-wrapper">
+          <div class="page-title">
+            <h1>Transactions</h1>
+            <p>View and manage all your transactions.</p>
+          </div>
+          <section class="card">
+            <p
+              style="
+                color: var(--clr-text-muted);
+                padding: 2rem;
+                text-align: center;
+              "
+            >
+              Transactions list will be displayed here.
+            </p>
+          </section>
+        </div>
+      </div>
+
+      <!-- Budgets Content -->
+      <div class="page-section" id="budgets">
+        <div class="dashboard-wrapper">
+          <div class="page-title">
+            <h1>Budgets</h1>
+            <p>Manage your monthly budgets and categories.</p>
+          </div>
+          <section class="card">
+            <p
+              style="
+                color: var(--clr-text-muted);
+                padding: 2rem;
+                text-align: center;
+              "
+            >
+              Budget details will be displayed here.
+            </p>
+          </section>
+        </div>
+      </div>
+
+      <!-- Goals Content -->
+      <div class="page-section" id="goals">
+        <div class="dashboard-wrapper">
+          <div class="page-title">
+            <h1>Financial Goals</h1>
+            <p>Track your progress towards your savings goals.</p>
+          </div>
+          <section class="card">
+            <p
+              style="
+                color: var(--clr-text-muted);
+                padding: 2rem;
+                text-align: center;
+              "
+            >
+              Financial goals will be displayed here.
+            </p>
+          </section>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>

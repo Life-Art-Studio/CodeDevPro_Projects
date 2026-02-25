@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+    <script src="app.js" defer></script>
+    <title>Toast/SnackBar</title>
+  </head>
+  <body>
+    <div class="top-right" id="toast-1"><span>This is Toast!</span></div>
+    <div class="top-left" id="toast-2"><span>This is Toast!</span></div>
+    <div class="bottom-left" id="toast-3"><span>This is Toast!</span></div>
+    <div class="bottom-right" id="toast-4"><span>This is Toast!</span></div>
+    <div class="app-container">
+      <header><h1>Toast/SnackBar</h1></header>
+      <div class="select-list">
+        <select name="position-x" id="position-x">
+          <option value="right">Right</option>
+          <option value="left">Left</option>
+        </select>
+        <select name="position-y" id="position-y">
+          <option value="top">Top</option>
+          <option value="bottom">Bottom</option>
+        </select>
+        <select name="type" id="type">
+          <option value="normal">Normal</option>
+          <option value="success">Success</option>
+          <option value="error">Error</option>
+          <option value="warning">Warning</option>
+          <option value="info">Info</option>
+        </select>
+      </div>
+     <form action="" id="form">
+       <input
+        type="text"
+        id="user-input"
+        required
+        value="This is Toast message!"
+      />
+      <button class="show" type="submit">Show</button>
+     </form>
+      <div class="duration-slider"></div>
+      
+    </div>
+  </body>
+</html>

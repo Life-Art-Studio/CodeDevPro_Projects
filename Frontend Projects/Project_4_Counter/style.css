@@ -1,0 +1,98 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  display: grid;
+  place-items: center;
+  height: 100vh;
+  background: linear-gradient(135deg, blue 50%, purple 50%);
+}
+.app-container {
+  box-shadow: 0px 2px 4px black;
+  background-color: #03030345;
+  color: white;
+  width: 100%;
+  max-width: 600px;
+  padding: 20px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
+  backdrop-filter: blur(16px);
+}
+.app-container header {
+  width: 100%;
+  text-align: center;
+  border-radius: 10px;
+  box-shadow: inset 0px 2px 2px rgba(255, 255, 255, 0.409);
+  font-size: 28px;
+}
+.counter {
+  width: 100%;
+  text-align: center;
+}
+.btns {
+  width: 100%;
+  display: flex;
+  gap: 50px;
+  align-items: center;
+  justify-content: center;
+}
+button {
+  font-size: 32px;
+  padding: 10px 30px;
+  border-radius: 10px;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  background-color: rgb(0, 225, 255);
+  box-shadow: inset 2px 2px 10px 2px black, 0px 2px 4px black;
+  transition: all ease-in-out 0.1s;
+}
+button:active {
+  scale: 0.9;
+}
+.increase-decrease {
+  width: 100%;
+  align-items: center;
+  display: flex;
+  justify-content: center;
+}
+.increase-decrease span {
+  font-size: 28px;
+  text-decoration: underline;
+  text-underline-offset: 10px;
+  text-decoration-thickness: 0.1px;
+  text-decoration-color: rgba(0, 255, 255, 0.422);
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  & > input {
+    font-size: clamp(12px, 3rem, 20px);
+    padding: 5px;
+    flex-shrink: 1;
+    width: 100%;
+    max-width: 100px;
+    outline: none;
+    border: none;
+    border-radius: 10px;
+  }
+}
+footer {
+  width: 80%;
+  text-align: center;
+  background-color: rgba(0, 0, 0, 0.546);
+  color: white;
+  padding-block: 20px;
+  backdrop-filter: blur(10px);
+  border-radius: 50% 50px 50%;
+  -webkit-border-radius: 50% 50px 50%;
+  -moz-border-radius: 50% 50px 50%;
+  -ms-border-radius: 50% 50px 50%;
+  -o-border-radius: 50% 50px 50%;
+}

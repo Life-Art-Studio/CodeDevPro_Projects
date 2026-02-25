@@ -1,0 +1,118 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  letter-spacing: 3px;
+}
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background-color: #00203a;
+}
+.app-container {
+  border: 2px solid rgba(255, 255, 255, 0.267);
+  padding: 40px;
+  width: 100%;
+  max-width: 800px;
+  height: fit-content;
+  border-radius: 10px;
+  -webkit-border-radius: 10px;
+  -moz-border-radius: 10px;
+  -ms-border-radius: 10px;
+  -o-border-radius: 10px;
+  background: rgba(0, 0, 0, 0.224);
+  backdrop-filter: blur(10px);
+  position: relative;
+  z-index: 1;
+}
+
+.app-container header {
+  width: 100%;
+  & > h1 {
+    color: white;
+    font-size: 28px;
+  }
+  & > h2 {
+    color: #008c55;
+    font-size: 28px;
+    text-decoration: underline;
+    text-underline-offset: 10px;
+  }
+}
+.password {
+  width: 100%;
+  display: flex;
+  position: relative;
+  align-items: center;
+  margin-block: 30px;
+  & > input {
+    flex: 1;
+    font-size: 24px;
+    padding: 10px 20px;
+    border-radius: 10px;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    -ms-border-radius: 10px;
+    -o-border-radius: 10px;
+    outline: none;
+    border: none;
+  }
+  & > img {
+    position: absolute;
+    right: 8px;
+    width: 40px;
+    cursor: pointer;
+    transition: all ease-in-out 0.1s;
+    -webkit-transition: all ease-in-out 0.1s;
+    -moz-transition: all ease-in-out 0.1s;
+    -ms-transition: all ease-in-out 0.1s;
+    -o-transition: all ease-in-out 0.1s;
+  }
+  & > img:active {
+    scale: 0.8;
+  }
+  & > .tool-tip {
+    position: absolute;
+    right: 0px;
+    color: rgb(7, 7, 7);
+    font-size: 24px;
+    top: 50px;
+    background-color: #00fffb;
+    padding: 5px 10px;
+    border-radius: 10px;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    -ms-border-radius: 10px;
+    -o-border-radius: 10px;
+    transition: cubic-bezier(0.075, 0.82, 0.165, 1) all 0.3s;
+    -webkit-transition: cubic-bezier(0.075, 0.82, 0.165, 1) all 0.3s;
+    -moz-transition: cubic-bezier(0.075, 0.82, 0.165, 1) all 0.3s;
+    -ms-transition: cubic-bezier(0.075, 0.82, 0.165, 1) all 0.3s;
+    -o-transition: cubic-bezier(0.075, 0.82, 0.165, 1) all 0.3s;
+    scale: 0;
+  }
+}
+img:hover + .tool-tip {
+  scale: 1;
+}
+button {
+  padding: 10px 20px;
+  font-size: 24px;
+  border-radius: 10px;
+  border: none;
+  outline: none;
+  -webkit-border-radius: 10px;
+  -moz-border-radius: 10px;
+  -ms-border-radius: 10px;
+  -o-border-radius: 10px;
+  background-color: #008c55;
+  color: white;
+  cursor: pointer;
+  transition: cubic-bezier(0.075, 0.82, 0.165, 1) all 0.3s;
+}
+button:active {
+  scale: 0.9;
+}
