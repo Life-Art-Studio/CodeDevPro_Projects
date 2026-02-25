@@ -197,6 +197,13 @@ const initApp = () => {
       icon: "fa-dumbbell",
       tags: ["Learning", "Drills"],
     },
+    {
+      title: "Calculator",
+      folder: "Calculator",
+      desc: "A simple calculator to perform basic arithmetic operations.",
+      icon: "fa-calculator",
+      tags: ["Math", "Utility"],
+    },
   ];
 
   // --- 4. Render Projects ---
