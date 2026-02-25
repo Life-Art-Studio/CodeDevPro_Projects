@@ -251,6 +251,7 @@ body {
 
 .logo span {
   color: var(--accent-primary);
+  margin-left: -10px;
 }
 
 .logo i {
