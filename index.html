@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CodeDevPro - Premium Frontend Portfolio</title>
+    <meta
+      name="description"
+      content="A cinematic showcase of frontend web development projects by CodeDevPro."
+    />
+    <link rel="stylesheet" href="style.css" />
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Font Awesome for Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <!-- Cinematic Preloader -->
+    <div id="preloader" class="preloader">
+      <div class="loader-circle"></div>
+      <div class="loader-text">INITIALIZING SYSTEM...</div>
+    </div>
+
+    <!-- Custom Cursor -->
+    <div class="cursor-dot" id="cursor-dot"></div>
+    <div class="cursor-outline" id="cursor-outline"></div>
+
+    <!-- Animated Background -->
+    <div class="bg-animated">
+      <div class="blob blob-1"></div>
+      <div class="blob blob-2"></div>
+      <div class="blob blob-3"></div>
+      <div class="grid-overlay"></div>
+    </div>
+
+    <!-- Navigation / Header -->
+    <header class="glass-header">
+      <div class="logo">
+        <i class="fa-solid fa-code"></i> CodeDev<span>Pro</span>
+      </div>
+      <nav>
+        <a href="#portfolio" class="nav-link active">Projects</a>
+        <a href="https://github.com/CodeDevPro" target="_blank" class="nav-link"
+          ><i class="fa-brands fa-github"></i> GitHub</a
+        >
+      </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="hero-content">
+        <h1 class="glitch" data-text="FRONTEND MASTERY">FRONTEND MASTERY</h1>
+        <p class="subtitle">
+          A curated collection of web applications, UI experiments, and creative
+          coding projects.
+        </p>
+        <a href="#portfolio" class="cta-btn magnetic">
+          Explore The Vault <i class="fa-solid fa-arrow-down"></i>
+        </a>
+      </div>
+    </section>
+
+    <!-- Portfolio Grid Section -->
+    <section id="portfolio" class="portfolio-section">
+      <div class="section-header">
+        <h2><i class="fa-solid fa-folder-open"></i> Project Vault</h2>
+        <div class="filter-controls">
+          <input
+            type="text"
+            id="search-input"
+            placeholder="Search projects..."
+            class="glass-input"
+          />
+        </div>
+      </div>
+
+      <div class="projects-grid" id="projects-grid">
+        <!-- Project Cards will be injected here by script.js -->
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="glass-footer">
+      <p>&copy; 2026 CodeDevPro. Crafted with passion and code.</p>
+      <div class="social-links">
+        <a href="#" class="magnetic"><i class="fa-brands fa-twitter"></i></a>
+        <a href="#" class="magnetic"
+          ><i class="fa-brands fa-linkedin-in"></i
+        ></a>
+      </div>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>
