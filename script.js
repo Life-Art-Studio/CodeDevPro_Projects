@@ -61,7 +61,7 @@ const initApp = () => {
       title:"Stop Watch",
       folder: "Stop_Watch",
       desc : "A Dynamic Stop Watch, Optimized for All devices.",
-      icon:"fa-watch",
+      icon:"fa-solid fa-stopwatch",
       tags:["Dynamic", "Responsive Design"]
     },
     {
