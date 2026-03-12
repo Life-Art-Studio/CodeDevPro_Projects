@@ -58,6 +58,13 @@ const initApp = () => {
   // Extracted from the provided directory structure
   const projectsData = [
     {
+      title:"Stop Watch",
+      folder: "Stop_Watch",
+      desc : "A Dynamic Stop Watch, Optimized for All devices.",
+      icon:"fa-watch",
+      tags:["Dynamic", "Responsive Design"]
+    },
+    {
       title: "Advanced Weather App",
       folder: "Advanced Weather",
       desc: "A highly detailed weather forecasting application with advanced metrics and interactive maps.",
