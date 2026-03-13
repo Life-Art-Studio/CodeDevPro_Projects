@@ -1,4 +1,4 @@
-let users = [
+const users = [
     { "id": 1, "name": "Aarav Sharma", "username": "aarav1", "role": "Frontend Developer", "company": "TechNova", "location": "Delhi, India", "avatar": "https://randomuser.me/api/portraits/men/1.jpg", "followers": 1200, "following": 300, "posts": 45, "isOnline": true },
     { "id": 2, "name": "Emily Carter", "username": "emily2", "role": "UI/UX Designer", "company": "PixelCraft", "location": "London, UK", "avatar": "https://randomuser.me/api/portraits/women/2.jpg", "followers": 2150, "following": 420, "posts": 82, "isOnline": false },
     { "id": 3, "name": "Liam Johnson", "username": "liam3", "role": "Backend Developer", "company": "CloudStack", "location": "Toronto, Canada", "avatar": "https://randomuser.me/api/portraits/men/3.jpg", "followers": 980, "following": 210, "posts": 33, "isOnline": true },
@@ -127,7 +127,9 @@ inp.addEventListener("input", () => {
         }
 
     })
-    renderUsers(searchUser)
+    setTimeout(()=>{
+        renderUsers(searchUser)
+    },500)
 })
 
 
