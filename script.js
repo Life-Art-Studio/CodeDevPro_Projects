@@ -58,6 +58,14 @@ const initApp = () => {
   // Extracted from the provided directory structure
   const projectsData = [
     {
+        title:"Search User",
+      folder: "Search_User",
+      desc : "A Dynamic User Data, Optimized for All devices.",
+      icon:"fa-solid fa-user",
+      tags:["Dynamic", "Responsive Design"]
+
+    },
+    {
       title:"Stop Watch",
       folder: "Stop_Watch",
       desc : "A Dynamic Stop Watch, Optimized for All devices.",
