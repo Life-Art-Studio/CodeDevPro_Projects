@@ -456,19 +456,26 @@ form button:hover {
 #add-note-btn {
     z-index: 11;
 }
+.app-footer{
+        width: 100%;
+    }
 
 /* =========================
    MOBILE
 ========================= */
 
 @media (max-width:500px) {
+    .footer-brand {
+    margin-left: 0;
+    display: flex;
+    letter-spacing: 10px;
+
+}
     #add-note-btn {
         z-index: 11;
     }
 
-    .app-footer{
-        width: 100%;
-    }
+    
     .container {
 
         width: 95%;
@@ -514,9 +521,12 @@ form button:hover {
 }
 
 .footer-brand {
-    margin-left: 42.5%;
+    /* margin-left: auto; */
     display: flex;
-    letter-spacing: 10px;
+    letter-spacing: 1px;
+    align-items: center;
+    justify-content: space-around;
+    font-size: clamp(10px,3vw,24px);
 
 }
 
@@ -525,9 +535,9 @@ form button:hover {
 .footer-social {
 
     display: flex;
-    gap: 16px;
+    gap: 10px;
 
-    font-size: 18px;
+    font-size: clamp(12px,3vw,18px)
 
 }
 
