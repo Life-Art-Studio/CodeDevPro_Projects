@@ -466,6 +466,9 @@ form button:hover {
         z-index: 11;
     }
 
+    .app-footer{
+        width: 100%;
+    }
     .container {
 
         width: 95%;
