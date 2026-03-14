@@ -58,6 +58,14 @@ const initApp = () => {
   // Extracted from the provided directory structure
   const projectsData = [
     {
+        title:"Notes Reminder",
+      folder: "Notes_Reminder",
+      desc : "A Dynamic Reminder Notes, Optimized for All devices.",
+      icon:"fa-solid fa-list-check",
+      tags:["Dynamic", "Responsive Design"]
+
+    },
+    {
         title:"Search User",
       folder: "Search_User",
       desc : "A Dynamic User Data, Optimized for All devices.",
