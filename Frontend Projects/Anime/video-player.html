@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Watch: Cybernetic Warriors - AnimeStream</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Hide footer on full player page to keep it clean */
+        footer { margin-top: 2rem; }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar scrolled" id="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">Anime<span>Stream</span></a>
+            
+            <div class="nav-menu" id="nav-menu">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="browse.html" class="nav-link">Browse</a>
+                <a href="trending.html" class="nav-link">Trending</a>
+                <a href="my-list.html" class="nav-link">My List</a>
+            </div>
+
+            <div class="nav-actions">
+                <div class="search-container">
+                    <input type="text" placeholder="Search anime..." class="search-input" id="search-input">
+                    <button class="icon-btn search-btn" id="search-btn"><i class="fa-solid fa-magnifying-glass"></i></button>
+                </div>
+                
+                <div class="profile-dropdown" id="profile-dropdown">
+                    <img src="https://i.pravatar.cc/150?img=12" alt="User Profile" class="profile-avatar" id="profile-btn">
+                    <div class="dropdown-content">
+                        <a href="profile.html"><i class="fa-regular fa-user"></i> Profile</a>
+                        <a href="history.html"><i class="fa-solid fa-clock-rotate-left"></i> History</a>
+                        <a href="favorites.html"><i class="fa-regular fa-heart"></i> Favorites</a>
+                        <div class="divider"></div>
+                        <a href="login.html" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+                    </div>
+                </div>
+
+                <button class="icon-btn menu-toggle" id="mobile-menu-btn">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="player-page">
+        <!-- Main Player UI -->
+        <main class="player-main">
+            <div class="video-wrapper">
+                <!-- Placeholder for actual video player component or iframe -->
+                <video poster="https://images.unsplash.com/photo-1542662565-7e4fd182875b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80" controls>
+                    <source src="#" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+            
+            <div class="player-info">
+                <h1 class="player-info-title">Episode 1: The Awakening</h1>
+                <div class="player-info-meta">
+                    <a href="anime-details.html" style="color: var(--accent-primary); font-weight: 600;">Cybernetic Warriors</a> 
+                    <span style="margin: 0 10px;">•</span> 
+                    Season 1 <span style="margin: 0 10px;">•</span> Oct 12, 2026
+                </div>
+                <div class="details-actions" style="margin-top: 1.5rem;">
+                    <button class="btn btn-secondary"><i class="fa-solid fa-thumbs-up"></i> Like</button>
+                    <button class="btn btn-secondary"><i class="fa-solid fa-share-nodes"></i> Share</button>
+                    <button class="btn btn-secondary"><i class="fa-regular fa-flag"></i> Report</button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Sidebar / Episodes List -->
+        <aside class="player-sidebar">
+            <h3 class="sidebar-title">Episodes (Season 1)</h3>
+            
+            <ul class="episode-list">
+                <!-- Active Episode -->
+                <li class="episode-item active">
+                    <img src="https://images.unsplash.com/photo-1623126908029-58cb08a2b272?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80" alt="Ep 1" class="episode-thumb">
+                    <div class="episode-details">
+                        <h4>1. The Awakening</h4>
+                        <p>24 min • Playing</p>
+                    </div>
+                </li>
+                
+                <li class="episode-item">
+                    <img src="https://images.unsplash.com/photo-1596464716127-f2a82984de30?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80" alt="Ep 2" class="episode-thumb">
+                    <div class="episode-details">
+                        <h4>2. Steel City Secrets</h4>
+                        <p>25 min</p>
+                    </div>
+                </li>
+                
+                <li class="episode-item">
+                    <img src="https://images.unsplash.com/photo-1580477659142-8805f4245b0a?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80" alt="Ep 3" class="episode-thumb">
+                    <div class="episode-details">
+                        <h4>3. Rogue Protocol</h4>
+                        <p>23 min</p>
+                    </div>
+                </li>
+                
+                <li class="episode-item">
+                    <img src="https://images.unsplash.com/photo-1601645191163-3fc0d5d64e35?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80" alt="Ep 4" class="episode-thumb">
+                    <div class="episode-details">
+                        <h4>4. Ghost in the Wire</h4>
+                        <p>24 min</p>
+                    </div>
+                </li>
+                
+                <li class="episode-item">
+                    <img src="https://images.unsplash.com/photo-1607604276583-9af5a55fdc40?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80" alt="Ep 5" class="episode-thumb">
+                    <div class="episode-details">
+                        <h4>5. Terminal</h4>
+                        <p>24 min</p>
+                    </div>
+                </li>
+                <li class="episode-item">
+                    <img src="https://images.unsplash.com/photo-1541562232579-512a21360020?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80" alt="Ep 6" class="episode-thumb">
+                    <div class="episode-details">
+                        <h4>6. System Override</h4>
+                        <p>26 min</p>
+                    </div>
+                </li>
+                 <li class="episode-item">
+                    <img src="https://images.unsplash.com/photo-1618336753974-aae8e04506aa?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80" alt="Ep 7" class="episode-thumb">
+                    <div class="episode-details">
+                        <h4>7. Betrayal</h4>
+                        <p>24 min</p>
+                    </div>
+                </li>
+            </ul>
+        </aside>
+    </div>
+
+    <footer>
+        <div class="footer-bottom">
+            <p>&copy; 2026 AnimeStream. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="app.js" type="module" defer></script>
+</body>
+</html>

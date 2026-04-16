@@ -57,6 +57,7 @@ const initApp = () => {
   // --- 3. Dynamic Project Data ---
   // Extracted from the provided directory structure
   const projectsData = [
+    
     {
         title:"Notes Reminder",
       folder: "Notes_Reminder",
