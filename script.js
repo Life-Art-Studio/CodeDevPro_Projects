@@ -57,6 +57,22 @@ const initApp = () => {
   // --- 3. Dynamic Project Data ---
   // Extracted from the provided directory structure
   const projectsData = [
+    {
+        title:"Task Master Pro",
+      folder: "Task_Master_Pro",
+      desc : "A Dynamic Task Tracker, Optimized for All devices.",
+      icon:"fa-solid fa-list-check",
+      tags:["Dynamic", "Responsive Design"]
+
+    },
+    {
+        title:"Neuro Finance",
+      folder: "Neuro_Finance",
+      desc : "A Dynamic Finance Tracker, Optimized for All devices.",
+      icon:"fa-solid fa-list-check",
+      tags:["Dynamic", "Responsive Design"]
+
+    },
     
     {
         title:"Notes Reminder",

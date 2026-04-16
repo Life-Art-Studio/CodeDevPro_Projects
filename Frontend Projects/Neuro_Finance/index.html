@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYS.FINANCE // DATALINK</title>
+    <!-- Sci-fi Digital Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Futuristic Screen Effects -->
+    <div class="scanlines"></div>
+    <div class="vignette"></div>
+
+    <div class="dashboard-container">
+        <!-- Top Tech Decoration -->
+        <div class="top-decor">
+            <span>SYS_KERNEL_9.4</span>
+            <span class="blinking">UPLINK_SECURE</span>
+            <span>NET_PING: <span class="income-text" id="pingDisplay">14ms</span></span>
+        </div>
+
+        <!-- Header Section -->
+        <header class="app-header cyber-box-header">
+            <div class="logo">
+                <i class="fa-solid fa-microchip logo-icon"></i>
+                <h1 data-text="NEURO_FINANCE">NEURO_FINANCE</h1>
+            </div>
+            <div class="sys-status">
+                <div class="status-bar"></div>
+                <span>NODE_ACTIVE</span>
+            </div>
+        </header>
+
+        <!-- Summary Cards Section -->
+        <section class="summary-cards">
+            <div class="card balance-card cyber-box">
+                <div class="card-deco">// 01</div>
+                <div class="card-info">
+                    <h3>CURRENT_BALANCE</h3>
+                    <h2 class="glitch-text" id="balanceAmount">Ð 4,350.00</h2>
+                </div>
+                <i class="fa-solid fa-cubes card-bg-icon"></i>
+            </div>
+            
+            <div class="card income-card cyber-box">
+                <div class="card-deco">// 02</div>
+                <div class="card-info">
+                    <h3>INFLOW_STREAM</h3>
+                    <h2 class="income-text" id="incomeAmount">+Ð 5,200.00</h2>
+                </div>
+                <i class="fa-solid fa-arrow-turn-up card-bg-icon"></i>
+            </div>
+            
+            <div class="card expense-card cyber-box">
+                <div class="card-deco">// 03</div>
+                <div class="card-info">
+                    <h3>OUTFLOW_STREAM</h3>
+                    <h2 class="expense-text" id="expenseAmount">-Ð 850.00</h2>
+                </div>
+                <i class="fa-solid fa-arrow-turn-down card-bg-icon"></i>
+            </div>
+        </section>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            
+            <!-- Left Column: Inputs & Chart -->
+            <div class="left-panel">
+                
+                <!-- Add Transaction Form -->
+                <section class="panel-section add-transaction cyber-box">
+                    <div class="corner-accents"></div>
+                    <div class="section-header">
+                        <h2>> INITIALIZE_TX</h2>
+                    </div>
+                    <form id="transactionForm">
+                        <div class="form-group">
+                            <label for="desc">[ PARAM: DESIGNATION ]</label>
+                            <div class="cyber-input-wrapper">
+                                <span class="input-prefix">></span>
+                                <input type="text" id="desc" placeholder="AWAITING_INPUT...">
+                                <div class="input-scan"></div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="amount">[ PARAM: CREDITS ]</label>
+                                <div class="cyber-input-wrapper">
+                                    <span class="input-prefix">Ð</span>
+                                    <input type="number" id="amount" placeholder="00.00" step="0.01">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="type">[ PARAM: VECTOR ]</label>
+                                <div class="cyber-input-wrapper">
+                                    <span class="input-prefix">V</span>
+                                    <select id="type">
+                                        <option value="expense">NEGATIVE</option>
+                                        <option value="income">POSITIVE</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="cyber-button">
+                            <span class="btn-text">EXECUTE_COMMAND</span>
+                            <span class="btn-glitch"></span>
+                        </button>
+                    </form>
+                </section>
+
+                <!-- Chart Placeholder -->
+                <section class="panel-section chart-section cyber-box">
+                    <div class="corner-accents"></div>
+                    <div class="section-header">
+                        <h2>> METRIC_ANALYSIS</h2>
+                        <span class="metric-ping blinking"></span>
+                    </div>
+                    <div class="canvas-container holographic-grid">
+                        <!-- Hologram Ring Visual -->
+                        <div class="holo-ring holo-1"></div>
+                        <div class="holo-ring holo-2"></div>
+                        <div class="chart-overlay-placeholder">
+                            <i class="fa-solid fa-satellite-dish heartbeat"></i>
+                            <p class="chart-text" id="chartText">AWAITING_CHART_LAYER</p>
+                        </div>
+                        <canvas id="expenseChart"></canvas>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Right Column: Transaction History -->
+            <div class="right-panel">
+                <section class="panel-section transaction-history cyber-box">
+                    <div class="corner-accents"></div>
+                    <div class="section-header flex-header">
+                        <h2>> DATALOG_STREAM</h2>
+                        <i class="fa-solid fa-bars-staggered"></i>
+                    </div>
+                    
+                    <ul id="transactionList" class="transaction-list">
+                        <!-- Mock Data with futuristic look -->
+                        <li class="cyber-list-item expense">
+                            <div class="item-hex">
+                                <i class="fa-solid fa-skull"></i>
+                            </div>
+                            <div class="item-info">
+                                <span class="item-desc">CYBER_IMPLANT_MAINTENANCE</span>
+                                <span class="item-date">T: 08:34:12 // SYS.CLK</span>
+                            </div>
+                            <div class="item-actions">
+                                <span class="item-amount">-Ð 120.50</span>
+                                <button class="btn-purge" title="Purge Node"><i class="fa-solid fa-xmark"></i></button>
+                            </div>
+                        </li>
+
+                        <li class="cyber-list-item income">
+                            <div class="item-hex">
+                                <i class="fa-solid fa-database"></i>
+                            </div>
+                            <div class="item-info">
+                                <span class="item-desc">DATA_EXTRACTION_BOUNTY</span>
+                                <span class="item-date">T: 14:10:05 // SYS.CLK</span>
+                            </div>
+                            <div class="item-actions">
+                                <span class="item-amount">+Ð 1,500.00</span>
+                                <button class="btn-purge" title="Purge Node"><i class="fa-solid fa-xmark"></i></button>
+                            </div>
+                        </li>
+
+                        <li class="cyber-list-item expense">
+                            <div class="item-hex">
+                                <i class="fa-solid fa-plug"></i>
+                            </div>
+                            <div class="item-info">
+                                <span class="item-desc">ENERGY_GRID_TAX</span>
+                                <span class="item-date">T: 21:00:00 // SYS.CLK</span>
+                            </div>
+                            <div class="item-actions">
+                                <span class="item-amount">-Ð 85.00</span>
+                                <button class="btn-purge" title="Purge Node"><i class="fa-solid fa-xmark"></i></button>
+                            </div>
+                        </li>
+                    </ul>
+                </section>
+            </div>
+        </main>
+
+        <!-- Cyber Footer -->
+        <footer class="cyber-footer">
+            <div class="footer-content">
+                <span class="footer-text">SYSTEM_ARCHITECT: <span class="highlight">CodeDevPro</span></span>
+                <span class="footer-deco">// END_SESSION</span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Script tags remain present for whenever user wants them -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
