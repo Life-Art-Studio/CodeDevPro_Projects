@@ -291,7 +291,8 @@ const Beats = () => {
   };
 
   return (
-    <div className="flex-1 overflow-hidden p-6 lg:p-8 bg-transparent font-sans h-full flex flex-col md:flex-row gap-6 animate-in fade-in duration-500">
+    <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-transparent font-sans h-full transition-colors animate-in fade-in duration-500">
+      <div className="max-w-7xl mx-auto h-full flex flex-col md:flex-row gap-6">
       
       {/* LEFT PANEL: Beat List */}
       <div className="w-full md:w-1/3 flex flex-col glass-panel rounded-2xl overflow-hidden shadow-sm border border-slate-200/50 dark:border-white/10 transition-colors">
@@ -427,6 +428,7 @@ const Beats = () => {
         }}
         beat={selectedBeat}
       />
+      </div>
     </div>
   );
 };

@@ -131,8 +131,8 @@ const Customers = () => {
           defaultOrderFilter={location.state?.filterStatus}
         />
       ) : (
-        /* If viewingCustomer is FALSE, show the normal Table! */
-        <div className="flex flex-col gap-6 animate-in fade-in duration-500 p-6 lg:p-8">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-transparent font-sans h-full transition-colors animate-in fade-in duration-500">
+          <div className="max-w-7xl mx-auto h-full flex flex-col gap-6">
           {/* DROP THE MODAL COMPONENT HERE (It stays invisible until isModalOpen is true) */}
           <AddCustomerModal
             isOpen={isModalOpen}
@@ -382,6 +382,7 @@ const Customers = () => {
                 </button>
               </div>
             </div>
+          </div>
           </div>
         </div>
       )}

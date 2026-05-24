@@ -54,6 +54,7 @@ const PaymentModal = ({ isOpen, onClose, order, onRecordPayment }) => {
       note,
       date,
     });
+    onClose();
   };
 
   return ReactDOM.createPortal(

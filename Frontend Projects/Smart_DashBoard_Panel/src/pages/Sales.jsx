@@ -128,8 +128,8 @@ const Sales = () => {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto scrollbar-hide p-6 lg:p-8 bg-transparent font-sans h-full transition-colors animate-in fade-in duration-500">
-      
+    <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-transparent font-sans h-full transition-colors animate-in fade-in duration-500">
+      <div className="max-w-7xl mx-auto h-full flex flex-col">
       {/* HEADER SECTION */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-8 ">
         <div>
@@ -473,6 +473,7 @@ const Sales = () => {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 };

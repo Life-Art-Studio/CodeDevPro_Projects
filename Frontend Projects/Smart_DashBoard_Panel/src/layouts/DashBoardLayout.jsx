@@ -32,12 +32,12 @@ const DashBoardLayout = () => {
           <Topbar />
         </div>
 
-        {/* The Scrollable Canvas: 
-          flex-1 takes up the remaining height. overflow-y-auto allows 
-          ONLY this specific section to scroll when you have long tables. 
+        {/* The Full Canvas: 
+          flex-1 takes up the remaining height. Child components (pages) 
+          are responsible for adding padding and overflow-y-auto. 
         */}
-        <div className="flex-1 overflow-y-auto p-4 md:p-6">
-          <main className="max-w-7xl mx-auto h-full">
+        <div className="flex-1 w-full relative h-full">
+          <main className="w-full h-full">
             {/* React Router will inject Sales, Customers, etc., right here */}
             <Outlet />
           </main>
