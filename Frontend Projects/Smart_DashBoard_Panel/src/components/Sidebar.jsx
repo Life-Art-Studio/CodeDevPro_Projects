@@ -1,5 +1,8 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useState, useEffect, useRef } from "react";
+import useCustomerContext from "../context/CustomerContext";
+import useOrderContext from "../context/OrderContext";
 
 const Sidebar = () => {
   const menuItems = [
@@ -11,6 +14,52 @@ const Sidebar = () => {
   ];
 
   const { isSidebarOpen, onOpenSidebarHandler } = useAuth();
+  
+  // --- Search Logic ---
+  const { customers } = useCustomerContext();
+  const { orders } = useOrderContext();
+  const navigate = useNavigate();
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const searchRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setIsSearchOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const filteredCustomers = searchQuery.trim() === "" ? [] : customers.filter(c => 
+    c.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    (c.email && c.email.toLowerCase().includes(searchQuery.toLowerCase())) ||
+    (c.phone && c.phone.toLowerCase().includes(searchQuery.toLowerCase())) ||
+    c.id.toLowerCase().includes(searchQuery.toLowerCase())
+  ).slice(0, 5);
+
+  const filteredOrders = searchQuery.trim() === "" ? [] : orders.filter(o => 
+    o.id.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    o.status.toLowerCase().includes(searchQuery.toLowerCase())
+  ).slice(0, 5);
+
+  const hasSearchResults = filteredCustomers.length > 0 || filteredOrders.length > 0;
+
+  const handleResultClick = (type, item) => {
+    setIsSearchOpen(false);
+    setSearchQuery("");
+    onOpenSidebarHandler(); // Close the sidebar on mobile!
+    if (type === 'customer') {
+      navigate('/dashboard/customers', { state: { openCustomerId: item.id } });
+    } else if (type === 'order') {
+      navigate('/dashboard/customers', { state: { openCustomerId: item.customerId, openOrderId: item.id } });
+    }
+  };
 
   return (
     <>
@@ -43,16 +92,88 @@ const Sidebar = () => {
           </button>
         </div>
 
-        {/* 🔥 NEW: Mobile Search Bar (Only visible on screens smaller than 'md') */}
-        <div className="px-4 pt-6 pb-2 md:hidden">
+        {/* 🔥 Mobile Search Bar (Only visible on screens smaller than 'md') */}
+        <div className="px-4 pt-6 pb-2 md:hidden relative" ref={searchRef}>
           <div className="flex items-center w-full bg-slate-100/50 dark:bg-slate-950/50 rounded-xl px-3 py-2.5 border border-slate-200/50 dark:border-white/10 focus-within:border-purple-500 focus-within:ring-1 focus-within:ring-purple-500 transition-all">
             <span className="text-slate-500 mr-2 text-sm">🔍</span>
             <input 
               type="text" 
-              placeholder="Search..." 
+              placeholder="Search customers, orders..." 
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setIsSearchOpen(true);
+              }}
+              onFocus={() => {
+                if (searchQuery.trim() !== "") setIsSearchOpen(true);
+              }}
               className="bg-transparent w-full focus:outline-none text-sm text-slate-800 dark:text-slate-200 placeholder-slate-500"
             />
+            {searchQuery && (
+              <button 
+                onClick={() => {
+                  setSearchQuery("");
+                  setIsSearchOpen(false);
+                }} 
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 ml-2"
+              >✕</button>
+            )}
           </div>
+
+          {/* Search Dropdown */}
+          {isSearchOpen && searchQuery.trim() !== "" && (
+            <div className="absolute top-full left-4 right-4 mt-2 glass-modal rounded-2xl shadow-2xl overflow-hidden z-50 animate-slide-up-fade border border-white/20">
+              <div className="max-h-[300px] overflow-y-auto custom-scrollbar">
+                
+                {filteredCustomers.length > 0 && (
+                  <div className="p-2">
+                    <h3 className="px-3 py-1 text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Customers</h3>
+                    {filteredCustomers.map(customer => (
+                      <div 
+                        key={customer.id} 
+                        onClick={() => handleResultClick('customer', customer)}
+                        className="px-3 py-2 hover:bg-purple-50 dark:hover:bg-white/10 rounded-xl cursor-pointer transition-colors"
+                      >
+                        <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">{customer.name}</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{customer.phone || 'No phone'}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {filteredOrders.length > 0 && (
+                  <div className="p-2 border-t border-slate-200/50 dark:border-white/10">
+                    <h3 className="px-3 py-1 text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Orders</h3>
+                    {filteredOrders.map(order => (
+                      <div 
+                        key={order.id} 
+                        onClick={() => handleResultClick('order', order)}
+                        className="px-3 py-2 hover:bg-purple-50 dark:hover:bg-white/10 rounded-xl cursor-pointer transition-colors"
+                      >
+                        <div className="flex justify-between items-center">
+                          <p className="text-sm font-semibold text-purple-600 dark:text-purple-400">{order.id}</p>
+                          <span className={`text-[10px] px-2 py-0.5 rounded-full border ${
+                            order.status === 'Paid' ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/30 dark:text-emerald-400' :
+                            order.status === 'Cancelled' ? 'bg-red-500/10 text-red-600 border-red-500/30 dark:text-red-400' :
+                            order.status === 'Partially Paid' ? 'bg-teal-500/10 text-teal-600 border-teal-500/30 dark:text-teal-400' :
+                            'bg-amber-500/10 text-amber-600 border-amber-500/30 dark:text-amber-400'
+                          }`}>{order.status}</span>
+                        </div>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">{order.date}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {!hasSearchResults && (
+                  <div className="p-4 text-center text-slate-500 dark:text-slate-400 text-sm">
+                    No results for "{searchQuery}"
+                  </div>
+                )}
+                
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Navigation Links Area */}
