@@ -165,11 +165,11 @@ const CustomerDetail = ({ customer, onBack, defaultOrderId, defaultOrderFilter }
       <div className="flex flex-col md:flex-row gap-6 animate-in fade-in h-full">
         {/* LEFT: Timeline List */}
         <div className="w-full md:w-2/3 flex flex-col h-full">
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex flex-wrap justify-between items-center mb-4 gap-3">
             <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">Visit History</h3>
             <button 
               onClick={() => { setVisitToEdit(null); setIsLogVisitModalOpen(true); }}
-              className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-semibold hover:bg-purple-700 transition-colors"
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-semibold hover:bg-purple-700 transition-colors w-full sm:w-auto"
             >
               Schedule Visit
             </button>
@@ -261,8 +261,9 @@ const CustomerDetail = ({ customer, onBack, defaultOrderId, defaultOrderFilter }
   };
 
   return (
-    <div className="flex flex-col h-full animate-in slide-in-from-right-8 duration-500">
-      {/* --- HEADER --- */}
+    <div className="flex-1 overflow-y-auto h-full p-4 sm:p-6 lg:p-8 animate-in slide-in-from-right-8 duration-500 transition-colors w-full">
+      <div className="flex flex-col h-full max-w-7xl mx-auto">
+        {/* --- HEADER --- */}
       <CustomerHeader customer={customer} orders={customerOrders} onBack={onBack} />
 
       {/* --- TAB NAVIGATION --- */}
@@ -286,7 +287,7 @@ const CustomerDetail = ({ customer, onBack, defaultOrderId, defaultOrderFilter }
       </div>
 
       {/* --- TAB CONTENT --- */}
-      <div className="flex-1 glass-panel rounded-2xl rounded-tl-none p-6 overflow-y-auto transition-colors relative z-0">
+      <div className="flex-1 glass-panel rounded-2xl rounded-tl-none p-4 sm:p-6 transition-colors relative z-0">
         {/* ========================================== */}
         {/* ORDERS TAB                                 */}
         {/* ========================================== */}
@@ -340,6 +341,7 @@ const CustomerDetail = ({ customer, onBack, defaultOrderId, defaultOrderFilter }
         fixedCustomerId={customer.id}
         initialData={visitToEdit}
       />
+      </div>
     </div>
   );
 };
