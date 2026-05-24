@@ -8,7 +8,7 @@ import Footer from "../components/Footer";
 const DashBoardLayout = () => {
   return (
     // Master Container: Full screen, prevents the whole browser window from scrolling
-    <div className="h-screen w-full flex overflow-hidden bg-transparent transition-colors duration-500">
+    <div className="min-h-screen w-full flex flex-col overflow-hidden bg-transparent transition-colors duration-500">
       {/* Sidebar Wrapper */}
       <div className="shrink-0 md:block z-30">
         <Sidebar />
