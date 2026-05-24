@@ -70,6 +70,26 @@ const MapPage = () => {
   const [isTaggingMode, setIsTaggingMode] = useState(false);
   const [customerToTag, setCustomerToTag] = useState(null);
 
+  // Mobile Sheet State
+  const [isMobileSheetExpanded, setIsMobileSheetExpanded] = useState(false);
+  const touchStartY = useRef(null);
+
+  const handleTouchStart = (e) => {
+    touchStartY.current = e.touches[0].clientY;
+  };
+  
+  const handleTouchEnd = (e) => {
+    if (!touchStartY.current) return;
+    const touchEndY = e.changedTouches[0].clientY;
+    const diff = touchStartY.current - touchEndY;
+    if (diff > 50) {
+      setIsMobileSheetExpanded(true); // Swipe up
+    } else if (diff < -50) {
+      setIsMobileSheetExpanded(false); // Swipe down
+    }
+    touchStartY.current = null;
+  };
+
   const handleMapClick = (latlng) => {
     if (isProximityMode) {
       setSearchCenter([latlng.lat, latlng.lng]);
@@ -144,6 +164,7 @@ const MapPage = () => {
             onClick={() => {
               const newMode = !isProximityMode;
               setIsProximityMode(newMode);
+              setIsMobileSheetExpanded(false);
               if (newMode) {
                 if (navigator.geolocation) {
                   navigator.geolocation.getCurrentPosition(
@@ -168,7 +189,8 @@ const MapPage = () => {
           <button 
             onClick={() => {
               setIsPlanningMode(!isPlanningMode);
-              if (isPlanningMode) setRouteSequence([]);
+              if (!isPlanningMode) setRouteSequence([]);
+              setIsMobileSheetExpanded(false);
               setIsProximityMode(false);
               setIsTaggingMode(false);
             }}
@@ -184,6 +206,7 @@ const MapPage = () => {
             onClick={() => {
               setIsTaggingMode(!isTaggingMode);
               setCustomerToTag(null);
+              setIsMobileSheetExpanded(false);
               setIsPlanningMode(false);
               setIsProximityMode(false);
             }}
@@ -278,8 +301,16 @@ const MapPage = () => {
 
       {/* Right Sidebar for Proximity Search */}
       {isProximityMode && (
-        <div className="absolute bottom-0 left-0 right-0 h-[55vh] md:relative md:w-80 md:h-full border-t md:border-t-0 md:border-l border-slate-200/50 dark:border-white/10 glass-panel shadow-[0_-10px_40px_rgba(0,0,0,0.15)] md:shadow-xl flex flex-col z-20 shrink-0 rounded-t-3xl md:rounded-none animate-slide-up-fade bg-white/95 dark:bg-[#0a0c14]/95 backdrop-blur-2xl">
-          <div className="p-4 border-b border-slate-200/50 dark:border-white/10 bg-white/50 dark:bg-slate-900/50">
+        <div className={`absolute bottom-0 left-0 right-0 ${isMobileSheetExpanded ? 'h-[60vh]' : 'h-[180px]'} md:relative md:w-80 md:h-full border-t md:border-t-0 md:border-l border-slate-200/50 dark:border-white/10 glass-panel shadow-[0_-10px_40px_rgba(0,0,0,0.15)] md:shadow-xl flex flex-col z-20 shrink-0 rounded-t-3xl md:rounded-none transition-all duration-300 animate-slide-up-fade bg-white/95 dark:bg-[#0a0c14]/95 backdrop-blur-2xl`}>
+          <div 
+            className="w-full flex justify-center py-3 md:hidden cursor-pointer"
+            onClick={() => setIsMobileSheetExpanded(!isMobileSheetExpanded)}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+          >
+            <div className="w-12 h-1.5 bg-slate-300 dark:bg-slate-700 rounded-full"></div>
+          </div>
+          <div className="p-4 pt-0 md:pt-4 border-b border-slate-200/50 dark:border-white/10 bg-transparent">
             <h2 className="font-bold text-slate-800 dark:text-slate-100 mb-4">Proximity Search</h2>
             <div className="space-y-2">
               <div className="flex justify-between items-center text-sm">
@@ -342,8 +373,16 @@ const MapPage = () => {
 
       {/* Right Sidebar for Route Planning */}
       {isPlanningMode && (
-        <div className="absolute bottom-0 left-0 right-0 h-[55vh] md:relative md:w-80 md:h-full border-t md:border-t-0 md:border-l border-slate-200/50 dark:border-white/10 glass-panel shadow-[0_-10px_40px_rgba(0,0,0,0.15)] md:shadow-xl flex flex-col z-20 shrink-0 rounded-t-3xl md:rounded-none animate-slide-up-fade bg-white/95 dark:bg-[#0a0c14]/95 backdrop-blur-2xl">
-          <div className="p-4 border-b border-slate-200/50 dark:border-white/10 bg-white/50 dark:bg-slate-900/50 flex justify-between items-center">
+        <div className={`absolute bottom-0 left-0 right-0 ${isMobileSheetExpanded ? 'h-[60vh]' : 'h-[140px]'} md:relative md:w-80 md:h-full border-t md:border-t-0 md:border-l border-slate-200/50 dark:border-white/10 glass-panel shadow-[0_-10px_40px_rgba(0,0,0,0.15)] md:shadow-xl flex flex-col z-20 shrink-0 rounded-t-3xl md:rounded-none transition-all duration-300 animate-slide-up-fade bg-white/95 dark:bg-[#0a0c14]/95 backdrop-blur-2xl`}>
+          <div 
+            className="w-full flex justify-center py-3 md:hidden cursor-pointer"
+            onClick={() => setIsMobileSheetExpanded(!isMobileSheetExpanded)}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+          >
+            <div className="w-12 h-1.5 bg-slate-300 dark:bg-slate-700 rounded-full"></div>
+          </div>
+          <div className="p-4 pt-0 md:pt-4 border-b border-slate-200/50 dark:border-white/10 bg-transparent flex justify-between items-center">
             <h2 className="font-bold text-slate-800 dark:text-slate-100">Route Sequence</h2>
             <button onClick={() => setRouteSequence([])} className="text-xs font-semibold text-red-600 hover:text-red-700 dark:text-red-400">Clear</button>
           </div>
@@ -401,8 +440,16 @@ const MapPage = () => {
 
       {/* Right Sidebar for Tagging Customers */}
       {isTaggingMode && (
-        <div className="absolute bottom-0 left-0 right-0 h-[55vh] md:relative md:w-80 md:h-full border-t md:border-t-0 md:border-l border-slate-200/50 dark:border-white/10 glass-panel shadow-[0_-10px_40px_rgba(0,0,0,0.15)] md:shadow-xl flex flex-col z-20 shrink-0 rounded-t-3xl md:rounded-none animate-slide-up-fade bg-white/95 dark:bg-[#0a0c14]/95 backdrop-blur-2xl">
-          <div className="p-4 border-b border-slate-200/50 dark:border-white/10 bg-white/50 dark:bg-slate-900/50">
+        <div className={`absolute bottom-0 left-0 right-0 ${isMobileSheetExpanded ? 'h-[60vh]' : 'h-[160px]'} md:relative md:w-80 md:h-full border-t md:border-t-0 md:border-l border-slate-200/50 dark:border-white/10 glass-panel shadow-[0_-10px_40px_rgba(0,0,0,0.15)] md:shadow-xl flex flex-col z-20 shrink-0 rounded-t-3xl md:rounded-none transition-all duration-300 animate-slide-up-fade bg-white/95 dark:bg-[#0a0c14]/95 backdrop-blur-2xl`}>
+          <div 
+            className="w-full flex justify-center py-3 md:hidden cursor-pointer"
+            onClick={() => setIsMobileSheetExpanded(!isMobileSheetExpanded)}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+          >
+            <div className="w-12 h-1.5 bg-slate-300 dark:bg-slate-700 rounded-full"></div>
+          </div>
+          <div className="p-4 pt-0 md:pt-4 border-b border-slate-200/50 dark:border-white/10 bg-transparent">
             <h2 className="font-bold text-slate-800 dark:text-slate-100">Tag Location</h2>
             <p className="text-xs text-slate-500 mt-1">Select a customer below, then click on the map to set their location.</p>
             {customerToTag && (
