@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { HashRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from 'react-hot-toast';
 
 // Layouts (The Picture Frames)
@@ -37,7 +37,7 @@ const App = () => {
           <OrderProvider>
             <BeatProvider>
               <VisitProvider>
-                <BrowserRouter>
+                <HashRouter>
               <Routes>
                 {/* Default Redirect: If they just type yourwebsite.com, send them to login */}
                 <Route path="/" element={<Navigate to="/auth/login" replace />} />
@@ -95,7 +95,7 @@ const App = () => {
                 </Route>
               </Routes>
                 <Toaster position="top-right" toastOptions={{ className: 'dark:bg-slate-800 dark:text-white' }} />
-              </BrowserRouter>
+              </HashRouter>
             </VisitProvider>
           </BeatProvider>
         </OrderProvider>
