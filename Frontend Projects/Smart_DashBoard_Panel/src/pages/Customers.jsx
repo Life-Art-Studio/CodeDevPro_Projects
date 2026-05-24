@@ -55,13 +55,15 @@ const Customers = () => {
     ? customers.filter((c) => safeOrders.some(o => o.customerId === c.id && (o.status === "Pending" || o.status === "Partially Paid")))
     : customers;
 
-  const filteredCustomers = displayCustomers.filter(
-    (customer) =>
-      customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      customer.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      customer.phone.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      customer.id.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+  const filteredCustomers = useMemo(() => {
+    return displayCustomers.filter(
+      (customer) =>
+        customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        customer.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        customer.phone.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        customer.id.toLowerCase().includes(searchTerm.toLowerCase()),
+    );
+  }, [displayCustomers, searchTerm]);
 
   const customerMetrics = useMemo(() => {
     return customers.reduce((acc, customer) => {
@@ -80,26 +82,30 @@ const Customers = () => {
   const getTotalOrders = (customer) => customerMetrics[customer.id]?.totalOrders || 0;
   const getTotalTransaction = (customer) => customerMetrics[customer.id]?.totalTransaction || 0;
 
-  const sortedCustomers = [...filteredCustomers].sort((a, b) => {
-    if (sortOption === "totalTransaction") {
-      return getTotalTransaction(b) - getTotalTransaction(a);
-    } else if (sortOption === "lastOrderAmount") {
-      return getLatestOrderTotal(b) - getLatestOrderTotal(a);
-    } else if (sortOption === "totalOrders") {
-      return getTotalOrders(b) - getTotalOrders(a);
-    }
-    return 0;
-  });
+  const sortedCustomers = useMemo(() => {
+    return [...filteredCustomers].sort((a, b) => {
+      if (sortOption === "totalTransaction") {
+        return getTotalTransaction(b) - getTotalTransaction(a);
+      } else if (sortOption === "lastOrderAmount") {
+        return getLatestOrderTotal(b) - getLatestOrderTotal(a);
+      } else if (sortOption === "totalOrders") {
+        return getTotalOrders(b) - getTotalOrders(a);
+      }
+      return 0;
+    });
+  }, [filteredCustomers, sortOption, customerMetrics]);
 
   const handleSortTransaction = (e) => {
     setSortOption(e.target.value);
   };
 
   const totalPages = Math.max(1, Math.ceil(sortedCustomers.length / ITEMS_PER_PAGE));
-  const paginatedCustomers = sortedCustomers.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
-  );
+  const paginatedCustomers = useMemo(() => {
+    return sortedCustomers.slice(
+      (currentPage - 1) * ITEMS_PER_PAGE,
+      currentPage * ITEMS_PER_PAGE
+    );
+  }, [sortedCustomers, currentPage]);
 
   const handleExportCustomersCSV = () => {
     if (customers.length === 0) {
