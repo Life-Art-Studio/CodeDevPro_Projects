@@ -278,7 +278,7 @@ const MapPage = () => {
 
       {/* Right Sidebar for Proximity Search */}
       {isProximityMode && (
-        <div className="w-full md:w-80 h-[50%] md:h-full border-t md:border-t-0 md:border-l border-slate-200/50 dark:border-white/10 glass-panel shadow-xl flex flex-col animate-slide-in-right z-20 shrink-0">
+        <div className="absolute bottom-0 left-0 right-0 h-[55vh] md:relative md:w-80 md:h-full border-t md:border-t-0 md:border-l border-slate-200/50 dark:border-white/10 glass-panel shadow-[0_-10px_40px_rgba(0,0,0,0.15)] md:shadow-xl flex flex-col z-20 shrink-0 rounded-t-3xl md:rounded-none animate-slide-up-fade bg-white/95 dark:bg-[#0a0c14]/95 backdrop-blur-2xl">
           <div className="p-4 border-b border-slate-200/50 dark:border-white/10 bg-white/50 dark:bg-slate-900/50">
             <h2 className="font-bold text-slate-800 dark:text-slate-100 mb-4">Proximity Search</h2>
             <div className="space-y-2">
@@ -342,7 +342,7 @@ const MapPage = () => {
 
       {/* Right Sidebar for Route Planning */}
       {isPlanningMode && (
-        <div className="w-full md:w-80 h-[50%] md:h-full border-t md:border-t-0 md:border-l border-slate-200/50 dark:border-white/10 glass-panel shadow-xl flex flex-col animate-slide-in-right z-20 shrink-0">
+        <div className="absolute bottom-0 left-0 right-0 h-[55vh] md:relative md:w-80 md:h-full border-t md:border-t-0 md:border-l border-slate-200/50 dark:border-white/10 glass-panel shadow-[0_-10px_40px_rgba(0,0,0,0.15)] md:shadow-xl flex flex-col z-20 shrink-0 rounded-t-3xl md:rounded-none animate-slide-up-fade bg-white/95 dark:bg-[#0a0c14]/95 backdrop-blur-2xl">
           <div className="p-4 border-b border-slate-200/50 dark:border-white/10 bg-white/50 dark:bg-slate-900/50 flex justify-between items-center">
             <h2 className="font-bold text-slate-800 dark:text-slate-100">Route Sequence</h2>
             <button onClick={() => setRouteSequence([])} className="text-xs font-semibold text-red-600 hover:text-red-700 dark:text-red-400">Clear</button>
@@ -401,7 +401,7 @@ const MapPage = () => {
 
       {/* Right Sidebar for Tagging Customers */}
       {isTaggingMode && (
-        <div className="w-full md:w-80 h-[50%] md:h-full border-t md:border-t-0 md:border-l border-slate-200/50 dark:border-white/10 glass-panel shadow-xl flex flex-col animate-slide-in-right z-20 shrink-0">
+        <div className="absolute bottom-0 left-0 right-0 h-[55vh] md:relative md:w-80 md:h-full border-t md:border-t-0 md:border-l border-slate-200/50 dark:border-white/10 glass-panel shadow-[0_-10px_40px_rgba(0,0,0,0.15)] md:shadow-xl flex flex-col z-20 shrink-0 rounded-t-3xl md:rounded-none animate-slide-up-fade bg-white/95 dark:bg-[#0a0c14]/95 backdrop-blur-2xl">
           <div className="p-4 border-b border-slate-200/50 dark:border-white/10 bg-white/50 dark:bg-slate-900/50">
             <h2 className="font-bold text-slate-800 dark:text-slate-100">Tag Location</h2>
             <p className="text-xs text-slate-500 mt-1">Select a customer below, then click on the map to set their location.</p>

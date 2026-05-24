@@ -115,7 +115,7 @@ const Dashboard = () => {
       </div>
 
       {/* METRIC CARDS GRID */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
         
         <div className="glass-panel p-6 rounded-2xl border-b-4 border-b-emerald-500 group">
           <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1 group-hover:text-emerald-400 transition-colors">Total Revenue</p>
