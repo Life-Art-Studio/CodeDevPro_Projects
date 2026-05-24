@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { useBeatContext } from '../context/BeatContext';
 import { useVisitContext } from '../context/VisitContext';
 import useCustomerContext from '../context/CustomerContext';
 import useOrderContext from '../context/OrderContext';
 import LogVisitModal from '../components/Beats/LogVisitModal';
+import CreateBeatModal from '../components/Beats/CreateBeatModal';
 import BeatsCalendar from '../components/Beats/BeatsCalendar';
 import { calculateOrderTotal, getOrderPaidAmount, getOrderOutstanding, formatCurrency } from '../utils/financeUtils';
 import { generateBeatPDF } from '../utils/generateBeatPdf';
@@ -19,14 +21,12 @@ const Beats = () => {
   const [selectedBeat, setSelectedBeat] = useState(null);
   const [activeTab, setActiveTab] = useState('info');
   const [isLogVisitModalOpen, setIsLogVisitModalOpen] = useState(false);
+  const [isCreateBeatModalOpen, setIsCreateBeatModalOpen] = useState(false);
   const [selectedCustomers, setSelectedCustomers] = useState(new Set());
   const [viewMode, setViewMode] = useState('list'); // 'list' or 'calendar'
 
   const handleAddBeat = () => {
-    const name = window.prompt("Enter Beat Name:");
-    if (name) {
-      addBeat({ name, assignedCustomers: [] });
-    }
+    setIsCreateBeatModalOpen(true);
   };
 
   const getCustomerName = (id) => customers.find(c => c.id === id)?.name || 'Unknown';
@@ -377,13 +377,40 @@ const Beats = () => {
               <div className="mb-6">
                 <div className="flex justify-between items-center">
                   <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">{selectedBeat.name}</h2>
-                  <button 
-                    onClick={() => generateBeatPDF(selectedBeat, customers, orders, visits, getOrderPaidAmount, getOrderOutstanding)}
-                    className="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors flex items-center gap-2"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                    Export Report
-                  </button>
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={() => {
+                        toast((t) => (
+                          <div className="flex flex-col gap-2">
+                            <span className="font-semibold text-sm">Are you sure you want to delete the beat "{selectedBeat.name}"?</span>
+                            <div className="flex gap-2 justify-end mt-2">
+                              <button 
+                                onClick={() => {
+                                  toast.dismiss(t.id);
+                                  deleteBeat(selectedBeat.id);
+                                  setSelectedBeat(null);
+                                  toast.success("Beat deleted successfully.");
+                                }}
+                                className="bg-red-500 text-white px-3 py-1 rounded-lg text-xs font-semibold hover:bg-red-600 transition-colors"
+                              >Delete</button>
+                              <button onClick={() => toast.dismiss(t.id)} className="bg-slate-200 dark:bg-slate-700 px-3 py-1 rounded-lg text-xs font-semibold text-slate-800 dark:text-slate-200 hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors">Cancel</button>
+                            </div>
+                          </div>
+                        ), { duration: Infinity });
+                      }}
+                      className="px-4 py-2 bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400 rounded-lg text-sm font-semibold hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors flex items-center gap-2"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                      Delete
+                    </button>
+                    <button 
+                      onClick={() => generateBeatPDF(selectedBeat, customers, orders, visits, getOrderPaidAmount, getOrderOutstanding)}
+                      className="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors flex items-center gap-2"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                      Export Report
+                    </button>
+                  </div>
                 </div>
                 <div className="flex gap-4 mt-4 border-b border-slate-200 dark:border-slate-800">
                   {['info', 'customers', 'visits'].map(tab => (
@@ -427,6 +454,12 @@ const Beats = () => {
           addVisit(data);
         }}
         beat={selectedBeat}
+      />
+      
+      <CreateBeatModal 
+        isOpen={isCreateBeatModalOpen}
+        onClose={() => setIsCreateBeatModalOpen(false)}
+        onSubmit={addBeat}
       />
       </div>
     </div>

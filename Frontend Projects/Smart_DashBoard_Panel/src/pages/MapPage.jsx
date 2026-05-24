@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Polyline, Circle, useMapEvents, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Polyline, Circle, useMapEvents, useMap, Tooltip } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import useCustomerContext from '../context/CustomerContext';
 import { useBeatContext } from '../context/BeatContext';
 import { useNavigate } from 'react-router-dom';
+import CreateBeatModal from '../components/Beats/CreateBeatModal';
 
 // Fix for default marker icons in React-Leaflet
 import L from 'leaflet';
@@ -37,7 +38,6 @@ const MapEvents = ({ onMapClick }) => {
   });
   return null;
 };
-// Component to handle map re-centering
 const RecenterAutomatically = ({ lat, lng }) => {
   const map = useMap();
   useEffect(() => {
@@ -46,6 +46,24 @@ const RecenterAutomatically = ({ lat, lng }) => {
     }
   }, [lat, lng, map]);
   return null;
+};
+
+// Component to handle proximity radius fitting
+const AutoFitCircle = ({ center, radius }) => {
+  const map = useMap();
+  useEffect(() => {
+    if (center && radius) {
+      // radius is in km. Create a bounds from the center and radius.
+      const latDiff = radius / 111; // 1 deg lat is approx 111km
+      const lngDiff = radius / (111 * Math.cos(center[0] * Math.PI / 180));
+      const bounds = [
+        [center[0] - latDiff, center[1] - lngDiff],
+        [center[0] + latDiff, center[1] + lngDiff]
+      ];
+      map.flyToBounds(bounds, { animate: true, duration: 1 });
+    }
+  }, [center, radius, map]);
+  return <Circle center={center} radius={radius * 1000} pathOptions={{ fillColor: '#a855f7', color: '#9333ea', weight: 2, fillOpacity: 0.1 }} />;
 };
 
 const MapPage = () => {
@@ -69,6 +87,10 @@ const MapPage = () => {
   // Tag Location State
   const [isTaggingMode, setIsTaggingMode] = useState(false);
   const [customerToTag, setCustomerToTag] = useState(null);
+
+  // Modals & Search
+  const [isCreateBeatModalOpen, setIsCreateBeatModalOpen] = useState(false);
+  const [routeSearchQuery, setRouteSearchQuery] = useState("");
 
   // Mobile Sheet State
   const [isMobileSheetExpanded, setIsMobileSheetExpanded] = useState(false);
@@ -140,12 +162,13 @@ const MapPage = () => {
   };
 
   const handleSaveBeat = () => {
-    const name = window.prompt("Enter a name for this new beat:");
-    if (name) {
-      addBeat({ name, assignedCustomers: routeSequence });
-      navigate('/dashboard/beats');
-    }
+    setIsCreateBeatModalOpen(true);
   };
+
+  const availableForRoute = customers.filter(c => 
+    !routeSequence.includes(c.id) && 
+    (c.name.toLowerCase().includes(routeSearchQuery.toLowerCase()) || c.phone.includes(routeSearchQuery))
+  );
 
   const polylinePositions = routeSequence
     .map(id => customers.find(c => c.id === id))
@@ -233,11 +256,7 @@ const MapPage = () => {
           {searchCenter && <RecenterAutomatically lat={searchCenter[0]} lng={searchCenter[1]} />}
           
           {searchCenter && isProximityMode && (
-            <Circle 
-              center={searchCenter} 
-              radius={searchRadius * 1000} // km to meters
-              pathOptions={{ fillColor: '#a855f7', color: '#9333ea', weight: 2, fillOpacity: 0.1 }}
-            />
+            <AutoFitCircle center={searchCenter} radius={searchRadius} />
           )}
 
           {polylinePositions.length >= 2 && (
@@ -258,30 +277,26 @@ const MapPage = () => {
                     click: () => handleMarkerClick(customer.id)
                   }}
                 >
-                  <Popup>
-                    <div className="p-1">
-                      <h3 className="font-bold text-slate-800">{customer.name}</h3>
-                      <p className="text-sm text-slate-600 mb-2">{customer.phone}</p>
-                      {customer.tags && customer.tags.length > 0 && (
-                        <div className="flex gap-1 flex-wrap mb-2">
-                          {customer.tags.map(tag => (
-                            <span key={tag} className="text-[9px] bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded font-bold uppercase">{tag}</span>
-                          ))}
-                        </div>
-                      )}
-                      {isPlanningMode && !isSelected && (
-                        <button 
-                          onClick={() => handleMarkerClick(customer.id)}
-                          className="w-full bg-purple-600 text-white rounded text-xs py-1 font-semibold hover:bg-purple-700"
-                        >
-                          Add to Route
-                        </button>
-                      )}
-                      {isSelected && (
-                        <span className="text-xs font-bold text-purple-600 bg-purple-100 px-2 py-1 rounded">Stop {routeIndex + 1}</span>
-                      )}
-                    </div>
-                  </Popup>
+                  {!isPlanningMode && (
+                    <Popup>
+                      <div className="p-1">
+                        <h3 className="font-bold text-slate-800">{customer.name}</h3>
+                        <p className="text-sm text-slate-600 mb-2">{customer.phone}</p>
+                        {customer.tags && customer.tags.length > 0 && (
+                          <div className="flex gap-1 flex-wrap mb-2">
+                            {customer.tags.map(tag => (
+                              <span key={tag} className="text-[9px] bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded font-bold uppercase">{tag}</span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </Popup>
+                  )}
+                  {isPlanningMode && isSelected && (
+                    <Tooltip permanent direction="top" className="bg-purple-100 text-purple-700 font-bold border-0 shadow-md">
+                      Stop {routeIndex + 1}
+                    </Tooltip>
+                  )}
                 </Marker>
               );
             }
@@ -387,39 +402,65 @@ const MapPage = () => {
             <button onClick={() => setRouteSequence([])} className="text-xs font-semibold text-red-600 hover:text-red-700 dark:text-red-400">Clear</button>
           </div>
           
-          <div className="flex-1 overflow-y-auto p-4 space-y-2">
-            {routeSequence.length === 0 ? (
-              <div className="text-center text-slate-500 text-sm mt-10">
-                Click markers on the map to add stops to your route.
-              </div>
-            ) : (
-              routeSequence.map((customerId, index) => {
-                const customer = customers.find(c => c.id === customerId);
-                return (
-                  <div 
-                    key={customerId}
-                    draggable
-                    onDragStart={(e) => handleDragStart(e, index)}
-                    onDragOver={(e) => e.preventDefault()}
-                    onDrop={(e) => handleDrop(e, index)}
-                    className="flex items-center gap-3 p-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl cursor-move hover:border-purple-300 dark:hover:border-purple-500/50 transition-colors shadow-sm"
-                  >
-                    <div className="w-6 h-6 shrink-0 bg-purple-100 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400 rounded-full flex items-center justify-center font-bold text-xs">
-                      {index + 1}
-                    </div>
-                    <div className="flex-1 truncate">
-                      <p className="font-semibold text-sm text-slate-800 dark:text-slate-200 truncate">{customer?.name || 'Unknown'}</p>
-                    </div>
-                    <button 
-                      onClick={() => handleRemoveFromRoute(customerId)}
-                      className="text-slate-400 hover:text-red-500 transition-colors p-1"
+          <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4 custom-scrollbar">
+            <div className="space-y-2 flex-1">
+              {routeSequence.length === 0 ? (
+                <div className="text-center text-slate-500 text-sm mt-4">
+                  Click markers on the map or search below to add stops.
+                </div>
+              ) : (
+                routeSequence.map((customerId, index) => {
+                  const customer = customers.find(c => c.id === customerId);
+                  return (
+                    <div 
+                      key={customerId}
+                      draggable
+                      onDragStart={(e) => handleDragStart(e, index)}
+                      onDragOver={(e) => e.preventDefault()}
+                      onDrop={(e) => handleDrop(e, index)}
+                      className="flex items-center gap-3 p-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl cursor-move hover:border-purple-300 dark:hover:border-purple-500/50 transition-colors shadow-sm"
                     >
-                      ✕
-                    </button>
-                  </div>
-                );
-              })
-            )}
+                      <div className="w-6 h-6 shrink-0 bg-purple-100 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400 rounded-full flex items-center justify-center font-bold text-xs">
+                        {index + 1}
+                      </div>
+                      <div className="flex-1 truncate">
+                        <p className="font-semibold text-sm text-slate-800 dark:text-slate-200 truncate">{customer?.name || 'Unknown'}</p>
+                      </div>
+                      <button 
+                        onClick={() => handleRemoveFromRoute(customerId)}
+                        className="text-slate-400 hover:text-red-500 transition-colors p-1"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            <hr className="border-slate-200 dark:border-slate-800" />
+            <div className="flex flex-col gap-2 min-h-[120px]">
+              <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Available Customers</h3>
+              <input 
+                type="text" 
+                placeholder="Search by name or phone..." 
+                value={routeSearchQuery}
+                onChange={(e) => setRouteSearchQuery(e.target.value)}
+                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-purple-500 dark:text-white"
+              />
+              <div className="flex flex-col gap-1 overflow-y-auto custom-scrollbar h-32">
+                {availableForRoute.map(c => (
+                  <button 
+                    key={c.id} 
+                    onClick={() => setRouteSequence([...routeSequence, c.id])}
+                    className="text-left px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors text-sm font-semibold text-slate-700 dark:text-slate-300 flex justify-between"
+                  >
+                    <span className="truncate pr-2">+ {c.name}</span>
+                    {!c.lat && <span className="text-[9px] bg-amber-100 text-amber-700 px-1 py-0.5 rounded font-bold whitespace-nowrap shrink-0">No Map</span>}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
 
           <div className="p-4 border-t border-slate-200/50 dark:border-white/10 bg-white/50 dark:bg-slate-900/50">
@@ -491,6 +532,14 @@ const MapPage = () => {
           </div>
         </div>
       )}
+      <CreateBeatModal 
+        isOpen={isCreateBeatModalOpen}
+        onClose={() => setIsCreateBeatModalOpen(false)}
+        onSubmit={(beatData) => {
+          addBeat({ ...beatData, assignedCustomers: routeSequence });
+          navigate('/dashboard/beats');
+        }}
+      />
     </div>
   );
 };

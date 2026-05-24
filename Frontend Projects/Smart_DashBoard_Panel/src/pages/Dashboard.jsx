@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import useOrderContext from '../context/OrderContext';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { generateDashboardReport } from '../utils/generateReports';
 import { calculateOrderTotal, formatCurrency, getOrderOutstanding, getOrderPaidAmount } from '../utils/financeUtils';
 import toast from 'react-hot-toast';
@@ -27,7 +27,7 @@ const Dashboard = () => {
       acc.push({ date: order.date, revenue: calculateOrderTotal(order) });
     }
     return acc;
-  }, []);
+  }, []).sort((a, b) => new Date(a.date) - new Date(b.date));
 
   const totalRevenue = orders.reduce((sum, order) => {
     if (order.status === "Paid" || order.status === "Partially Paid" || order.status === "Delivered") {
@@ -118,7 +118,7 @@ const Dashboard = () => {
       {/* METRIC CARDS GRID */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
         
-        <div className="glass-panel p-6 rounded-2xl border-b-4 border-b-emerald-500 group">
+        <div className="glass-panel p-6 rounded-2xl border-b-4 border-b-emerald-500 group animate-slide-up-fade" style={{ animationDelay: '50ms' }}>
           <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1 group-hover:text-emerald-400 transition-colors">Total Revenue</p>
           <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-800 dark:text-slate-100 neon-text group-hover:scale-105 transform origin-left transition-transform tracking-tighter">₹{formatCurrency(totalRevenue)}</h3>
           <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium mt-3 flex items-center gap-1 bg-emerald-500/10 inline-block px-2 py-1 rounded-md">
@@ -126,7 +126,7 @@ const Dashboard = () => {
           </p>
         </div>
 
-        <div className="glass-panel p-6 rounded-2xl border-b-4 border-b-purple-500 group animate-slide-up-fade" style={{ animationDelay: '100ms' }}>
+        <div className="glass-panel p-6 rounded-2xl border-b-4 border-b-purple-500 group animate-slide-up-fade" style={{ animationDelay: '150ms' }}>
           <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1 group-hover:text-purple-400 transition-colors">Active Buyers</p>
           <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-800 dark:text-slate-100 neon-text group-hover:scale-105 transform origin-left transition-transform tracking-tighter">{activeCustomersCount}</h3>
           <p className="text-xs text-purple-500 dark:text-purple-400 font-medium mt-3 flex items-center gap-1 bg-purple-500/10 inline-block px-2 py-1 rounded-md">
@@ -134,7 +134,7 @@ const Dashboard = () => {
           </p>
         </div>
 
-        <div className="glass-panel p-6 rounded-2xl border-b-4 border-b-pink-500 group animate-slide-up-fade" style={{ animationDelay: '200ms' }}>
+        <div className="glass-panel p-6 rounded-2xl border-b-4 border-b-pink-500 group animate-slide-up-fade" style={{ animationDelay: '250ms' }}>
           <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1 group-hover:text-pink-400 transition-colors">Total Orders</p>
           <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-800 dark:text-slate-100 neon-text-pink group-hover:scale-105 transform origin-left transition-transform tracking-tighter">{totalOrdersCount}</h3>
           <p className="text-xs text-pink-500 dark:text-pink-400 font-medium mt-3 flex items-center gap-1 bg-pink-500/10 inline-block px-2 py-1 rounded-md">
@@ -143,11 +143,11 @@ const Dashboard = () => {
         </div>
 
         <div onClick={() => navigate('/dashboard/customers', { state: { filterStatus: 'Pending' }})}
-             className="cursor-pointer glass-panel p-6 rounded-2xl border-b-4 border-b-amber-500 group animate-slide-up-fade hover:scale-[1.02] transition-transform" style={{ animationDelay: '300ms' }}>
+             className="cursor-pointer glass-panel p-6 rounded-2xl border-b-4 border-b-amber-500 group animate-slide-up-fade hover:scale-[1.02] transition-transform" style={{ animationDelay: '350ms' }}>
           <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1 group-hover:text-amber-400 transition-colors">Pending Payments</p>
           <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-800 dark:text-slate-100 neon-text group-hover:scale-105 transform origin-left transition-transform tracking-tighter">₹{formatCurrency(pendingTotal)}</h3>
           <p className="text-xs text-amber-600 dark:text-amber-400 font-medium mt-3 flex items-center gap-1 bg-amber-500/10 inline-block px-2 py-1 rounded-md">
-            <span>{pendingOrders.length} orders awaiting</span>
+            <span>{pendingOrders.length} order{pendingOrders.length === 1 ? '' : 's'} awaiting</span>
           </p>
         </div>
 
@@ -168,15 +168,26 @@ const Dashboard = () => {
             {/* Glowing orb behind chart */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-purple-500/20 rounded-full blur-[80px]"></div>
             
-            <div className="w-full h-[300px] p-4 border border-dashed border-purple-500/30 rounded-xl flex items-center justify-center text-purple-400/50 bg-white/5 dark:bg-[#0a0c14]/30 backdrop-blur-sm transition-colors relative z-10">
+            <div className="w-full h-[300px] p-4 border border-dashed border-purple-500/30 rounded-xl flex items-center justify-center text-purple-400/50 bg-white/5 dark:bg-[#0a0c14]/30 backdrop-blur-sm transition-colors relative z-10 shadow-[inset_0_0_20px_rgba(168,85,247,0.1)]">
               <ResponsiveContainer width="100%" height={250}>
-                <LineChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
-                  <YAxis />
-                  <Tooltip formatter={(v) => `₹${v.toFixed(2)}`} />
-                  <Line type="monotone" dataKey="revenue" stroke="#2563eb" strokeWidth={2} />
-                </LineChart>
+                <AreaChart data={chartData}>
+                  <defs>
+                    <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#ec4899" stopOpacity={0.6}/>
+                      <stop offset="95%" stopColor="#a855f7" stopOpacity={0.05}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#94a3b830" vertical={false} />
+                  <XAxis dataKey="date" stroke="#94a3b8" tick={{fill: '#94a3b8', fontSize: 12}} tickLine={false} axisLine={false} />
+                  <YAxis stroke="#94a3b8" tick={{fill: '#94a3b8', fontSize: 12}} tickLine={false} axisLine={false} tickFormatter={(v) => `₹${v}`} />
+                  <Tooltip 
+                    formatter={(v) => `₹${v.toFixed(2)}`} 
+                    contentStyle={{ backgroundColor: 'rgba(15, 23, 42, 0.9)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', color: '#fff', boxShadow: '0 10px 25px rgba(0,0,0,0.5)' }}
+                    itemStyle={{ color: '#ec4899', fontWeight: 'bold' }}
+                    cursor={{ stroke: '#ec4899', strokeWidth: 1, strokeDasharray: '5 5' }}
+                  />
+                  <Area type="monotone" dataKey="revenue" stroke="#ec4899" strokeWidth={4} fillOpacity={1} fill="url(#colorRevenue)" activeDot={{ r: 8, stroke: '#fff', strokeWidth: 2, fill: '#ec4899' }} />
+                </AreaChart>
               </ResponsiveContainer>
             </div>
           </div>
@@ -192,11 +203,11 @@ const Dashboard = () => {
           <div className="p-6 flex-1 flex flex-col relative">
             <div className="space-y-6 flex-1 relative z-10">
               
-              {recentOrders.map((order) => (
+              {recentOrders.map((order, index) => (
                 <div key={order.id} 
                      onClick={() => navigate('/dashboard/customers', { state: { openCustomerId: order.customerId, openOrderId: order.id }})}
-                     className="flex gap-4 items-start hover:translate-x-2 transition-all cursor-pointer p-2 -mx-2 rounded-xl hover:bg-white/10 dark:hover:bg-white/5 hover:ring-1 hover:ring-purple-500/30">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg shrink-0 shadow-lg ${
+                     className="flex gap-4 items-center p-3 rounded-xl cursor-pointer glass-panel border border-slate-200/50 dark:border-white/10 hover:border-purple-300 dark:hover:border-purple-500/50 hover:bg-white/40 dark:hover:bg-white/5 transition-all group shadow-sm hover:shadow-md hover:scale-[1.02] animate-slide-up-fade" style={{ animationDelay: `${500 + index * 100}ms` }}>
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center text-xl shrink-0 shadow-lg transition-transform group-hover:scale-110 ${
                     order.status === 'Paid' ? 'bg-emerald-500/20 text-emerald-500 border border-emerald-500/30' :
                     order.status === 'Cancelled' ? 'bg-red-500/20 text-red-500 border border-red-500/30' :
                     order.status === 'Partially Paid' ? 'bg-teal-500/20 text-teal-500 border border-teal-500/30' :
@@ -205,11 +216,11 @@ const Dashboard = () => {
                     {order.status === 'Paid' ? '💰' : order.status === 'Cancelled' ? '❌' : order.status === 'Partially Paid' ? '💳' : '🛒'}
                   </div>
                   <div>
-                    <p className="text-sm text-slate-800 dark:text-slate-200 transition-colors">
+                    <p className="text-sm text-slate-800 dark:text-slate-200 transition-colors group-hover:text-purple-600 dark:group-hover:text-purple-400 font-medium">
                       Order <span className="font-bold text-purple-500">{order.id}</span> is marked as <span className="font-semibold text-pink-500">{order.status}</span>.
                     </p>
                     <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 transition-colors">
-                      Amount: ₹{formatCurrency(calculateOrderTotal(order))}
+                      Amount: <span className="font-bold">₹{formatCurrency(calculateOrderTotal(order))}</span>
                     </p>
                   </div>
                 </div>

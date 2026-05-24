@@ -59,10 +59,10 @@ const PaymentModal = ({ isOpen, onClose, order, onRecordPayment }) => {
 
   return ReactDOM.createPortal(
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#0a0c14]/80 backdrop-blur-md animate-in fade-in duration-300">
-      <div className="glass-modal rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-300 transition-colors border border-white/20">
+      <div className="glass-modal flex flex-col max-h-[90vh] rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-300 transition-colors border border-white/20">
         
         {/* Modal Header */}
-        <div className="px-6 py-5 border-b border-white/10 flex items-center justify-between bg-white/5 dark:bg-white/5 transition-colors backdrop-blur-md">
+        <div className="shrink-0 px-6 py-5 border-b border-white/10 flex items-center justify-between bg-white/5 dark:bg-white/5 transition-colors backdrop-blur-md">
           <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 transition-colors tracking-tight">Record Payment</h3>
           <button
             onClick={onClose}
@@ -75,8 +75,8 @@ const PaymentModal = ({ isOpen, onClose, order, onRecordPayment }) => {
         </div>
 
         {/* Modal Body */}
-        <form onSubmit={handleSubmit}>
-          <div className="p-6 space-y-6">
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
+          <div className="p-6 space-y-6 overflow-y-auto custom-scrollbar flex-1">
             
             {/* Stats Overview */}
             <div className="space-y-3 bg-white/50 dark:bg-white/5 p-4 rounded-2xl border border-slate-200/50 dark:border-white/10">
@@ -198,7 +198,7 @@ const PaymentModal = ({ isOpen, onClose, order, onRecordPayment }) => {
           </div>
 
           {/* Modal Footer */}
-          <div className="px-6 py-5 border-t border-white/10 bg-white/5 dark:bg-white/5 flex justify-end gap-3 transition-colors backdrop-blur-md">
+          <div className="shrink-0 px-6 py-5 border-t border-white/10 bg-white/5 dark:bg-white/5 flex justify-end gap-3 transition-colors backdrop-blur-md">
             <button
               type="button"
               onClick={onClose}
