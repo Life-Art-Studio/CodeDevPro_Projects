@@ -133,12 +133,12 @@ const MapPage = () => {
     .map(c => [c.lat, c.lng]);
 
   return (
-    <div className="flex-1 flex h-full bg-slate-50 dark:bg-[#0a0c14] relative z-0 animate-in fade-in duration-500 overflow-hidden">
+    <div className="flex-1 flex flex-col md:flex-row h-full bg-slate-50 dark:bg-[#0a0c14] relative z-0 animate-in fade-in duration-500 overflow-hidden">
       <div className="flex-1 flex flex-col relative z-0">
         {/* Top Bar for Map Actions */}
-      <div className="h-16 border-b border-slate-200/50 dark:border-white/10 bg-white/50 dark:bg-[#0a0c14]/50 backdrop-blur-md flex items-center justify-between px-6 shadow-sm z-10 relative">
+      <div className="border-b border-slate-200/50 dark:border-white/10 bg-white/50 dark:bg-[#0a0c14]/50 backdrop-blur-md flex flex-col md:flex-row items-start md:items-center justify-between p-4 md:px-6 shadow-sm z-10 relative gap-3 md:gap-0 shrink-0">
         <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100">Customer Map</h1>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-2 md:gap-3 w-full md:w-auto">
           {/* Feature 5 and 8 buttons go here */}
           <button 
             onClick={() => {
@@ -199,7 +199,7 @@ const MapPage = () => {
       </div>
 
       {/* Map Container */}
-      <div className="flex-1 relative z-0">
+      <div className="flex-1 relative z-0 min-h-[300px]">
         <MapContainer center={mapCenter} zoom={zoom} style={{ height: '100%', width: '100%' }}>
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -278,7 +278,7 @@ const MapPage = () => {
 
       {/* Right Sidebar for Proximity Search */}
       {isProximityMode && (
-        <div className="w-80 h-full border-l border-slate-200/50 dark:border-white/10 glass-panel shadow-xl flex flex-col animate-slide-in-right z-20">
+        <div className="w-full md:w-80 h-[50%] md:h-full border-t md:border-t-0 md:border-l border-slate-200/50 dark:border-white/10 glass-panel shadow-xl flex flex-col animate-slide-in-right z-20 shrink-0">
           <div className="p-4 border-b border-slate-200/50 dark:border-white/10 bg-white/50 dark:bg-slate-900/50">
             <h2 className="font-bold text-slate-800 dark:text-slate-100 mb-4">Proximity Search</h2>
             <div className="space-y-2">
@@ -342,7 +342,7 @@ const MapPage = () => {
 
       {/* Right Sidebar for Route Planning */}
       {isPlanningMode && (
-        <div className="w-80 h-full border-l border-slate-200/50 dark:border-white/10 glass-panel shadow-xl flex flex-col animate-slide-in-right z-20">
+        <div className="w-full md:w-80 h-[50%] md:h-full border-t md:border-t-0 md:border-l border-slate-200/50 dark:border-white/10 glass-panel shadow-xl flex flex-col animate-slide-in-right z-20 shrink-0">
           <div className="p-4 border-b border-slate-200/50 dark:border-white/10 bg-white/50 dark:bg-slate-900/50 flex justify-between items-center">
             <h2 className="font-bold text-slate-800 dark:text-slate-100">Route Sequence</h2>
             <button onClick={() => setRouteSequence([])} className="text-xs font-semibold text-red-600 hover:text-red-700 dark:text-red-400">Clear</button>
@@ -401,7 +401,7 @@ const MapPage = () => {
 
       {/* Right Sidebar for Tagging Customers */}
       {isTaggingMode && (
-        <div className="w-80 h-full border-l border-slate-200/50 dark:border-white/10 glass-panel shadow-xl flex flex-col animate-slide-in-right z-20">
+        <div className="w-full md:w-80 h-[50%] md:h-full border-t md:border-t-0 md:border-l border-slate-200/50 dark:border-white/10 glass-panel shadow-xl flex flex-col animate-slide-in-right z-20 shrink-0">
           <div className="p-4 border-b border-slate-200/50 dark:border-white/10 bg-white/50 dark:bg-slate-900/50">
             <h2 className="font-bold text-slate-800 dark:text-slate-100">Tag Location</h2>
             <p className="text-xs text-slate-500 mt-1">Select a customer below, then click on the map to set their location.</p>
