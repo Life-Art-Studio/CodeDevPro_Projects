@@ -4,6 +4,7 @@ import Topbar from "../components/Topbar";
 import ProfilePanel from "../components/Profile";
 import SettingsPanel from "../components/Settings";
 import Footer from "../components/Footer";
+import NotificationsPanel from "../components/NotificationsPanel";
 
 const DashBoardLayout = () => {
   return (
@@ -19,6 +20,9 @@ const DashBoardLayout = () => {
       </div>
       <div className="absolute z-50 right-0">
         <SettingsPanel />
+      </div>
+      <div className="absolute z-50 right-0">
+        <NotificationsPanel />
       </div>
 
       {/* Main Content Column */}

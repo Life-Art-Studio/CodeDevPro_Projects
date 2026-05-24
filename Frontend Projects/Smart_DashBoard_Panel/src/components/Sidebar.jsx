@@ -11,6 +11,7 @@ const Sidebar = () => {
     { name: "Customers", path: "/dashboard/customers", icon: "👥" },
     { name: "Beats", path: "/dashboard/beats", icon: "🗺️" },
     { name: "Map View", path: "/dashboard/map", icon: "📍" },
+    { name: "Catalogue", path: "/dashboard/catalogue", icon: "📦" },
   ];
 
   const { isSidebarOpen, onOpenSidebarHandler } = useAuth();

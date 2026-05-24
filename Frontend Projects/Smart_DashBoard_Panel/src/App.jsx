@@ -19,6 +19,7 @@ const Sales = lazy(() => import('./pages/Sales'));
 const Customers = lazy(() => import('./pages/Customers'));
 const Beats = lazy(() => import('./pages/Beats'));
 const MapPage = lazy(() => import('./pages/MapPage'));
+const Catalogue = lazy(() => import('./pages/Catalogue'));
 
 // Auth Gate
 import { useAuth } from "./context/AuthContext";
@@ -28,6 +29,7 @@ import { OrderProvider } from "./context/OrderContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import { BeatProvider } from "./context/BeatContext";
 import { VisitProvider } from "./context/VisitContext";
+import { ProductProvider } from "./context/ProductContext";
 
 const ProtectedRoute = ({ children }) => {
   const { isLoggedIn } = useAuth();
@@ -42,71 +44,81 @@ const App = () => {
           <OrderProvider>
             <BeatProvider>
               <VisitProvider>
-                <HashRouter>
-              <Suspense fallback={<LoadingSpinner />}>
-                <Routes>
-                  {/* Default Redirect: If they just type yourwebsite.com, send them to login */}
-                  <Route path="/" element={<Navigate to="/auth/login" replace />} />
+                <ProductProvider>
+                  <HashRouter>
+                    <Suspense fallback={<LoadingSpinner />}>
+                      <Routes>
+                        {/* Default Redirect: If they just type yourwebsite.com, send them to login */}
+                        <Route path="/" element={<Navigate to="/auth/login" replace />} />
 
-                  {/* Public Branch: Uses the blank, centered AuthLayout */}
-                  <Route path="/auth" element={<AuthLayouts />}>
-                    <Route path="login" element={<Login />} />
-                    <Route path="signup" element={<Signup />} />
-                  </Route>
+                        {/* Public Branch: Uses the blank, centered AuthLayout */}
+                        <Route path="/auth" element={<AuthLayouts />}>
+                          <Route path="login" element={<Login />} />
+                          <Route path="signup" element={<Signup />} />
+                        </Route>
 
-                  {/* Private Branch: Uses the complex Sidebar/Topbar Layout */}
-                  <Route path="/dashboard" element={<DashBoardLayout />}>
-                    <Route
-                      index
-                      element={
-                        <ProtectedRoute>
-                          <Dashboard />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="sales"
-                      element={
-                        <ProtectedRoute>
-                          <Sales />
-                        </ProtectedRoute>
-                      }
-                    />
-                    
-                      <Route
-                        path="customers"
-                        element={
-                          <ProtectedRoute>
-                            <Customers />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="beats"
-                        element={
-                          <ProtectedRoute>
-                            <Beats />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="map"
-                        element={
-                          <ProtectedRoute>
-                            <MapPage />
-                          </ProtectedRoute>
-                        }
-                      />
-                    
-                  </Route>
-                </Routes>
-              </Suspense>
+                        {/* Private Branch: Uses the complex Sidebar/Topbar Layout */}
+                        <Route path="/dashboard" element={<DashBoardLayout />}>
+                          <Route
+                            index
+                            element={
+                              <ProtectedRoute>
+                                <Dashboard />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="sales"
+                            element={
+                              <ProtectedRoute>
+                                <Sales />
+                              </ProtectedRoute>
+                            }
+                          />
+                          
+                            <Route
+                              path="customers"
+                              element={
+                                <ProtectedRoute>
+                                  <Customers />
+                                </ProtectedRoute>
+                              }
+                            />
+                            <Route
+                              path="beats"
+                              element={
+                                <ProtectedRoute>
+                                  <Beats />
+                                </ProtectedRoute>
+                              }
+                            />
+                            <Route
+                              path="map"
+                              element={
+                                <ProtectedRoute>
+                                  <MapPage />
+                                </ProtectedRoute>
+                              }
+                            />
+                            <Route
+                              path="catalogue"
+                              element={
+                                <ProtectedRoute>
+                                  <Catalogue />
+                                </ProtectedRoute>
+                              }
+                            />
+                          
+                        </Route>
+                      </Routes>
+                    </Suspense>
 
-              <NotificationPanel />
-              </HashRouter>
-            </VisitProvider>
-          </BeatProvider>
-        </OrderProvider>
+                    <NotificationPanel />
+                  </HashRouter>
+                </ProductProvider>
+              </VisitProvider>
+            </BeatProvider>
+          </OrderProvider>
         </CustomerProvider>
       </AuthProvider>
     </ThemeProvider>

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ProductSuggestionPanel from './ProductSuggestionPanel';
 
 const OrderBuilder = ({ initialOrder, onSave, onCancel }) => {
   // Setup local state based on the order passed in
@@ -14,6 +15,26 @@ const OrderBuilder = ({ initialOrder, onSave, onCancel }) => {
 
   const handleRemoveItem = (itemId) => {
     setActiveOrder({ ...activeOrder, items: activeOrder.items.filter(item => item.id !== itemId) });
+  };
+
+  const handleAddProductFromCatalogue = (product, pricing) => {
+    // Add product using Retailer Cost as the price
+    setActiveOrder(prev => ({
+      ...prev,
+      items: [
+        ...prev.items,
+        {
+          id: Date.now(),
+          name: product.name,
+          qty: 1, // Default 1, user can adjust
+          price: Number(pricing.retailerCost.toFixed(2)),
+          discount: 0,
+          gst: 18,
+          // Store scheme info if needed
+          schemeInfo: product.scheme?.free > 0 ? `Scheme: ${product.scheme.buy}+${product.scheme.free}` : null
+        }
+      ]
+    }));
   };
 
   const handleItemChange = (itemId, field, value) => {
@@ -34,8 +55,11 @@ const OrderBuilder = ({ initialOrder, onSave, onCancel }) => {
   const currentFinalTotal = currentSubtotal - globalDiscountAmount;
 
   return (
-    <div className="space-y-6 animate-in fade-in">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-200 dark:border-slate-800 pb-4 transition-colors gap-4">
+    <div className="flex flex-col lg:flex-row h-[calc(100vh-200px)] animate-in fade-in bg-white dark:bg-[#0a0c14] rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm">
+      
+      {/* LEFT: Order Table */}
+      <div className="flex-1 flex flex-col p-4 sm:p-6 overflow-y-auto custom-scrollbar">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-200 dark:border-slate-800 pb-4 transition-colors gap-4 shrink-0">
         <div>
           <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 transition-colors">
             {activeOrder.id.startsWith("ORD-") && activeOrder.id.length > 5 ? `Edit Order ${activeOrder.id}` : "New Order"}
@@ -66,6 +90,7 @@ const OrderBuilder = ({ initialOrder, onSave, onCancel }) => {
               <tr key={item.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 group transition-colors">
                 <td className="py-3 pr-2">
                   <input type="text" value={item.name} placeholder="e.g. Engine Oil" onChange={(e) => handleItemChange(item.id, "name", e.target.value)} className="w-full px-3 py-2 bg-transparent border border-slate-200 dark:border-slate-700 dark:text-slate-200 rounded-lg focus:outline-blue-500 transition-colors" />
+                  {item.schemeInfo && <p className="text-[10px] text-pink-500 mt-1 font-bold">{item.schemeInfo}</p>}
                 </td>
                 <td className="py-3 pr-2">
                   <input type="number" min="1" value={item.qty} onChange={(e) => handleItemChange(item.id, "qty", Number(e.target.value))} className="w-full px-3 py-2 bg-transparent border border-slate-200 dark:border-slate-700 dark:text-slate-200 rounded-lg focus:outline-blue-500 transition-colors" />
@@ -129,6 +154,13 @@ const OrderBuilder = ({ initialOrder, onSave, onCancel }) => {
           </div>
         </div>
       </div>
+      </div>
+
+      {/* RIGHT: Suggestion Panel */}
+      <div className="w-full lg:w-80 shrink-0 h-full border-t lg:border-t-0 border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/20">
+        <ProductSuggestionPanel onAddProduct={handleAddProductFromCatalogue} />
+      </div>
+
     </div>
   );
 };

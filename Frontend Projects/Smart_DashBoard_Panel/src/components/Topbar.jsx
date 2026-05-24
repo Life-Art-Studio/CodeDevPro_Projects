@@ -8,7 +8,6 @@ import StorageService from '../services/storageService';
 import { useVisitContext } from "../context/VisitContext";
 import { useBeatContext } from "../context/BeatContext";
 import { getOrderOutstanding } from "../utils/financeUtils";
-import NotificationsPanel from "./NotificationsPanel";
 
 const Topbar = () => { // Make sure to accept the prop!
   const { handleLogout,onOpenSidebarHandler,onOpenProfileHandler,onOpenSettingsHandler, onOpenNotificationsHandler} = useAuth();
@@ -310,7 +309,6 @@ const Topbar = () => { // Make sure to accept the prop!
           )}
         </div>
       </div>
-      <NotificationsPanel />
     </div>
   );
 };

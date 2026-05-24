@@ -104,6 +104,19 @@ const StorageService = {
 
   saveVisits: (visits) => {
     localStorage.setItem("beatVisits", JSON.stringify(visits));
+  },
+
+  // === PRODUCTS ===
+  getProducts: () => {
+    try {
+      return JSON.parse(localStorage.getItem("products")) ?? null;
+    } catch {
+      return null;
+    }
+  },
+
+  saveProducts: (products) => {
+    localStorage.setItem("products", JSON.stringify(products));
   }
 };
 
