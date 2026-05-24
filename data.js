@@ -139,7 +139,7 @@ export const projectsData = [
     },
     {
       title: "Smart Dashboard Panel",
-      folder: "Smart_DashBoard_Panel",
+      folder: "Smart_DashBoard_Panel/dist",
       desc: "A comprehensive, modern web application featuring a glassmorphic dashboard for managing customers, sales, and analytics.",
       icon: "fa-solid fa-chart-line",
       tags: ["React", "Dashboard"],
