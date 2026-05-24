@@ -23,66 +23,83 @@ const Sales = () => {
   // ==========================================
   // DATA FILTERING
   // ==========================================
-  const completedSales = orders.filter(
-    (order) => order.status === "Paid" || order.status === "Delivered" || order.status === "Partially Paid"
-  );
+  const completedSales = React.useMemo(() => {
+    return orders.filter(
+      (order) => order.status === "Paid" || order.status === "Delivered" || order.status === "Partially Paid"
+    );
+  }, [orders]);
 
-  const totalSalesRevenue = completedSales.reduce((sum, order) => sum + getOrderPaidAmount(order), 0);
-  const averageOrderValue = completedSales.length > 0 ? totalSalesRevenue / completedSales.length : 0;
-  const totalItemsSold = completedSales.reduce((total, order) => {
-    const orderItemCount = order.items.reduce((sum, item) => sum + Number(item.qty), 0);
-    return total + orderItemCount;
-  }, 0);
+  const totalSalesRevenue = React.useMemo(() => {
+    return completedSales.reduce((sum, order) => sum + getOrderPaidAmount(order), 0);
+  }, [completedSales]);
 
+  const averageOrderValue = React.useMemo(() => {
+    return completedSales.length > 0 ? totalSalesRevenue / completedSales.length : 0;
+  }, [completedSales, totalSalesRevenue]);
+
+  const totalItemsSold = React.useMemo(() => {
+    return completedSales.reduce((total, order) => {
+      const orderItemCount = order.items.reduce((sum, item) => sum + Number(item.qty), 0);
+      return total + orderItemCount;
+    }, 0);
+  }, [completedSales]);
   // ==========================================
   // CHART DATA PREPARATION
   // ==========================================
-  const chartData = completedSales.reduce((acc, order) => {
-    const existing = acc.find(d => d.date === order.date);
-    if (existing) {
-      existing.revenue += calculateOrderTotal(order);
-    } else {
-      acc.push({ date: order.date, revenue: calculateOrderTotal(order) });
-    }
-    return acc;
-  }, []);
-
-  const categoryData = completedSales.reduce((acc, order) => {
-    order.items.forEach(item => {
-      const existing = acc.find(d => d.name === (item.name || 'Unknown'));
+  const chartData = React.useMemo(() => {
+    return completedSales.reduce((acc, order) => {
+      const existing = acc.find(d => d.date === order.date);
       if (existing) {
-        existing.value += calculateRowTotal(item);
+        existing.revenue += calculateOrderTotal(order);
       } else {
-        acc.push({ name: item.name || 'Unknown', value: calculateRowTotal(item) });
+        acc.push({ date: order.date, revenue: calculateOrderTotal(order) });
       }
-    });
-    return acc;
-  }, []);
+      return acc;
+    }, []);
+  }, [completedSales]);
 
-  const dailySales = orders.reduce((acc, order) => {
-    const date = order.date;
-    if (!acc[date]) acc[date] = [];
-    acc[date].push(order);
-    return acc;
-  }, {});
+  const categoryData = React.useMemo(() => {
+    return completedSales.reduce((acc, order) => {
+      order.items.forEach(item => {
+        const existing = acc.find(d => d.name === (item.name || 'Unknown'));
+        if (existing) {
+          existing.value += calculateRowTotal(item);
+        } else {
+          acc.push({ name: item.name || 'Unknown', value: calculateRowTotal(item) });
+        }
+      });
+      return acc;
+    }, []);
+  }, [completedSales]);
+  const dailySales = React.useMemo(() => {
+    return orders.reduce((acc, order) => {
+      const date = order.date;
+      if (!acc[date]) acc[date] = [];
+      acc[date].push(order);
+      return acc;
+    }, {});
+  }, [orders]);
 
-  const salesByCustomer = completedSales.reduce((acc, order) => {
-    if (!acc[order.customerId]) acc[order.customerId] = [];
-    acc[order.customerId].push(order);
-    return acc;
-  }, {});
+  const salesByCustomer = React.useMemo(() => {
+    return completedSales.reduce((acc, order) => {
+      if (!acc[order.customerId]) acc[order.customerId] = [];
+      acc[order.customerId].push(order);
+      return acc;
+    }, {});
+  }, [completedSales]);
 
-  const productBreakdown = completedSales.reduce((acc, order) => {
-    order.items.forEach(item => {
-      const key = item.name || 'Unknown';
-      if (!acc[key]) acc[key] = { name: key, totalQty: 0, totalRevenue: 0, customers: new Set() };
-      acc[key].totalQty += Number(item.qty);
-      acc[key].totalRevenue += calculateRowTotal(item);
-      acc[key].customers.add(order.customerId);
-    });
-    return acc;
-  }, {});
-
+  const productBreakdown = React.useMemo(() => {
+    return completedSales.reduce((acc, order) => {
+      order.items.forEach(item => {
+        const key = item.name || 'Unknown';
+        if (!acc[key]) acc[key] = { name: key, totalQty: 0, totalRevenue: 0, customers: new Set() };
+        acc[key].totalQty += Number(item.qty);
+        acc[key].totalRevenue += calculateRowTotal(item);
+        acc[key].customers.add(order.customerId);
+      });
+      return acc;
+    }, {});
+  }, [completedSales]);
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
   // ==========================================

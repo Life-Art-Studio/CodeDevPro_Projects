@@ -7,6 +7,7 @@ import DashBoardLayout from "./layouts/DashBoardLayout";
 
 import React, { Suspense, lazy } from 'react';
 import LoadingSpinner from './components/LoadingSpinner';
+import NotificationPanel from "./components/NotificationPanel";
 
 // Auth Pages (Lazy)
 const Login = lazy(() => import('./pages/auth/Login'));
@@ -100,7 +101,8 @@ const App = () => {
                   </Route>
                 </Routes>
               </Suspense>
-                <Toaster position="top-right" toastOptions={{ className: 'dark:bg-slate-800 dark:text-white' }} />
+
+              <NotificationPanel />
               </HashRouter>
             </VisitProvider>
           </BeatProvider>
