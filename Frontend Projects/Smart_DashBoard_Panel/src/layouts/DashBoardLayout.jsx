@@ -30,7 +30,7 @@ const DashBoardLayout = () => {
 
         {/* Content Canvas */}
         <div className="flex-1 w-full relative h-full flex flex-col">
-          <main className="flex-1 w-full h-full overflow-y-auto">
+          <main className="flex-1 w-full h-full overflow-y-auto pb-20 md:pb-0">
             <Outlet />
           </main>
           {/* Footer */}

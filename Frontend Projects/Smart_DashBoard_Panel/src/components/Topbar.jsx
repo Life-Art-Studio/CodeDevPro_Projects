@@ -114,7 +114,7 @@ const Topbar = () => { // Make sure to accept the prop!
   };
 
   return (
-    <div className="h-16 w-full bg-white/40 dark:bg-[#0a0c14]/40 backdrop-blur-2xl flex items-center justify-between px-4 md:px-6 border-b border-slate-200/50 dark:border-white/10 shadow-sm relative z-10 transition-colors duration-500">
+    <div className="h-14 md:h-16 w-full bg-white/40 dark:bg-[#0a0c14]/40 backdrop-blur-2xl flex items-center justify-between px-4 md:px-6 border-b border-slate-200/50 dark:border-white/10 shadow-sm relative z-10 transition-colors duration-500">
       
       {/* LEFT SIDE: Hamburger, Logo, Search */}
       <div className="flex items-center gap-4 flex-1">
