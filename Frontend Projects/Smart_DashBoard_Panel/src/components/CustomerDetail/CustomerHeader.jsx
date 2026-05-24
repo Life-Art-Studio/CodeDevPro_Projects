@@ -8,9 +8,9 @@ const CustomerHeader = ({ customer, orders = [], onBack }) => {
   const totalOutstanding = validOrders.reduce((sum, order) => sum + getOrderOutstanding(order), 0);
   
   return (
-    <div className="flex items-center justify-between mb-6 bg-white dark:bg-slate-900/50 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 backdrop-blur-sm transition-colors">
+    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 bg-white dark:bg-slate-900/50 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 backdrop-blur-sm transition-colors">
       <div className="flex items-center gap-4">
-        <button onClick={onBack} className="p-2 text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors">
+        <button onClick={onBack} className="p-2 text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors shrink-0">
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
         </button>
         <div>
@@ -26,10 +26,10 @@ const CustomerHeader = ({ customer, orders = [], onBack }) => {
           )}
         </div>
       </div>
-      <div className="text-right">
+      <div className="text-left sm:text-right w-full sm:w-auto mt-4 sm:mt-0 pt-4 sm:pt-0 border-t sm:border-t-0 border-slate-200 dark:border-slate-800">
         <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold mb-0.5 transition-colors">Outstanding Balance</p>
         <p className="text-2xl font-bold text-amber-600 dark:text-amber-400 transition-colors">₹{totalOutstanding.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-        <div className="flex justify-end gap-3 mt-1">
+        <div className="flex sm:justify-end gap-3 mt-1">
           <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
             Billed: <span className="font-bold">₹{totalBilled.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
           </p>

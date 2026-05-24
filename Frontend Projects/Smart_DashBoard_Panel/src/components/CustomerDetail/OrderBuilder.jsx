@@ -35,16 +35,16 @@ const OrderBuilder = ({ initialOrder, onSave, onCancel }) => {
 
   return (
     <div className="space-y-6 animate-in fade-in">
-      <div className="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-4 transition-colors">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-200 dark:border-slate-800 pb-4 transition-colors gap-4">
         <div>
           <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 transition-colors">
             {activeOrder.id.startsWith("ORD-") && activeOrder.id.length > 5 ? `Edit Order ${activeOrder.id}` : "New Order"}
           </h3>
           <p className="text-sm text-slate-500 dark:text-slate-400 transition-colors">{activeOrder.date}</p>
         </div>
-        <div className="flex gap-2">
-          <button onClick={onCancel} className="px-4 py-2 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 rounded-lg text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">Cancel</button>
-          <button onClick={() => onSave(activeOrder)} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 shadow-sm transition-colors">Save Order</button>
+        <div className="flex gap-2 w-full sm:w-auto">
+          <button onClick={onCancel} className="flex-1 sm:flex-none px-4 py-2 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 rounded-lg text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">Cancel</button>
+          <button onClick={() => onSave(activeOrder)} className="flex-1 sm:flex-none px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 shadow-sm transition-colors">Save Order</button>
         </div>
       </div>
 
@@ -100,12 +100,12 @@ const OrderBuilder = ({ initialOrder, onSave, onCancel }) => {
         </table>
       </div>
 
-      <div className="flex justify-between items-start pt-4 border-t border-slate-200 dark:border-slate-800 transition-colors">
+      <div className="flex flex-col sm:flex-row justify-between items-start pt-4 border-t border-slate-200 dark:border-slate-800 transition-colors gap-4">
         <button onClick={handleAddItem} className="text-blue-600 dark:text-blue-400 text-sm font-semibold hover:text-blue-800 dark:hover:text-blue-300 flex items-center gap-1 transition-colors">
           <span>+</span> Add Line Item
         </button>
         
-        <div className="w-72 space-y-3 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700 transition-colors">
+        <div className="w-full sm:w-72 space-y-3 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700 transition-colors">
           <div className="flex justify-between items-center text-sm">
             <span className="text-slate-500 dark:text-slate-400">Subtotal (Inc. GST)</span>
             <span className="font-semibold dark:text-slate-200">₹{currentSubtotal.toFixed(2)}</span>

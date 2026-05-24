@@ -152,16 +152,16 @@ const Customers = () => {
                 Manage your client list and view their status.
               </p>
             </div>
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto mt-4 sm:mt-0">
               <button
                 onClick={handleExportCustomersCSV}
-                className="bg-white/10 dark:bg-white/5 border border-slate-200/50 dark:border-white/10 text-slate-700 dark:text-slate-200 font-medium py-2 px-4 rounded-xl transition-all flex items-center gap-2 hover:bg-white/20 dark:hover:bg-white/10"
+                className="w-full sm:w-auto justify-center bg-white/10 dark:bg-white/5 border border-slate-200/50 dark:border-white/10 text-slate-700 dark:text-slate-200 font-medium py-2 px-4 rounded-xl transition-all flex items-center gap-2 hover:bg-white/20 dark:hover:bg-white/10"
               >
                 <span>📥</span> Export CSV
               </button>
               <button
                 onClick={() => setIsModalOpen(true)}
-                className="bg-gradient-to-r from-purple-600 to-blue-500 text-white font-medium py-2 px-4 rounded-xl transition-all flex items-center gap-2 shadow-[0_0_15px_rgba(147,51,234,0.3)] hover:shadow-[0_0_25px_rgba(147,51,234,0.5)] hover:scale-105"
+                className="w-full sm:w-auto justify-center bg-gradient-to-r from-purple-600 to-blue-500 text-white font-medium py-2 px-4 rounded-xl transition-all flex items-center gap-2 shadow-[0_0_15px_rgba(147,51,234,0.3)] hover:shadow-[0_0_25px_rgba(147,51,234,0.5)] hover:scale-105"
               >
                 <span>➕</span> Add Customer
               </button>
@@ -330,7 +330,7 @@ const Customers = () => {
             </div>
 
             {/* Table Footer / Pagination */}
-            <div className="px-6 py-4 border-t border-slate-200/50 dark:border-white/10 bg-white/5 dark:bg-white/5 flex items-center justify-between transition-colors">
+            <div className="px-6 py-4 border-t border-slate-200/50 dark:border-white/10 bg-white/5 dark:bg-white/5 flex flex-col sm:flex-row items-center justify-between gap-4 transition-colors">
               <p className="text-sm text-slate-500 dark:text-slate-400">
                 Showing{" "}
                 <span className="font-medium text-purple-600 dark:text-purple-400">

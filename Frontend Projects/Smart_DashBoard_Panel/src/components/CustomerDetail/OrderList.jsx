@@ -28,8 +28,8 @@ const OrderList = ({ orders, customer, onCreateNew, onEdit, onDelete, onStatusCh
 
   return (
     <div className="space-y-6 animate-in fade-in">
-      <div className="flex justify-between items-center">
-        <div className="flex items-center gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="flex flex-wrap items-center gap-3">
           <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 transition-colors">Order History</h3>
           <select 
             value={filterStatus} 
@@ -46,7 +46,7 @@ const OrderList = ({ orders, customer, onCreateNew, onEdit, onDelete, onStatusCh
             <option value="Cancelled">Cancelled</option>
           </select>
         </div>
-        <button onClick={onCreateNew} className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 shadow-sm flex items-center gap-2 transition-colors">
+        <button onClick={onCreateNew} className="w-full sm:w-auto bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 shadow-sm flex items-center justify-center gap-2 transition-colors">
           <span>➕</span> New Order
         </button>
       </div>
