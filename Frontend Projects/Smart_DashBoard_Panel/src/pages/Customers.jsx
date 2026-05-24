@@ -52,7 +52,7 @@ const Customers = () => {
   const safeOrders = Array.isArray(orders) ? orders : [];
 
   const displayCustomers = pendingFilterActive
-    ? customers.filter((c) => safeOrders.some(o => o.customerId === c.id && o.status === "Pending"))
+    ? customers.filter((c) => safeOrders.some(o => o.customerId === c.id && (o.status === "Pending" || o.status === "Partially Paid")))
     : customers;
 
   const filteredCustomers = displayCustomers.filter(

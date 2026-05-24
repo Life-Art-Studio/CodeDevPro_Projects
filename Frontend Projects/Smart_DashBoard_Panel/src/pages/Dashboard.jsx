@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import useOrderContext from '../context/OrderContext';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { generateDashboardReport } from '../utils/generateReports';
-import { calculateOrderTotal, formatCurrency, getOrderOutstanding } from '../utils/financeUtils';
+import { calculateOrderTotal, formatCurrency, getOrderOutstanding, getOrderPaidAmount } from '../utils/financeUtils';
 import toast from 'react-hot-toast';
 
 const Dashboard = () => {
@@ -30,8 +30,8 @@ const Dashboard = () => {
   }, []);
 
   const totalRevenue = orders.reduce((sum, order) => {
-    if (order.status === "Paid") {
-      return sum + calculateOrderTotal(order);
+    if (order.status === "Paid" || order.status === "Partially Paid" || order.status === "Delivered") {
+      return sum + getOrderPaidAmount(order);
     }
     return sum;
   }, 0);
@@ -121,7 +121,7 @@ const Dashboard = () => {
           <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1 group-hover:text-emerald-400 transition-colors">Total Revenue</p>
           <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-800 dark:text-slate-100 neon-text group-hover:scale-105 transform origin-left transition-transform tracking-tighter">₹{formatCurrency(totalRevenue)}</h3>
           <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium mt-3 flex items-center gap-1 bg-emerald-500/10 inline-block px-2 py-1 rounded-md">
-            <span>Live Data (Paid Only)</span>
+            <span>Collected Revenue</span>
           </p>
         </div>
 
