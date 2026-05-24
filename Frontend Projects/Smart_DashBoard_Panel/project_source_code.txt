@@ -1,0 +1,3335 @@
+
+
+================================================================================
+FILE: src/index.css
+================================================================================
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --animate-float: float 3s ease-in-out infinite;
+  --animate-pulse-glow: pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-slide-up-fade: slide-up-fade 0.4s ease-out forwards;
+  
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  
+  @keyframes pulse-glow {
+    0%, 100% { opacity: 1; box-shadow: 0 0 10px rgba(59, 130, 246, 0.5); }
+    50% { opacity: .5; box-shadow: 0 0 20px rgba(59, 130, 246, 0.8); }
+  }
+  
+  @keyframes slide-up-fade {
+    0% { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-300;
+}
+
+/* Glassmorphism utilities */
+.glass {
+  @apply bg-white/70 backdrop-blur-md border border-white/20;
+}
+
+.dark .glass {
+  @apply bg-slate-900/70 backdrop-blur-md border border-slate-700/50;
+}
+
+
+================================================================================
+FILE: src/pages/PopUps/EditCustomer.jsx
+================================================================================
+import React, { useState, useEffect } from 'react';
+import useCustomerContext from '../../context/CustomerContext';
+import ReactDOM from 'react-dom';
+
+// We accept the specific customer data as a prop!
+const EditCustomerModal = ({ isOpen, onClose, customer }) => {
+  const { updateCustomer } = useCustomerContext();
+  
+  const [formData, setFormData] = useState({
+    id: '',
+    name: '',
+    address: '',
+    phone: '',
+    status: 'Active',
+    spend: '',
+    date: ''
+  });
+
+  // Automatically fill the form when a customer is passed in
+  useEffect(() => {
+    if (customer) {
+      // Strip the '$' and commas from the spend string so it fits in the number input
+      const rawSpend = customer.spend ? customer.spend.replace(/[^0-9.-]+/g, "") : "";
+      
+      setFormData({
+        id: customer.id,
+        name: customer.name,
+        address: customer.address,
+        phone: customer.phone,
+        status: customer.status,
+        spend: rawSpend,
+        date: customer.date // Keep their original join date!
+      });
+    }
+  }, [customer]);
+
+  if (!isOpen) return null;
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    
+    // Format the data back into our nice table structure
+    const updatedCustomerData = {
+      ...formData,
+      spend: `$${parseFloat(formData.spend || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`,
+    };
+
+    updateCustomer(updatedCustomerData);
+    onClose();
+  };
+
+  return ReactDOM.createPortal(
+    <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200 transition-colors border border-transparent dark:border-slate-800">
+        
+        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 transition-colors">
+          <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 transition-colors">Edit Customer</h3>
+          <button onClick={onClose} className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 p-1.5 rounded-lg transition-colors">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit}>
+          <div className="p-6 space-y-4">
+            {/* ID Display (Read Only) */}
+            <div>
+               <label htmlFor="id" className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1 transition-colors">Customer ID</label>
+               <input type="text" id="id" name="id" value={formData.id} readOnly className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 text-sm cursor-not-allowed transition-colors" />
+            </div>
+
+            <div>
+              <label htmlFor="name" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 transition-colors">Full Name *</label>
+              <input type="text" id="name" name="name" required value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="w-full px-3 py-2 bg-transparent border border-slate-200 dark:border-slate-700 dark:text-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 text-sm transition-colors" />
+            </div>
+
+            <div>
+              <label htmlFor="address" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 transition-colors">Address *</label>
+              <input type="text" id="address" name="address" required value={formData.address} onChange={(e) => setFormData({...formData, address: e.target.value})} className="w-full px-3 py-2 bg-transparent border border-slate-200 dark:border-slate-700 dark:text-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 text-sm transition-colors" />
+            </div>
+
+            <div>
+              <label htmlFor="phone" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 transition-colors">Phone *</label>
+              <input type="text" id="phone" name="phone" required value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} className="w-full px-3 py-2 bg-transparent border border-slate-200 dark:border-slate-700 dark:text-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 text-sm transition-colors" />
+            </div>
+
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <label htmlFor="status" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 transition-colors">Status</label>
+                <select id="status" name="status" value={formData.status} onChange={(e) => setFormData({...formData, status: e.target.value})} className="w-full px-3 py-2 bg-transparent border border-slate-200 dark:border-slate-700 dark:text-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 text-sm transition-colors">
+                  <option className="dark:bg-slate-900" value="Active">Active</option>
+                  <option className="dark:bg-slate-900" value="Inactive">Inactive</option>
+                </select>
+              </div>
+
+              <div className="flex-1">
+                <label htmlFor="spend" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 transition-colors">Total Spend</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-2 text-slate-400 text-sm">₹</span>
+                  <input type="number" id="spend" name="spend" step="0.01" value={formData.spend} onChange={(e) => setFormData({...formData, spend: e.target.value})} className="w-full pl-7 pr-3 py-2 bg-transparent border border-slate-200 dark:border-slate-700 dark:text-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 text-sm transition-colors" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="px-6 py-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 flex justify-end gap-3 transition-colors">
+            <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">Cancel</button>
+            <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm">Save Changes</button>
+          </div>
+        </form>
+
+      </div>
+    </div>,
+    document.getElementById('PopModal')
+  );
+};
+
+export default EditCustomerModal;
+
+
+================================================================================
+FILE: src/pages/PopUps/AddCustomerModal.jsx
+================================================================================
+import React, { useState } from "react";
+import useCustomerContext from "../../context/CustomerContext";
+import ReactDOM from "react-dom";
+
+const AddCustomerModal = ({ isOpen, onClose }) => {
+  const { addCustomer } = useCustomerContext();
+  const [formData, setFormData] = useState({
+    name: "",
+    address: "",
+    phone: "",
+    status: "Active",
+    spend: "",
+  });
+
+  if (!isOpen) return null;
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    // Create a beautifully formatted fake customer object
+    const newCustomer = {
+      id: `CUS-${Math.floor(Math.random() * 9000) + 1000}`, // Generates CUS-1234
+      name: formData.name,
+      address: formData.address,
+      phone: formData.phone,
+      status: formData.status,
+      // Format the number to look like currency ($1,000.00)
+      spend: `${parseFloat(formData.spend || 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+      date: new Date().toLocaleDateString("en-US", {
+        month: "short",
+        day: "2-digit",
+        year: "numeric",
+      }),
+    };
+
+    // Send it to the parent
+    addCustomer(newCustomer);
+
+    // Reset the form and close the modal
+    setFormData({
+      name: "",
+      address: "",
+      phone: "",
+      status: "Active",
+      spend: "",
+    });
+    onClose();
+  };
+
+  return ReactDOM.createPortal(
+    // 1. The Dark Overlay Backdrop
+    <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+      {/* 2. The Modal Box */}
+      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200 transition-colors border border-transparent dark:border-slate-800">
+        {/* Modal Header */}
+        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 transition-colors">
+          <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 transition-colors">Add New Customer</h3>
+          <button
+            onClick={onClose}
+            className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 p-1.5 rounded-lg transition-colors"
+          >
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M6 18L18 6M6 6l12 12"
+              ></path>
+            </svg>
+          </button>
+        </div>
+
+        {/* Modal Form Body */}
+        <form onSubmit={handleSubmit}>
+          <div className="p-6 space-y-4">
+            {/* Full Name Input */}
+            <div>
+              <label
+                htmlFor="name"
+                className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 transition-colors"
+              >
+                Full Name *
+              </label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                required
+                placeholder="e.g. Jane Doe"
+                value={formData.name}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
+                className="w-full px-3 py-2 bg-transparent border border-slate-200 dark:border-slate-700 dark:text-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent text-sm transition-colors"
+              />
+            </div>
+
+            {/* Address Input */}
+            <div>
+              <label
+                htmlFor="address"
+                className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 transition-colors"
+              >
+                Address *
+              </label>
+              <input
+                type="text"
+                id="address"
+                name="address"
+                required
+                placeholder="123 Main St, Anytown, USA"
+                value={formData.address}
+                onChange={(e) =>
+                  setFormData({ ...formData, address: e.target.value })
+                }
+                className="w-full px-3 py-2 bg-transparent border border-slate-200 dark:border-slate-700 dark:text-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent text-sm transition-colors"
+              />
+            </div>
+
+            {/* Phone Input */}
+            <div>
+              <label
+                htmlFor="phone"
+                className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 transition-colors"
+              >
+                Phone *
+              </label>
+              <input
+                type="tel"
+                id="phone"
+                name="phone"
+                required
+                placeholder="+1 234 567 890"
+                value={formData.phone}
+                onChange={(e) =>
+                  setFormData({ ...formData, phone: e.target.value })
+                }
+                className="w-full px-3 py-2 bg-transparent border border-slate-200 dark:border-slate-700 dark:text-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent text-sm transition-colors"
+              />
+            </div>
+
+            {/*  A Row with two smaller inputs (Status & Spend) */}
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <label
+                  htmlFor="status"
+                  className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 transition-colors"
+                >
+                  Status
+                </label>
+                <select
+                  id="status"
+                  name="status"
+                  value={formData.status}
+                  onChange={(e) =>
+                    setFormData({ ...formData, status: e.target.value })
+                  }
+                  className="w-full px-3 py-2 bg-transparent border border-slate-200 dark:border-slate-700 dark:text-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent text-sm transition-colors"
+                >
+                  <option className="dark:bg-slate-900" value="Active">Active</option>
+                  <option className="dark:bg-slate-900" value="Inactive">Inactive</option>
+                </select>
+              </div>
+
+              <div className="flex-1">
+                <label htmlFor="spend" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 transition-colors">Total Spend</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-2 text-slate-400 text-sm">₹</span>
+                  <input type="number" id="spend" name="spend" step="0.01" value={formData.spend} onChange={(e) => setFormData({...formData, spend: e.target.value})} className="w-full pl-7 pr-3 py-2 bg-transparent border border-slate-200 dark:border-slate-700 dark:text-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 text-sm transition-colors" />
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          {/* Modal Footer (Action Buttons) */}
+          <div className="px-6 py-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 flex justify-end gap-3 transition-colors">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+            >
+              Save Customer
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>,
+    document.getElementById("PopModal"),
+  );
+};
+
+export default AddCustomerModal;
+
+
+================================================================================
+FILE: src/pages/CustomerDetail.jsx
+================================================================================
+import React, { useState } from "react";
+import CustomerHeader from "../components/CustomerDetail/CustomerHeader";
+import OrderList from "../components/CustomerDetail/OrderList";
+import OrderBuilder from "../components/CustomerDetail/OrderBuilder";
+import FinancialsTab from "../components/CustomerDetail/FinancialsTab";
+import ReportsTab from "../components/CustomerDetail/ReportsTab";
+import useOrderContext from "../context/OrderContext";
+
+const CustomerDetail = ({ customer, onBack }) => {
+  const [activeTab, setActiveTab] = useState("orders");
+  const [orderView, setOrderView] = useState("list");
+  const [activeOrder, setActiveOrder] = useState(null);
+
+  const { orders, addOrder, deleteOrder, updateOrder } = useOrderContext();
+
+  // IMPORTANT: Filter global orders to ONLY show ones for THIS customer
+  const customerOrders = orders.filter(
+    (order) => order.customerId === customer.id,
+  );
+
+  // --- ROUTING / VIEW FUNCTIONS ---
+
+
+ 
+
+  const handleCreateNewOrder = () => {
+    setActiveOrder({
+      id: `ORD-${Math.floor(Math.random() * 9000) + 1000}`,
+      customerId: customer.id, // <-- NEW: Tag the order to this specific customer!
+      date: new Date().toLocaleDateString("en-US", {
+        month: "short",
+        day: "2-digit",
+        year: "numeric",
+      }),
+      status: "Pending",
+      globalDiscount: "",
+      items: [
+        { id: Date.now(), name: "", qty: 1, price: "", discount: "", gst: 18 },
+      ],
+    });
+    setOrderView("edit");
+  };
+
+  const handleEditOrder = (orderToEdit) => {
+    setActiveOrder(JSON.parse(JSON.stringify(orderToEdit)));
+    setOrderView("edit");
+  };
+
+  const handleSaveOrder = (completedOrder) => {
+    // Check against global orders
+    const isExisting = orders.find((o) => o.id === completedOrder.id);
+
+    if (isExisting) {
+      updateOrder(completedOrder.id, completedOrder);
+    } else {
+      addOrder(completedOrder);
+    }
+
+    setOrderView("list");
+  };
+
+  const handleDeleteOrder = (orderId) => {
+    if (
+      window.confirm(
+        `Are you sure you want to delete order ${orderId}? This cannot be undone.`,
+      )
+    ) {
+      deleteOrder(orderId);
+    }
+  };
+
+  const handleStatusChange = (orderId, newStatus) => {
+    const orderToUpdate = orders.find(o => o.id === orderId);
+    if (orderToUpdate) {
+      // Create a copy of the order with the new status, and send to Context
+      updateOrder(orderId, { ...orderToUpdate, status: newStatus });
+    }
+  };
+
+  return (
+    <div className="flex flex-col h-full animate-in slide-in-from-right-8 duration-300">
+      {/* --- HEADER --- */}
+      <CustomerHeader customer={customer} orders={customerOrders} onBack={onBack} />
+
+      {/* --- TAB NAVIGATION --- */}
+      <div className="flex gap-2 mb-6 border-b border-slate-200 dark:border-slate-800 pb-px transition-colors">
+        {["orders", "financials", "reports"].map((tab) => (
+          <button
+            key={tab}
+            onClick={() => {
+              setActiveTab(tab);
+              setOrderView("list");
+            }}
+            className={`px-4 py-2 text-sm font-semibold capitalize rounded-t-lg transition-colors ${
+              activeTab === tab
+                ? "bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 border-t border-x border-slate-200 dark:border-slate-800 border-b-white dark:border-b-slate-900 -mb-px"
+                : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50"
+            }`}
+          >
+            {tab}
+          </button>
+        ))}
+      </div>
+
+      {/* --- TAB CONTENT --- */}
+      <div className="flex-1 bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-6 overflow-y-auto transition-colors">
+        {/* ========================================== */}
+        {/* ORDERS TAB                                 */}
+        {/* ========================================== */}
+        {activeTab === "orders" && (
+          <div className="animate-in fade-in duration-300">
+            {orderView === "list" ? (
+              <OrderList
+                orders={customerOrders} // <-- Pass only this customer's orders!
+                onCreateNew={handleCreateNewOrder}
+                onEdit={handleEditOrder}
+                onDelete={handleDeleteOrder}
+                customer={customer}
+                onStatusChange={handleStatusChange}
+
+              />
+            ) : (
+              <OrderBuilder
+                initialOrder={activeOrder}
+                onSave={handleSaveOrder}
+                onCancel={() => setOrderView("list")}
+              />
+            )}
+          </div>
+        )}
+
+        {/* ========================================== */}
+        {/* FINANCIALS TAB                             */}
+        {/* ========================================== */}
+        {activeTab === "financials" && (
+          <FinancialsTab orders={customerOrders} /> // <-- Pass only this customer's orders!
+        )}
+
+        {/* ========================================== */}
+        {/* REPORTS TAB                                */}
+        {/* ========================================== */}
+        {activeTab === "reports" && (
+          <ReportsTab orders={customerOrders} /> // <-- Pass only this customer's orders!
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default CustomerDetail;
+
+
+================================================================================
+FILE: src/pages/auth/Login.jsx
+================================================================================
+import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useAuth } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
+
+const Login = () => {
+  // Get the login handler from context
+  const { handleLogin, isLoggedIn } = useAuth();
+  const navigate = useNavigate();
+
+  // Form State
+  const [loginData, setLoginData] = useState({
+    email: "",
+    password: "",
+  });
+
+  // Submit Handler
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    handleLogin(loginData);
+  };
+
+  // ... inside Login component
+  useEffect(() => {
+    if (isLoggedIn) {
+      navigate("/dashboard"); // Redirect to dashboard
+    }
+  }, [isLoggedIn, navigate]);
+
+  // Main Card: White background, rounded corners, subtle shadow
+  return (
+    <div className="w-full max-w-md bg-white dark:bg-slate-900/50 backdrop-blur-md rounded-2xl shadow-xl p-8 border border-transparent dark:border-slate-800 transition-colors animate-in fade-in duration-500">
+      {/* Header Section */}
+      <div className="text-center mb-8">
+        <h2 className="text-3xl font-bold text-gray-800 dark:text-slate-100 transition-colors">Welcome Back</h2>
+        <p className="text-gray-500 dark:text-slate-400 mt-2 text-sm transition-colors">
+          Sign in to your account to continue
+        </p>
+      </div>
+
+      {/* The Form */}
+      <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
+        {/* Email Input Group */}
+        <div>
+          <label
+            htmlFor="email"
+            className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1 transition-colors"
+          >
+            Email Address
+          </label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            required
+            placeholder="Enter Your Email Address"
+            className="w-full px-4 py-2 bg-transparent border border-gray-300 dark:border-slate-700 dark:text-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 dark:focus:ring-blue-400 focus:border-transparent transition-all"
+            value={loginData.email}
+            onChange={(e) =>
+              setLoginData({ ...loginData, email: e.target.value })
+            }
+          />
+        </div>
+
+        {/* Password Input Group */}
+        <div>
+          <label
+            htmlFor="password"
+            className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1 transition-colors"
+          >
+            Password
+          </label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            required
+            placeholder="********"
+            className="w-full px-4 py-2 bg-transparent border border-gray-300 dark:border-slate-700 dark:text-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 dark:focus:ring-blue-400 focus:border-transparent transition-all"
+            value={loginData.password}
+            onChange={(e) =>
+              setLoginData({ ...loginData, password: e.target.value })
+            }
+          />
+        </div>
+
+        {/* Submit Button */}
+        <button
+          type="submit"
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg transition-colors mt-2"
+        >
+          Sign In
+        </button>
+      </form>
+
+      {/* Footer Link */}
+      <div className="text-center mt-6">
+        <p className="text-sm text-gray-600 dark:text-slate-400 transition-colors">
+          Don't have an account?{" "}
+          <Link
+            to="/auth/signup"
+            className="text-blue-600 dark:text-blue-400 font-medium hover:underline transition-colors"
+          >
+            Sign up
+          </Link>
+        </p>
+      </div>
+    </div>
+  );
+};
+
+export default Login;
+
+
+================================================================================
+FILE: src/pages/auth/Signup.jsx
+================================================================================
+import { Link } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+const Signup = () => {
+   const { handleSignUp } = useAuth();
+   const navigate = useNavigate();
+
+   // Form State
+   const [formData, setFormData] = useState({
+     name: "",
+     email: "",
+     password: "",
+   });
+
+   const handleSubmit = (e) => {
+     e.preventDefault();
+     // Pass the form data to the context handler
+     handleSignUp(formData);
+     navigate("/dashboard"); // Redirect to dashboard
+   };
+  return (
+    <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
+      
+      {/* Header Section */}
+      <div className="text-center mb-8">
+        <h2 className="text-3xl font-bold text-gray-800">Create an Account</h2>
+        <p className="text-gray-500 mt-2 text-sm">Join us to manage your business smartly</p>
+      </div>
+
+      {/* The Form */}
+      <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
+        
+        {/* Full Name Input - NEW */}
+        <div>
+          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+            Full Name
+          </label>
+          <input 
+            type="text" 
+            id="name"
+            name="name"
+            placeholder="Enter Your Name"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all"
+            value={formData.name}
+            onChange={(e) =>
+              setFormData({ ...formData, name: e.target.value })
+            }
+          />
+        </div>
+
+        {/* Email Input */}
+        <div>
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+            Email Address
+          </label>
+          <input 
+            type="email" 
+            id="email"
+            name="email"
+            placeholder="Enter Your Email Address"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all"
+            value={formData.email}
+            onChange={(e) =>
+              setFormData({ ...formData, email: e.target.value })
+            }
+          />
+        </div>
+
+        {/* Password Input */}
+        <div>
+          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+            Password
+          </label>
+          <input 
+            type="password" 
+            id="password"
+            name="password"
+            placeholder="Enter Your Password"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all"
+            value={formData.password}
+            onChange={(e) =>
+              setFormData({ ...formData, password: e.target.value })
+            }
+          />
+        </div>
+
+        {/* Submit Button */}
+        <button 
+          type="submit" 
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg transition-colors mt-2"
+        >
+          Sign Up
+        </button>
+
+      </form>
+
+      {/* Footer Link */}
+      <div className="text-center mt-6">
+        <p className="text-sm text-gray-600">
+          Already have an account?{' '}
+          {/* Notice how this links BACK to the login page */}
+          <Link to="/auth/login" className="text-blue-600 font-medium hover:underline">
+            Log in
+          </Link>
+        </p>
+      </div>
+
+    </div>
+  );
+};
+
+export default Signup;
+
+
+================================================================================
+FILE: src/pages/Customers.jsx
+================================================================================
+import { useState } from "react";
+import CustomerDetail from "./CustomerDetail";
+import AddCustomerModal from "../pages/PopUps/AddCustomerModal";
+import useCustomerContext from "../context/CustomerContext";
+import useOrderContext from "../context/OrderContext";
+import { calculateOrderTotal } from "../utils/financeUtils";
+import EditCustomerModal from "../pages/PopUps/EditCustomer";
+const Customers = () => {
+  // 2. Component State
+  const { customers, addCustomer, deleteCustomer,updateCustomer } = useCustomerContext();
+  const { orders } = useOrderContext();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortOption, setSortOption] = useState("totalTransaction");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [viewingCustomer, setViewingCustomer] = useState(null);
+
+
+ 
+  // 3. THE HANDLER TO ADD THE DATA TO THE TABLE
+  const handleAddCustomer = (newCustomerData) => {
+    addCustomer(newCustomerData);
+  };
+  const handleEditCustomer = (customerToEdit) => {
+    setSelectedCustomer(customerToEdit);
+    setEditModalOpen(true);
+  };
+  // 3. The Search Filter Logic
+  // This automatically updates the table every time you type a letter!
+  const filteredCustomers = customers.filter(
+    (customer) =>
+      customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      customer.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      customer.phone.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      customer.id.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
+
+  const safeOrders = Array.isArray(orders) ? orders : [];
+
+  const getLatestOrderTotal = (customer) => {
+    const custOrders = safeOrders.filter(o => o.customerId === customer.id);
+    return custOrders.length > 0 ? calculateOrderTotal(custOrders[0]) : 0;
+  };
+
+  const getTotalOrders = (customer) => {
+    return safeOrders.filter(o => o.customerId === customer.id).length;
+  };
+
+  const getTotalTransaction = (customer) => {
+    const custOrders = safeOrders.filter(o => o.customerId === customer.id);
+    if (custOrders.length > 0) {
+      return custOrders.reduce((sum, order) => sum + calculateOrderTotal(order), 0);
+    }
+    return parseFloat(String(customer.spend || "0").replace(/[^0-9.-]+/g, "")) || 0;
+  };
+
+  const sortedCustomers = [...filteredCustomers].sort((a, b) => {
+    if (sortOption === "totalTransaction") {
+      return getTotalTransaction(b) - getTotalTransaction(a);
+    } else if (sortOption === "lastOrderAmount") {
+      return getLatestOrderTotal(b) - getLatestOrderTotal(a);
+    } else if (sortOption === "totalOrders") {
+      return getTotalOrders(b) - getTotalOrders(a);
+    }
+    return 0;
+  });
+
+  const handleSortTransaction = (e) => {
+    setSortOption(e.target.value);
+  };
+  return (
+    <>
+      {/* If viewingCustomer is TRUE, show the Detail Page! */}
+      {viewingCustomer ? (
+        <CustomerDetail
+          customer={viewingCustomer}
+          onBack={() => setViewingCustomer(null)}
+        />
+      ) : (
+        /* If viewingCustomer is FALSE, show the normal Table! */
+        <div className="flex flex-col gap-6 animate-in fade-in duration-300">
+          {/* DROP THE MODAL COMPONENT HERE (It stays invisible until isModalOpen is true) */}
+          <AddCustomerModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            onAdd={handleAddCustomer}
+          />
+          <EditCustomerModal
+            isOpen={editModalOpen}
+            onClose={() => setEditModalOpen(false)}
+            customer={selectedCustomer}
+          />
+          {/* --- Page Header --- */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 transition-colors">Customers</h1>
+              <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 transition-colors">
+                Manage your client list and view their status.
+              </p>
+            </div>
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center gap-2 shadow-sm"
+            >
+              <span>➕</span> Add Customer
+            </button>
+          </div>
+
+          {/* --- Table Toolbar (Search & Filter) --- */}
+          <div className="bg-white dark:bg-slate-900/50 backdrop-blur-md p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row justify-between gap-4 transition-colors">
+            {/* Search Bar */}
+            <div className="relative w-full max-w-md">
+              <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 dark:text-slate-500">
+                🔍
+              </span>
+              <input
+                type="text"
+                placeholder="Search by name, address, or ID..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 bg-transparent border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent text-sm text-slate-700 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 transition-all"
+              />
+            </div>
+
+            {/* Mock Filter Button */}
+            
+          </div>
+
+          {/* --- The Data Table --- */}
+          <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden transition-colors">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                {/* Table Headers */}
+                <thead>
+                  <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-xs uppercase text-slate-500 dark:text-slate-400 font-semibold tracking-wider transition-colors">
+                    <th className="px-6 py-4">Customer</th>
+                    <th className="px-6 py-4 hidden sm:table-cell">
+                      Customer ID
+                    </th>
+                    <th className="px-6 py-4">Status</th>
+                    <th className="px-6 py-4 hidden md:table-cell">
+                      <select name="sort-transaction" id="sort-transaction" value={sortOption} onChange={handleSortTransaction} className="bg-transparent font-semibold uppercase outline-none cursor-pointer dark:text-slate-300 dark:bg-slate-900">
+                        <option value="totalTransaction">Total Transaction</option>
+                        <option value="lastOrderAmount">Last Order Amount</option>
+                        <option value="totalOrders">Total Orders</option>
+                      </select>
+                    </th>
+                    <th className="px-6 py-4 hidden lg:table-cell">
+                      Date Added
+                    </th>
+                    <th className="px-6 py-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+
+                {/* Table Body */}
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50">
+                  {sortedCustomers.length > 0 ? (
+                    sortedCustomers.map((customer) => (
+                      <tr
+                        key={customer.id}
+                        className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group"
+                      >
+                        {/* User Info Column with Avatar */}
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="h-9 w-9 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400 flex items-center justify-center font-bold text-sm shrink-0 transition-colors">
+                              {customer.name.charAt(0)}
+                            </div>
+                            <div className="block">
+                              <button
+                                onClick={() => setViewingCustomer(customer)}
+                                className="text-sm font-bold text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline text-left cursor-pointer transition-colors"
+                              >
+                                {customer.name}
+                              </button>
+                              <p className="text-xs text-slate-500 dark:text-slate-400 transition-colors">
+                                {customer.address}
+                              </p>
+                              <p className="text-xs text-slate-500 dark:text-slate-400 transition-colors">
+                                {customer.phone}
+                              </p>
+                            </div>
+                          </div>
+                        </td>
+
+                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-300 hidden sm:table-cell font-mono transition-colors">
+                          {customer.id}
+                        </td>
+
+                        {/* Dynamic Status Badge */}
+                        <td className="px-6 py-4">
+                          <span
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border transition-colors ${
+                              customer.status === "Active"
+                                ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800/50"
+                                : "bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700"
+                            }`}
+                          >
+                            {customer.status === "Active" && (
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5"></span>
+                            )}
+                            {customer.status}
+                          </span>
+                        </td>
+
+                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-300 font-medium hidden md:table-cell transition-colors">
+                          {sortOption === "totalTransaction" && (
+                            `₹${getTotalTransaction(customer).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                          )}
+                          {sortOption === "lastOrderAmount" && (
+                            `₹${getLatestOrderTotal(customer).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                          )}
+                          {sortOption === "totalOrders" && (
+                            `${getTotalOrders(customer)} Order${getTotalOrders(customer) !== 1 ? 's' : ''}`
+                          )}
+                        </td>
+
+                        <td className="px-6 py-4 text-sm text-slate-500 dark:text-slate-400 hidden lg:table-cell transition-colors">
+                          {customer.date}
+                        </td>
+
+                        {/* Action Buttons */}
+                        <td className="px-6 py-4 text-right">
+                          <button
+                            onClick={() => handleEditCustomer(customer)}
+                            className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm font-medium transition-colors p-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg opacity-0 group-hover:opacity-100 md:opacity-100"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => deleteCustomer(customer)}
+                            className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm font-medium transition-colors p-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg opacity-0 group-hover:opacity-100 md:opacity-100"
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    /* Empty State (If search yields no results) */
+                    <tr>
+                      <td colSpan="6" className="px-6 py-12 text-center">
+                        <p className="text-slate-500 text-sm">
+                          No customers found matching "{searchTerm}"
+                        </p>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Table Footer / Pagination */}
+            <div className="px-6 py-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 flex items-center justify-between transition-colors">
+              <p className="text-sm text-slate-500 dark:text-slate-400">
+                Showing{" "}
+                <span className="font-medium text-slate-700 dark:text-slate-200">
+                  {sortedCustomers.length}
+                </span>{" "}
+                results
+              </p>
+              <div className="flex gap-2">
+                <button
+                  className="px-3 py-1 text-sm border border-slate-200 dark:border-slate-700 rounded text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-50 transition-colors"
+                  disabled
+                >
+                  Prev
+                </button>
+                <button
+                  className="px-3 py-1 text-sm border border-slate-200 dark:border-slate-700 rounded text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-50 transition-colors"
+                  disabled
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
+
+export default Customers;
+
+
+================================================================================
+FILE: src/pages/Dashboard.jsx
+================================================================================
+import React from 'react';
+import useOrderContext from '../context/OrderContext';
+import { generateDashboardReport } from '../utils/generateReports';
+
+const Dashboard = () => {
+  const { orders, clearAllOrders } = useOrderContext();
+
+  // ==========================================
+  // INLINE MATH HELPERS
+  // ==========================================
+  const calculateRowTotal = (item) => {
+    const itemTotal = item.qty * item.price;
+    const afterDiscount = itemTotal - (itemTotal * (item.discount / 100));
+    return afterDiscount + (afterDiscount * (item.gst / 100));
+  };
+
+  const calculateOrderTotal = (order) => {
+    if (!order || !order.items) return 0;
+    const subtotal = order.items.reduce((sum, item) => sum + calculateRowTotal(item), 0);
+    const globalDiscountAmt = subtotal * ((Number(order.globalDiscount) || 0) / 100);
+    return subtotal - globalDiscountAmt;
+  };
+
+  const formatCurrency = (amount) => {
+    return Number(amount).toLocaleString('en-IN', { 
+      minimumFractionDigits: 2, 
+      maximumFractionDigits: 2 
+    });
+  };
+
+  // ==========================================
+  // DYNAMIC METRICS
+  // ==========================================
+  const totalOrdersCount = orders.length;
+
+  const totalRevenue = orders.reduce((sum, order) => {
+    if (order.status === "Paid") {
+      return sum + calculateOrderTotal(order);
+    }
+    return sum;
+  }, 0);
+
+  const uniqueCustomerIds = new Set(orders.map(order => order.customerId));
+  uniqueCustomerIds.delete(undefined); 
+  const activeCustomersCount = uniqueCustomerIds.size;
+
+  const recentOrders = orders.slice(0, 4);
+
+  // ==========================================
+  // RESET FUNCTIONALITY
+  // ==========================================
+  const handleResetDashboard = () => {
+    const isConfirmed = window.confirm(
+      "⚠️ WARNING: Are you sure you want to reset the dashboard?\n\nThis will permanently delete ALL orders across all customers. This action cannot be undone."
+    );
+    
+    if (isConfirmed) {
+      clearAllOrders();
+    }
+  };
+
+  // ==========================================
+  // THE "EMPTY STATE" UI (NO DATA)
+  // ==========================================
+  if (orders.length === 0) {
+    return (
+      <div className="flex-1 overflow-y-auto p-6 lg:p-8 bg-slate-50 dark:bg-slate-950 font-sans h-full flex flex-col items-center justify-center transition-colors">
+        <div className="max-w-md text-center animate-slide-up-fade">
+          <div className="w-20 h-20 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center text-4xl mx-auto mb-6 shadow-sm transition-colors">
+            📊
+          </div>
+          <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-3 transition-colors">Welcome to your Dashboard</h2>
+          <p className="text-slate-500 dark:text-slate-400 mb-8 leading-relaxed transition-colors">
+            It looks like you don't have any data yet. Once you navigate to a customer and create your first order, your live revenue and analytics will automatically appear here.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // ==========================================
+  // THE "ACTIVE STATE" UI (HAS DATA)
+  // ==========================================
+  return (
+    <div className="flex-1 overflow-y-auto p-6 lg:p-8 bg-slate-50 dark:bg-slate-950 font-sans h-full transition-colors animate-in fade-in duration-300">
+      
+      {/* PAGE HEADER */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-8">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 transition-colors">Overview</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 transition-colors">Here is what's happening with your business today.</p>
+        </div>
+        
+        {/* ACTION BUTTONS GROUP */}
+        <div className="flex items-center gap-3 shrink-0">
+          <button 
+            onClick={handleResetDashboard}
+            className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-900 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 rounded-lg text-sm font-medium hover:bg-red-50 dark:hover:bg-red-900/30 shadow-sm transition-colors"
+          >
+            <span>🔄</span> Reset
+          </button>
+
+         <button 
+            onClick={() => generateDashboardReport(orders, { totalRevenue, totalOrdersCount, activeCustomersCount })}
+            className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 rounded-lg text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 shadow-sm transition-colors"
+          >
+            <span>📥</span> Download Report
+          </button>
+        </div>
+      </div>
+
+      {/* METRIC CARDS GRID (Now strictly 3 columns!) */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+        
+        <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm transition-all hover:shadow-md dark:hover:shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Total Revenue</p>
+          <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100">₹{formatCurrency(totalRevenue)}</h3>
+          <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium mt-2 flex items-center gap-1">
+            <span>Live Data (Paid Only)</span>
+          </p>
+        </div>
+
+        <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm transition-all hover:shadow-md dark:hover:shadow-[0_4px_20px_rgba(0,0,0,0.5)] animate-slide-up-fade" style={{ animationDelay: '100ms' }}>
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Active Buyers</p>
+          <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100">{activeCustomersCount}</h3>
+          <p className="text-xs text-blue-500 dark:text-blue-400 font-medium mt-2 flex items-center gap-1">
+            <span>Live Data</span>
+          </p>
+        </div>
+
+        <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm transition-all hover:shadow-md dark:hover:shadow-[0_4px_20px_rgba(0,0,0,0.5)] animate-slide-up-fade" style={{ animationDelay: '200ms' }}>
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Total Orders</p>
+          <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100">{totalOrdersCount}</h3>
+          <p className="text-xs text-blue-500 dark:text-blue-400 font-medium mt-2 flex items-center gap-1">
+            <span>Live Data</span>
+          </p>
+        </div>
+
+      </div>
+
+      {/* MAIN CHARTS & ACTIVITY AREA */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-slide-up-fade" style={{ animationDelay: '300ms' }}>
+        
+        <div className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col transition-colors">
+          <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+            <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">Revenue Analytics</h2>
+            <select className="text-sm border border-slate-200 dark:border-slate-700 rounded-lg text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800 px-3 py-1.5 outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
+              <option>This Year</option>
+              <option>Last Year</option>
+            </select>
+          </div>
+          <div className="flex-1 min-h-[300px] p-6 flex items-center justify-center">
+            <div className="w-full h-full border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl flex items-center justify-center text-slate-400 dark:text-slate-500 bg-slate-50/50 dark:bg-slate-900/50 transition-colors">
+              [ Chart.js / Recharts Component Will Go Here ]
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col transition-colors">
+          <div className="p-6 border-b border-slate-100 dark:border-slate-800">
+            <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">Recent Activity</h2>
+          </div>
+          <div className="p-6 flex-1 flex flex-col">
+            <div className="space-y-6 flex-1">
+              
+              {recentOrders.map((order) => (
+                <div key={order.id} className="flex gap-4 items-start hover:-translate-y-1 transition-transform cursor-default">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm shrink-0 shadow-sm ${
+                    order.status === 'Paid' ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400' :
+                    order.status === 'Cancelled' ? 'bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400' :
+                    'bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400'
+                  }`}>
+                    {order.status === 'Paid' ? '💰' : order.status === 'Cancelled' ? '❌' : '🛒'}
+                  </div>
+                  <div>
+                    <p className="text-sm text-slate-800 dark:text-slate-200 transition-colors">
+                      Order <span className="font-bold">{order.id}</span> is marked as <span className="font-semibold">{order.status}</span>.
+                    </p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 transition-colors">
+                      Amount: ₹{formatCurrency(calculateOrderTotal(order))}
+                    </p>
+                  </div>
+                </div>
+              ))}
+
+            </div>
+            
+            {orders.length > 4 && (
+              <button className="w-full mt-6 py-2 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-semibold text-blue-600 dark:text-blue-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                View All {orders.length} Orders
+              </button>
+            )}
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+};
+
+export default Dashboard;
+
+
+================================================================================
+FILE: src/pages/Sales.jsx
+================================================================================
+import React, { useState } from 'react';
+import useOrderContext from '../context/OrderContext';
+
+const Sales = () => {
+  const { orders } = useOrderContext();
+  const [timeframe, setTimeframe] = useState('This Month');
+
+  // ==========================================
+  // INLINE MATH HELPERS
+  // ==========================================
+  const calculateRowTotal = (item) => {
+    const itemTotal = item.qty * item.price;
+    const afterDiscount = itemTotal - (itemTotal * (item.discount / 100));
+    return afterDiscount + (afterDiscount * (item.gst / 100));
+  };
+
+  const calculateOrderTotal = (order) => {
+    if (!order || !order.items) return 0;
+    const subtotal = order.items.reduce((sum, item) => sum + calculateRowTotal(item), 0);
+    const globalDiscountAmt = subtotal * ((Number(order.globalDiscount) || 0) / 100);
+    return subtotal - globalDiscountAmt;
+  };
+
+  const formatCurrency = (amount) => {
+    return Number(amount).toLocaleString('en-IN', { 
+      minimumFractionDigits: 2, 
+      maximumFractionDigits: 2 
+    });
+  };
+
+  // ==========================================
+  // DATA FILTERING
+  // ==========================================
+  const completedSales = orders.filter(
+    (order) => order.status === "Paid" || order.status === "Delivered"
+  );
+
+  const totalSalesRevenue = completedSales.reduce((sum, order) => sum + calculateOrderTotal(order), 0);
+  const averageOrderValue = completedSales.length > 0 ? totalSalesRevenue / completedSales.length : 0;
+  const totalItemsSold = completedSales.reduce((total, order) => {
+    const orderItemCount = order.items.reduce((sum, item) => sum + Number(item.qty), 0);
+    return total + orderItemCount;
+  }, 0);
+
+  // ==========================================
+  // CSV EXPORT LOGIC
+  // ==========================================
+  const handleExportCSV = () => {
+    if (completedSales.length === 0) {
+      alert("No sales data available to export.");
+      return;
+    }
+
+    // 1. Define the CSV Headers
+    const headers = ["Order ID", "Date", "Status", "Items Count", "Total Amount (INR)"];
+    
+    // 2. Map the orders into CSV rows
+    const rows = completedSales.map(order => [
+      order.id,
+      order.date,
+      order.status,
+      order.items.length,
+      calculateOrderTotal(order).toFixed(2)
+    ]);
+
+    // 3. Combine headers and rows into a single string
+    // Each row is joined by a comma, and rows are separated by newlines
+    const csvContent = [headers, ...rows]
+      .map(e => e.join(","))
+      .join("\n");
+
+    // 4. Create a Blob (Binary Large Object) for the file
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    
+    // 5. Create a hidden 'a' tag to trigger the download
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `Sales_Report_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  return (
+    <div className="flex-1 overflow-y-auto p-6 lg:p-8 bg-slate-50 dark:bg-slate-950 font-sans h-full transition-colors animate-in fade-in duration-300">
+      
+      {/* HEADER SECTION */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-8">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 transition-colors">Sales Analytics</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 transition-colors">Deep dive into your revenue streams and transaction history.</p>
+        </div>
+        
+        <div className="flex items-center gap-3 shrink-0">
+          <select 
+            value={timeframe}
+            onChange={(e) => setTimeframe(e.target.value)}
+            className="text-sm border border-slate-200 dark:border-slate-700 rounded-lg text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-900 px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500 shadow-sm font-medium transition-colors cursor-pointer"
+          >
+            <option>Today</option>
+            <option>This Week</option>
+            <option>This Month</option>
+            <option>This Year</option>
+            <option>All Time</option>
+          </select>
+          
+          {/* NOW ATTACHED TO handleExportCSV */}
+          <button 
+            onClick={handleExportCSV}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 shadow-sm transition-colors"
+          >
+            <span>📊</span> Export CSV
+          </button>
+        </div>
+      </div>
+
+      {/* KPI CARDS */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+        <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden transition-all hover:shadow-md dark:hover:shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
+          <div className="absolute top-0 right-0 p-4 opacity-10 text-4xl">💰</div>
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Gross Sales Volume</p>
+          <h3 className="text-3xl font-bold text-slate-800 dark:text-slate-100 transition-colors">₹{formatCurrency(totalSalesRevenue)}</h3>
+          <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium mt-2 flex items-center gap-1 transition-colors">
+            <span>Based on {completedSales.length} successful transactions</span>
+          </p>
+        </div>
+
+        <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden transition-all hover:shadow-md dark:hover:shadow-[0_4px_20px_rgba(0,0,0,0.5)] animate-slide-up-fade" style={{ animationDelay: '100ms' }}>
+          <div className="absolute top-0 right-0 p-4 opacity-10 text-4xl">📈</div>
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Average Order Value (AOV)</p>
+          <h3 className="text-3xl font-bold text-slate-800 dark:text-slate-100 transition-colors">₹{formatCurrency(averageOrderValue)}</h3>
+          <p className="text-xs text-blue-500 dark:text-blue-400 font-medium mt-2 flex items-center gap-1 transition-colors">
+            <span>Revenue per customer checkout</span>
+          </p>
+        </div>
+
+        <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden transition-all hover:shadow-md dark:hover:shadow-[0_4px_20px_rgba(0,0,0,0.5)] animate-slide-up-fade" style={{ animationDelay: '200ms' }}>
+          <div className="absolute top-0 right-0 p-4 opacity-10 text-4xl">📦</div>
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Total Units Sold</p>
+          <h3 className="text-3xl font-bold text-slate-800 dark:text-slate-100 transition-colors">{totalItemsSold}</h3>
+          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-2 flex items-center gap-1 transition-colors">
+            <span>Individual items shipped</span>
+          </p>
+        </div>
+      </div>
+
+      {/* CHARTS PLACEHOLDERS */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8 animate-slide-up-fade" style={{ animationDelay: '300ms' }}>
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col transition-colors">
+          <div className="p-5 border-b border-slate-100 dark:border-slate-800">
+            <h2 className="text-md font-bold text-slate-800 dark:text-slate-100">Sales Trend ({timeframe})</h2>
+          </div>
+          <div className="h-64 p-6 flex items-center justify-center">
+            <div className="w-full h-full border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl flex items-center justify-center text-slate-400 dark:text-slate-500 bg-slate-50/50 dark:bg-slate-900/50 transition-colors">
+              [ Line Chart: Revenue over Time ]
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col transition-colors">
+          <div className="p-5 border-b border-slate-100 dark:border-slate-800">
+            <h2 className="text-md font-bold text-slate-800 dark:text-slate-100">Sales by Category</h2>
+          </div>
+          <div className="h-64 p-6 flex items-center justify-center">
+            <div className="w-full h-full border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl flex items-center justify-center text-slate-400 dark:text-slate-500 bg-slate-50/50 dark:bg-slate-900/50 transition-colors">
+              [ Doughnut Chart: Top Products ]
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* TRANSACTION TABLE */}
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden transition-colors animate-slide-up-fade" style={{ animationDelay: '400ms' }}>
+        <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/30 transition-colors">
+          <h2 className="text-md font-bold text-slate-800 dark:text-slate-100">Recent Transactions</h2>
+        </div>
+        
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm border-collapse">
+            <thead className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 transition-colors">
+              <tr className="text-slate-500 dark:text-slate-400">
+                <th className="py-3 px-5 font-semibold uppercase tracking-wider text-xs">Order ID</th>
+                <th className="py-3 px-5 font-semibold uppercase tracking-wider text-xs">Date</th>
+                <th className="py-3 px-5 font-semibold uppercase tracking-wider text-xs">Status</th>
+                <th className="py-3 px-5 font-semibold uppercase tracking-wider text-xs text-right">Amount</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50">
+              {completedSales.length === 0 ? (
+                <tr>
+                  <td colSpan="4" className="py-8 text-center text-slate-500 dark:text-slate-400">
+                    No completed sales found.
+                  </td>
+                </tr>
+              ) : (
+                completedSales.slice(0, 8).map(order => (
+                  <tr key={order.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+                    <td className="py-3 px-5 font-medium text-blue-600 dark:text-blue-400">{order.id}</td>
+                    <td className="py-3 px-5 text-slate-600 dark:text-slate-400">{order.date}</td>
+                    <td className="py-3 px-5">
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium border transition-colors ${order.status === 'Paid' ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800/50' : 'bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700'}`}>
+                        {order.status}
+                      </span>
+                    </td>
+                    <td className="py-3 px-5 font-bold text-slate-800 dark:text-slate-100 text-right">
+                      ₹{formatCurrency(calculateOrderTotal(order))}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Sales;
+
+
+================================================================================
+FILE: src/context/CustomerContext.jsx
+================================================================================
+import { createContext,useContext,useState } from "react";
+import initialCustomers from "../utils/CustomerList";
+import StorageService from "../services/storageService";
+
+const CustomerContext = createContext(null);
+
+
+export const CustomerProvider = ({children}) => {
+    const [customers,setCustomers] = useState(StorageService.getCustomers() ? JSON.parse(StorageService.getCustomers()) : initialCustomers  );
+    const addCustomer = (customer) => {
+        const newCustomers = [customer, ...customers];
+        setCustomers(newCustomers);
+        StorageService.saveCustomers(newCustomers);
+    }
+   
+    const deleteCustomer = (customer) => {
+        if (window.confirm(`Are you sure you want to delete ${customer.name}?`)) {
+            const newCustomers = customers.filter((c) => c.id !== customer.id);
+            setCustomers(newCustomers);
+            StorageService.saveCustomers(newCustomers);
+        }
+    }
+    const updateCustomer = (updatedCustomer) => {
+        const updatedCustomers = customers.map(customer => 
+            // If the ID matches, replace the old data with the new data
+            customer.id === updatedCustomer.id ? updatedCustomer : customer
+        );
+        setCustomers(updatedCustomers);
+        StorageService.saveCustomers(updatedCustomers);
+    };
+    return (
+        <CustomerContext.Provider value={{customers,addCustomer,deleteCustomer,updateCustomer}}>
+            {children}
+        </CustomerContext.Provider>
+    )
+}
+
+
+
+
+
+const useCustomerContext = () => {
+    return useContext(CustomerContext);
+}
+
+
+
+export default useCustomerContext;
+
+
+================================================================================
+FILE: src/context/ThemeContext.jsx
+================================================================================
+import React, { createContext, useContext, useEffect, useState } from 'react';
+
+const ThemeContext = createContext();
+
+export const ThemeProvider = ({ children }) => {
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    // Check local storage or system preference
+    if (typeof window !== 'undefined') {
+      const storedTheme = localStorage.getItem('theme');
+      if (storedTheme) {
+        return storedTheme === 'dark';
+      }
+      return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    const root = window.document.documentElement;
+    if (isDarkMode) {
+      root.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      root.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  }, [isDarkMode]);
+
+  const toggleTheme = () => setIsDarkMode((prev) => !prev);
+
+  return (
+    <ThemeContext.Provider value={{ isDarkMode, toggleTheme }}>
+      {children}
+    </ThemeContext.Provider>
+  );
+};
+
+export const useTheme = () => useContext(ThemeContext);
+
+
+================================================================================
+FILE: src/context/AuthContext.jsx
+================================================================================
+import React, { createContext, useContext, useState } from "react";
+import AuthService from "../services/authService";
+import StorageService from "../services/storageService";
+
+const AuthContext = createContext(null);
+
+export const AuthProvider = ({ children }) => {
+  
+  // 1. Initialize Auth State using the Storage Service!
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+    return StorageService.getLoginStatus();
+  });
+
+  // 2. UI States (No changes needed here)
+  const [isSidebarOpen, setIsOpen] = useState(false);
+  const [isProfileOpen, setIsOpenProfile] = useState(false);
+  const [isSettingsOpen, setIsOpenSettings] = useState(false);
+
+  // --- AUTHENTICATION HANDLERS --- //
+
+  const handleLogin = (loginData) => {
+    // Let the Service do the heavy lifting!
+    const isSuccess = AuthService.login(loginData.email, loginData.password);
+    if (isSuccess) {
+      setIsLoggedIn(true);
+      return true;
+    } else {
+      setIsLoggedIn(false);
+      return false;
+    }
+  };
+
+  const handleSignUp = (signUpData) => {
+    AuthService.signUp(signUpData);
+    setIsLoggedIn(true);
+  };
+
+  const handleLogout = () => {
+    AuthService.logout();
+    setIsLoggedIn(false);
+  };
+
+  const handleDeleteAccount = () => {
+    if (window.confirm("🚨 CRITICAL WARNING: Are you sure you want to delete your account? You will lose all access.")) {
+      AuthService.deleteAccount(); // Wipe the data
+      setIsOpenSettings(false);    // Close the panel
+      setIsLoggedIn(false);        // Kick them out
+    }
+  };
+
+  const handleResetData = () => {
+    if (window.confirm("⚠️ Are you sure you want to reset all dashboard data? This cannot be undone.")) {
+      AuthService.resetDashboardData();
+      alert("Dashboard data has been reset to zero.");
+    }
+  };
+
+  // --- UI TOGGLE HANDLERS --- //
+
+  const onOpenSidebarHandler = () => setIsOpen(!isSidebarOpen);
+  const onOpenProfileHandler = () => setIsOpenProfile(!isProfileOpen);
+  const onOpenSettingsHandler = () => setIsOpenSettings(!isSettingsOpen);
+
+  return (
+    <AuthContext.Provider
+      value={{
+        // Auth State & Actions
+        isLoggedIn,
+        handleLogin,
+        handleLogout,
+        handleSignUp,
+        handleResetData,
+        handleDeleteAccount,
+        
+        // UI State & Actions
+        isSidebarOpen,
+        onOpenSidebarHandler,
+        isProfileOpen,
+        onOpenProfileHandler,
+        isSettingsOpen,
+        onOpenSettingsHandler,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+export const useAuth = () => useContext(AuthContext);
+
+
+================================================================================
+FILE: src/context/OrderContext.jsx
+================================================================================
+import { createContext, useState, useContext } from "react";
+import StorageService from "../services/storageService";
+
+const OrderContext = createContext([]);
+
+export const OrderProvider = ({ children }) => {
+  const [orders, setOrders] = useState(() => {
+    const stored = StorageService.getOrders();
+    return stored ? JSON.parse(stored) : []; // Default to empty array if no orders exist yet
+  });
+
+  const addOrder = (order) => {
+    const newOrders = [order, ...orders]; // Put new order at the top
+    setOrders(newOrders);
+    StorageService.saveOrders(newOrders); // SAVE TO STORAGE!
+  };
+
+  const deleteOrder = (id) => {
+    const newOrders = orders.filter((order) => order.id !== id);
+    setOrders(newOrders);
+    StorageService.saveOrders(newOrders); // SAVE TO STORAGE!
+  };
+
+  const updateOrder = (id, updatedOrder) => {
+    const newOrders = orders.map((order) =>
+      order.id === id ? { ...order, ...updatedOrder } : order,
+    );
+    setOrders(newOrders);
+    StorageService.saveOrders(newOrders); // SAVE TO STORAGE!
+  };
+  const clearAllOrders = () => {
+    if(window.confirm("Are you sure you want to clear all orders?")){
+      setOrders([]); // Wipe React state
+      StorageService.clearOrders(); // Wipe Local Storage
+    }
+  };
+
+  return (
+    <OrderContext.Provider
+      value={{ orders, addOrder, deleteOrder, updateOrder, clearAllOrders }}
+    >
+      {children}
+    </OrderContext.Provider>
+  );
+};
+
+const useOrderContext = () => {
+  return useContext(OrderContext);
+};
+
+export default useOrderContext;
+
+
+================================================================================
+FILE: src/layouts/DashBoardLayout.jsx
+================================================================================
+import { Outlet } from "react-router-dom";
+import Sidebar from "../components/Sidebar";
+// We will build the Topbar next, but we need to import it now!
+import Topbar from "../components/Topbar"; 
+import ProfilePanel from "../components/Profile";
+import SettingsPanel from "../components/Settings";
+
+const DashBoardLayout = () => {
+  return (
+    // Master Container: Full screen, prevents the whole browser window from scrolling
+    <div className="h-screen w-full flex overflow-hidden bg-slate-50 dark:bg-slate-950 transition-colors duration-300">
+      
+      {/* Sidebar Wrapper: 
+        We lock the width to 64 units (256px) and use flex-shrink-0 
+        so it never gets squished on smaller screens. 
+      */}
+      <div className=" shrink-0   md:block z-30 shadow-xl">
+        <Sidebar />
+      </div>
+
+<div className="absolute z-50 right-0">
+  <ProfilePanel />
+</div>
+<div className="absolute z-50 right-0">
+  <SettingsPanel />
+</div>
+      {/* Main Content Column */}
+      <div className="flex-1 flex flex-col w-full">
+        
+        {/* Topbar Wrapper: Fixed height of 16 units (64px) */}
+        <div className="h-16 shrink-0 z-10">
+          <Topbar />
+        </div>
+
+        {/* The Scrollable Canvas: 
+          flex-1 takes up the remaining height. overflow-y-auto allows 
+          ONLY this specific section to scroll when you have long tables. 
+        */}
+        <div className="flex-1 overflow-y-auto p-4 md:p-6">
+          <main className="max-w-7xl mx-auto h-full">
+            {/* React Router will inject Sales, Customers, etc., right here */}
+            <Outlet />
+          </main>
+        </div>
+
+      </div>
+    </div>
+  );
+};
+
+export default DashBoardLayout;
+
+
+================================================================================
+FILE: src/layouts/AuthLayouts.jsx
+================================================================================
+import { Outlet } from "react-router-dom";
+
+const AuthLayouts = () => {
+  return (
+    <div className="min-h-screen w-full bg-gray-500 flex items-center justify-center p-4">
+      <Outlet />
+    </div>
+  );
+};
+
+export default AuthLayouts; 
+
+
+================================================================================
+FILE: src/main.jsx
+================================================================================
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import './index.css'
+import App from './App.jsx'
+
+createRoot(document.getElementById('root')).render(
+  <StrictMode>
+    <App />
+  </StrictMode>,
+)
+
+
+================================================================================
+FILE: src/components/ProtectedRoute.jsx
+================================================================================
+import React from 'react'
+
+const ProtectedRoute = () => {
+  return (
+    <div>ProtectedRoute</div>
+  )
+}
+
+export default ProtectedRoute
+
+
+================================================================================
+FILE: src/components/Profile.jsx
+================================================================================
+import { useAuth } from "../context/AuthContext";
+import { useState } from "react";
+const ProfilePanel = () => {
+  const { isProfileOpen, onOpenProfileHandler, handleLogout } = useAuth();
+
+  // Safely grab user data for the display
+  const rawUserData = localStorage.getItem("userData");
+  const userData = rawUserData ? JSON.parse(rawUserData) : { name: "Admin User", email: "admin@test.com" };
+  const userInitial = userData.name ? userData.name.charAt(0).toUpperCase() : "U";
+
+  const [updateName, setUpdateName] = useState(userData.name)
+
+  const save =()=>{
+    localStorage.setItem("userData", JSON.stringify({ name: updateName, email: userData.email }));
+    onOpenProfileHandler();
+  }
+
+  return (
+    <>
+      {/* 1. The Glass Backdrop Overlay */}
+      {isProfileOpen && (
+        <div
+          className="fixed inset-0 bg-slate-900/30 backdrop-blur-sm z-50 transition-opacity"
+          onClick={onOpenProfileHandler}
+        ></div>
+      )}
+
+      {/* 2. The Sliding Right Panel */}
+      <div
+        className={`fixed inset-y-0 right-0 z-70 w-full sm:w-100px bg-white shadow-2xl transform transition-transform duration-300 ease-in-out flex flex-col ${
+          isProfileOpen ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
+        
+        {/* Panel Header */}
+        <div className="h-16 flex items-center justify-between px-6 border-b border-slate-100 shrink-0">
+          <h2 className="text-lg font-bold text-slate-800">My Profile</h2>
+          <button
+            onClick={onOpenProfileHandler}
+            className="text-slate-400 hover:text-slate-700 hover:bg-slate-100 p-2 rounded-full transition-colors"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+
+        {/* Panel Scrollable Content */}
+        <div className="flex-1 overflow-y-auto p-6">
+          
+          {/* Avatar Section */}
+          <div className="flex flex-col items-center justify-center mb-8">
+            <div className="h-24 w-24 rounded-full bg-linear-to-tr from-blue-600 to-indigo-500 text-white flex items-center justify-center text-4xl font-bold shadow-lg border-4 border-blue-50 mb-4">
+              {userInitial}
+            </div>
+            <h3 className="text-xl font-bold text-slate-800">{userData.name}</h3>
+            <p className="text-slate-500 text-sm">{userData.email}</p>
+            <span className="mt-2 inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20">
+              Active Member
+            </span>
+          </div>
+
+          <hr className="border-slate-100 mb-6" />
+
+          {/* Form Settings (Visual only for now) */}
+          <div className="space-y-4">
+            <h4 className="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-2">Personal Information</h4>
+            
+            <div>
+              <label className="block text-xs font-medium text-slate-500 mb-1">Full Name</label>
+              <input type="text" value={updateName} onChange={(e)=>setUpdateName(e.target.value)} className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-blue-500 text-sm text-slate-700 bg-slate-50" />
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-slate-500 mb-1">Email Address</label>
+              <input type="email" defaultValue={userData.email} readOnly className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none text-sm text-slate-500 bg-slate-100 cursor-not-allowed" />
+              <p className="text-[10px] text-slate-400 mt-1">Email cannot be changed.</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Panel Footer */}
+        <div className="p-6 border-t border-slate-100 bg-slate-50 shrink-0">
+          <button onClick={save} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg transition-colors shadow-sm mb-3">
+            Save Changes
+          </button>
+          
+          <button 
+            onClick={() => {
+              onOpenProfileHandler(); // Close the panel
+              handleLogout();         // Log them out
+            }}
+            className="w-full bg-white hover:bg-red-50 text-red-600 font-semibold py-2.5 rounded-lg transition-colors border border-red-100 shadow-sm flex justify-center items-center gap-2"
+          >
+            <span>🚪</span> Sign Out
+          </button>
+        </div>
+
+      </div>
+    </>
+  );
+};
+
+export default ProfilePanel;
+
+
+================================================================================
+FILE: src/components/CustomerDetail/FinancialsTab.jsx
+================================================================================
+import React from 'react';
+
+const FinancialsTab = () => {
+  return (
+    <div className="space-y-6 animate-in fade-in">
+      <h3 className="text-lg font-bold text-slate-800 mb-4">Ledger & Payments</h3>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div className="p-4 border border-slate-200 rounded-lg bg-slate-50">
+          <p className="text-xs text-slate-500 font-semibold uppercase">Total Inbound</p>
+          <p className="text-xl font-bold text-emerald-600">+₹4,250.00</p>
+        </div>
+        <div className="p-4 border border-slate-200 rounded-lg bg-slate-50">
+          <p className="text-xs text-slate-500 font-semibold uppercase">Total Outbound/Refunds</p>
+          <p className="text-xl font-bold text-red-600">-₹150.00</p>
+        </div>
+        <div className="p-4 border border-slate-200 rounded-lg bg-slate-50">
+          <p className="text-xs text-slate-500 font-semibold uppercase">Est. Profit Margin</p>
+          <p className="text-xl font-bold text-blue-600">32.4%</p>
+        </div>
+      </div>
+      <div className="flex gap-2">
+        <button className="bg-emerald-50 text-emerald-700 border border-emerald-200 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-emerald-100">Record Payment In</button>
+        <button className="bg-red-50 text-red-700 border border-red-200 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-red-100">Record Refund Out</button>
+      </div>
+    </div>
+  );
+};
+
+export default FinancialsTab;
+
+
+================================================================================
+FILE: src/components/CustomerDetail/OrderList.jsx
+================================================================================
+import React from 'react';
+import { generateInvoicePDF } from '../../utils/generatePdf'; 
+import { calculateOrderTotal } from '../../utils/financeUtils'; // <-- We import our math here!
+
+// Added onStatusChange to props
+const OrderList = ({ orders, customer, onCreateNew, onEdit, onDelete, onStatusChange }) => {
+
+  // --- NEW: Color Coded Status Helper ---
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'Paid': return 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800/50';
+      case 'Pending': return 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800/50';
+      case 'Processing': return 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800/50';
+      case 'Shipped': return 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-800/50';
+      case 'Delivered': return 'bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-400 dark:border-indigo-800/50';
+      case 'Cancelled': return 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800/50';
+      default: return 'bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700';
+    }
+  };
+    
+  return (
+    <div className="space-y-6 animate-in fade-in">
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 transition-colors">Order History</h3>
+        <button onClick={onCreateNew} className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 shadow-sm flex items-center gap-2 transition-colors">
+          <span>➕</span> New Order
+        </button>
+      </div>
+
+      <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden transition-colors">
+        <table className="w-full text-left text-sm border-collapse">
+          <thead className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 transition-colors">
+            <tr className="text-slate-500 dark:text-slate-400">
+              <th className="py-3 px-4 font-semibold uppercase tracking-wider text-xs">Order ID</th>
+              <th className="py-3 px-4 font-semibold uppercase tracking-wider text-xs">Date</th>
+              <th className="py-3 px-4 font-semibold uppercase tracking-wider text-xs">Status</th>
+              <th className="py-3 px-4 font-semibold uppercase tracking-wider text-xs">Total Amount</th>
+              <th className="py-3 px-4 font-semibold uppercase tracking-wider text-xs text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50">
+            {orders.map(order => {
+               
+               // Look how clean this is now! 
+               // Just one line calling our utility function.
+               const listTotal = calculateOrderTotal(order);
+
+               return (
+                <tr key={order.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+                  <td className="py-3 px-4 font-medium text-slate-800 dark:text-slate-200">{order.id}</td>
+                  <td className="py-3 px-4 text-slate-500 dark:text-slate-400">{order.date}</td>
+                  <td className="py-3 px-4">
+                    
+                    {/* --- NEW: Interactive Status Dropdown --- */}
+                    <select
+                      value={order.status}
+                      onChange={(e) => onStatusChange(order.id, e.target.value)}
+                      className={`px-3 py-1 rounded-full text-xs font-semibold border appearance-none cursor-pointer outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${getStatusColor(order.status)}`}
+                      style={{ 
+                        // Adds a tiny custom dropdown arrow via CSS
+                        backgroundImage: `url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E")`, 
+                        backgroundRepeat: 'no-repeat', 
+                        backgroundPosition: 'right 0.4rem center', 
+                        backgroundSize: '1em',
+                        paddingRight: '1.5rem' // Make room for the arrow
+                      }}
+                    >
+                      <option className="dark:bg-slate-900" value="Pending">Pending</option>
+                      <option className="dark:bg-slate-900" value="Processing">Processing</option>
+                      <option className="dark:bg-slate-900" value="Shipped">Shipped</option>
+                      <option className="dark:bg-slate-900" value="Delivered">Delivered</option>
+                      <option className="dark:bg-slate-900" value="Paid">Paid</option>
+                      <option className="dark:bg-slate-900" value="Cancelled">Cancelled</option>
+                    </select>
+
+                  </td>
+                  <td className="py-3 px-4 font-bold text-slate-800 dark:text-slate-100">₹{listTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                  <td className="py-3 px-4 text-right">
+                    
+                    <button 
+                      onClick={() => generateInvoicePDF(order, customer)} 
+                      className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 font-medium px-3 py-1 bg-emerald-50 dark:bg-emerald-900/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 rounded transition-colors mr-2"
+                      title="Download PDF Invoice"
+                    >
+                      PDF
+                    </button>
+                    
+                    <button onClick={() => onEdit(order)} className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium px-3 py-1 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded transition-colors mr-2">
+                      Edit
+                    </button>
+                    <button onClick={() => onDelete(order.id)} className="text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 font-medium px-3 py-1 bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 rounded transition-colors">
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+               )
+            })}
+          </tbody>
+        </table>
+        {orders.length === 0 && (
+          <div className="py-12 text-center text-slate-500 dark:text-slate-400">No orders found. Click "New Order" to create one.</div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default OrderList;
+
+
+================================================================================
+FILE: src/components/CustomerDetail/CustomerHeader.jsx
+================================================================================
+import React from 'react';
+import { calculateOrderTotal } from '../../utils/financeUtils';
+
+const CustomerHeader = ({ customer, orders = [], onBack }) => {
+  const pendingOrders = orders.filter(order => order.status !== 'Paid' && order.status !== 'Cancelled');
+  const totalOrderAmount = pendingOrders.reduce((sum, order) => sum + calculateOrderTotal(order), 0);
+  return (
+    <div className="flex items-center justify-between mb-6 bg-white dark:bg-slate-900/50 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 backdrop-blur-sm transition-colors">
+      <div className="flex items-center gap-4">
+        <button onClick={onBack} className="p-2 text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors">
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+        </button>
+        <div>
+          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 transition-colors">{customer.name}</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 transition-colors">ID: {customer.id} | {customer.email}</p>
+        </div>
+      </div>
+      <div className="text-right">
+        <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold mb-1 transition-colors">Current Balance</p>
+        <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 transition-colors">₹{totalOrderAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+      </div>
+    </div>
+  );
+};
+
+export default CustomerHeader;
+
+
+================================================================================
+FILE: src/components/CustomerDetail/OrderBuilder.jsx
+================================================================================
+import React, { useState } from 'react';
+
+const OrderBuilder = ({ initialOrder, onSave, onCancel }) => {
+  // Setup local state based on the order passed in
+  const [activeOrder, setActiveOrder] = useState(initialOrder);
+
+  // --- Handlers for this specific order ---
+  const handleAddItem = () => {
+    setActiveOrder({
+      ...activeOrder,
+      items: [...activeOrder.items, { id: Date.now(), name: "", qty: 1, price: 0, discount: 0, gst: 18 }]
+    });
+  };
+
+  const handleRemoveItem = (itemId) => {
+    setActiveOrder({ ...activeOrder, items: activeOrder.items.filter(item => item.id !== itemId) });
+  };
+
+  const handleItemChange = (itemId, field, value) => {
+    const updatedItems = activeOrder.items.map(item => item.id === itemId ? { ...item, [field]: value } : item );
+    setActiveOrder({ ...activeOrder, items: updatedItems });
+  };
+
+  // --- Math ---
+  const calculateRowTotal = (item) => {
+    const itemTotal = item.qty * item.price;
+    const afterDiscount = itemTotal - (itemTotal * (item.discount / 100));
+    return afterDiscount + (afterDiscount * (item.gst / 100));
+  };
+
+  const currentSubtotal = activeOrder.items.reduce((sum, item) => sum + calculateRowTotal(item), 0);
+  const globalDiscountPercentage = Number(activeOrder.globalDiscount) || 0;
+  const globalDiscountAmount = currentSubtotal * (globalDiscountPercentage / 100);
+  const currentFinalTotal = currentSubtotal - globalDiscountAmount;
+
+  return (
+    <div className="space-y-6 animate-in fade-in">
+      <div className="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-4 transition-colors">
+        <div>
+          <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 transition-colors">
+            {activeOrder.id.startsWith("ORD-") && activeOrder.id.length > 5 ? `Edit Order ${activeOrder.id}` : "New Order"}
+          </h3>
+          <p className="text-sm text-slate-500 dark:text-slate-400 transition-colors">{activeOrder.date}</p>
+        </div>
+        <div className="flex gap-2">
+          <button onClick={onCancel} className="px-4 py-2 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 rounded-lg text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">Cancel</button>
+          <button onClick={() => onSave(activeOrder)} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 shadow-sm transition-colors">Save Order</button>
+        </div>
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="w-full text-left text-sm border-collapse min-w-[700px]">
+          <thead>
+            <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 transition-colors">
+              <th className="py-3 font-semibold w-1/3">Product Name</th>
+              <th className="py-3 font-semibold w-24">Qty</th>
+              <th className="py-3 font-semibold w-28">Unit Price</th>
+              <th className="py-3 font-semibold w-28">Discount %</th>
+              <th className="py-3 font-semibold w-24">GST %</th>
+              <th className="py-3 font-semibold text-right">Total</th>
+              <th className="py-3 text-center w-12"></th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50">
+            {activeOrder.items.map((item) => (
+              <tr key={item.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 group transition-colors">
+                <td className="py-3 pr-2">
+                  <input type="text" value={item.name} placeholder="e.g. Engine Oil" onChange={(e) => handleItemChange(item.id, "name", e.target.value)} className="w-full px-3 py-2 bg-transparent border border-slate-200 dark:border-slate-700 dark:text-slate-200 rounded-lg focus:outline-blue-500 transition-colors" />
+                </td>
+                <td className="py-3 pr-2">
+                  <input type="number" min="1" value={item.qty} onChange={(e) => handleItemChange(item.id, "qty", Number(e.target.value))} className="w-full px-3 py-2 bg-transparent border border-slate-200 dark:border-slate-700 dark:text-slate-200 rounded-lg focus:outline-blue-500 transition-colors" />
+                </td>
+                <td className="py-3 pr-2">
+                  <div className="relative">
+                    <span className="absolute left-3 top-2 text-slate-400">₹</span>
+                    <input type="number" value={item.price} onChange={(e) => handleItemChange(item.id, "price", Number(e.target.value))} className="w-full pl-6 pr-2 py-2 bg-transparent border border-slate-200 dark:border-slate-700 dark:text-slate-200 rounded-lg focus:outline-blue-500 transition-colors" />
+                  </div>
+                </td>
+                <td className="py-3 pr-2">
+                  <input type="number" value={item.discount} onChange={(e) => handleItemChange(item.id, "discount", Number(e.target.value))} className="w-full px-3 py-2 bg-transparent border border-slate-200 dark:border-slate-700 text-orange-600 dark:text-orange-400 rounded-lg focus:outline-orange-500 transition-colors" />
+                </td>
+                <td className="py-3 pr-2">
+                  <select value={item.gst} onChange={(e) => handleItemChange(item.id, "gst", Number(e.target.value))} className="w-full px-2 py-2 bg-transparent border border-slate-200 dark:border-slate-700 dark:text-slate-200 rounded-lg focus:outline-blue-500 transition-colors">
+                    <option className="dark:bg-slate-900" value={0}>0%</option>
+                    <option className="dark:bg-slate-900" value={5}>5%</option>
+                    <option className="dark:bg-slate-900" value={12}>12%</option>
+                    <option className="dark:bg-slate-900" value={18}>18%</option>
+                    <option className="dark:bg-slate-900" value={28}>28%</option>
+                  </select>
+                </td>
+                <td className="py-3 text-right font-bold text-slate-800 dark:text-slate-100 transition-colors">₹{calculateRowTotal(item).toFixed(2)}</td>
+                <td className="py-3 text-center">
+                  <button onClick={() => handleRemoveItem(item.id)} className="text-red-400 hover:text-red-600 p-2 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="flex justify-between items-start pt-4 border-t border-slate-200 dark:border-slate-800 transition-colors">
+        <button onClick={handleAddItem} className="text-blue-600 dark:text-blue-400 text-sm font-semibold hover:text-blue-800 dark:hover:text-blue-300 flex items-center gap-1 transition-colors">
+          <span>+</span> Add Line Item
+        </button>
+        
+        <div className="w-72 space-y-3 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700 transition-colors">
+          <div className="flex justify-between items-center text-sm">
+            <span className="text-slate-500 dark:text-slate-400">Subtotal (Inc. GST)</span>
+            <span className="font-semibold dark:text-slate-200">₹{currentSubtotal.toFixed(2)}</span>
+          </div>
+          <div className="flex justify-between items-center text-sm">
+            <span className="text-slate-500 dark:text-slate-400">Global Discount (%)</span>
+            <div className="relative w-24">
+              <input type="number" min="0" max="100" value={activeOrder.globalDiscount} onChange={(e) => setActiveOrder({...activeOrder, globalDiscount: Number(e.target.value)})} className="w-full pl-2 pr-6 py-1 bg-transparent border border-slate-300 dark:border-slate-600 rounded text-right text-orange-600 dark:text-orange-400 focus:outline-orange-500 transition-colors" />
+              <span className="absolute right-2 top-1.5 text-slate-400 text-sm">%</span>
+            </div>
+          </div>
+          {globalDiscountAmount > 0 && (
+            <div className="flex justify-between items-center text-xs text-orange-600 dark:text-orange-400">
+              <span>Discount Amount</span>
+              <span>-₹{globalDiscountAmount.toFixed(2)}</span>
+            </div>
+          )}
+          <div className="flex justify-between items-center text-lg font-bold border-t border-slate-300 dark:border-slate-600 pt-3 mt-2 transition-colors">
+            <span className="dark:text-slate-200">Final Total</span>
+            <span className="text-blue-600 dark:text-blue-400">₹{currentFinalTotal.toFixed(2)}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default OrderBuilder;
+
+
+================================================================================
+FILE: src/components/CustomerDetail/ReportsTab.jsx
+================================================================================
+import React from 'react';
+
+const ReportsTab = () => {
+  return (
+    <div className="space-y-6 animate-in fade-in">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-bold text-slate-800">Analytics & Reports</h3>
+        <select defaultValue="Weekly Report" className="px-3 py-1.5 border rounded-lg bg-white text-sm font-medium focus:outline-blue-500">
+          <option value="Weekly Report">Weekly Report</option>
+          <option value="Monthly Report">Monthly Report</option>
+          <option value="Quarterly Report">Quarterly Report</option>
+          <option value="Annual GST Summary">Annual GST Summary</option>
+        </select>
+      </div>
+      <div className="h-64 border-2 border-dashed border-slate-200 rounded-xl flex items-center justify-center text-slate-400 bg-slate-50">
+        [ Chart / Data Table Area for Reports ]
+      </div>
+    </div>
+  );
+};
+
+export default ReportsTab;
+
+
+================================================================================
+FILE: src/components/Topbar.jsx
+================================================================================
+import { useState, useEffect, useRef } from "react";
+import { useAuth } from "../context/AuthContext";
+import { useTheme } from "../context/ThemeContext";
+
+const Topbar = () => { // Make sure to accept the prop!
+  const { handleLogout,onOpenSidebarHandler,onOpenProfileHandler,onOpenSettingsHandler} = useAuth();
+  const { isDarkMode, toggleTheme } = useTheme();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  // Safely get user data
+  const rawUserData = localStorage.getItem("userData");
+  const userData = rawUserData ? JSON.parse(rawUserData) : { name: "User", email: "" };
+  // Get the first initial for the avatar
+  const userInitial = userData.name ? userData.name.charAt(0).toUpperCase() : "U";
+
+  const profileHandler = ()=>{
+    
+    setIsDropdownOpen(false)
+    onOpenProfileHandler()
+    
+  }
+
+    const settingsHandler = () =>{
+    
+    setIsDropdownOpen(false)
+    onOpenSettingsHandler()
+    
+  }
+
+  return (
+    <div className="h-16 w-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-md flex items-center justify-between px-4 md:px-6 border-b border-slate-200 dark:border-slate-800 shadow-sm relative z-10 transition-colors duration-300">
+      
+      {/* LEFT SIDE: Hamburger, Logo, Search */}
+      <div className="flex items-center gap-4 flex-1">
+        
+        {/* Mobile Hamburger Button */}
+        <button 
+          onClick={onOpenSidebarHandler}
+          className="md:hidden text-slate-500 hover:text-slate-800 transition-colors p-1"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path>
+          </svg>
+        </button>
+
+        {/* Brand Logo (Visible on all screens) */}
+        <div className="flex items-center shrink-0">
+          <h1 className="text-slate-800 dark:text-slate-100 text-xl font-extrabold tracking-tight transition-colors duration-300">
+            Smart<span className="text-blue-600 dark:text-blue-400">SaaS</span>
+          </h1>
+        </div>
+
+        {/* Search Input (Hidden on mobile) */}
+        <div className="hidden sm:flex items-center w-full max-w-md bg-slate-100/80 dark:bg-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg px-3 py-2 transition-colors ml-4 border border-transparent focus-within:border-blue-500 focus-within:bg-white dark:focus-within:bg-slate-900 focus-within:ring-2 focus-within:ring-blue-100 dark:focus-within:ring-blue-900">
+          <span className="text-slate-400 mr-2 text-sm">🔍</span>
+          <input 
+            type="text" 
+            placeholder="Search..." 
+            className="bg-transparent w-full focus:outline-none text-sm text-slate-700 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500"
+          />
+        </div>
+      </div>
+
+      {/* RIGHT SIDE: Notifications & Profile */}
+      <div className="flex items-center gap-3 sm:gap-4 shrink-0">
+        
+        {/* Theme Toggle Button */}
+        <button 
+          onClick={toggleTheme}
+          className="relative text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 transition-colors p-2 rounded-full hover:bg-slate-50 dark:hover:bg-slate-800"
+        >
+          {isDarkMode ? "🌙" : "☀️"}
+        </button>
+
+        {/* Notification Bell */}
+        <button className="relative text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 transition-colors p-2 rounded-full hover:bg-slate-50 dark:hover:bg-slate-800">
+          <span>🔔</span>
+          <span className="absolute top-1 right-1 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white dark:ring-slate-900 animate-pulse"></span>
+        </button>
+
+        <div className="h-6 w-px bg-slate-200 dark:bg-slate-700 hidden sm:block"></div>
+
+        {/* User Profile Trigger Area */}
+        <div className="relative" ref={dropdownRef}>
+          <div 
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            className="flex items-center gap-2 sm:gap-3 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 p-1 sm:p-2 rounded-lg transition-colors select-none"
+          >
+            <div className="flex flex-col text-right hidden md:block">
+              <span className="text-sm font-semibold text-slate-700 dark:text-slate-200 block">{userData.name}</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400 block truncate w-32">{userData.email}</span>
+            </div>
+            
+            {/* Avatar Circle */}
+            <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-full bg-linear-to-tr from-blue-600 to-indigo-500 text-white flex items-center justify-center font-bold shadow-sm border border-white/20">
+              {userInitial}
+            </div>
+            
+            {/* Tiny arrow */}
+            <span className={`text-[10px] text-slate-400 transition-transform duration-200 hidden sm:block ${isDropdownOpen ? "rotate-180" : ""}`}>
+              ▼
+            </span>
+          </div>
+
+          {/* Dropdown Card */}
+          {isDropdownOpen && (
+            <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-100 dark:border-slate-700 py-2 z-50 animate-slide-up-fade">
+              <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-700 md:hidden bg-slate-50/50 dark:bg-slate-900/50">
+                <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">{userData.name}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">{userData.email}</p>
+              </div>
+
+              <div className="p-2 space-y-1">
+                <button 
+                  onClick={profileHandler}
+                  className="w-full text-left px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors flex items-center gap-2"
+                >
+                  <span className="text-lg opacity-70" >👤</span> My Profile
+                </button>
+                <button 
+                  onClick={settingsHandler}
+                  className="w-full text-left px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors flex items-center gap-2"
+                >
+                  <span className="text-lg opacity-70">⚙️</span> Settings
+                </button>
+              </div>
+              
+              <hr className="my-1 border-slate-100 dark:border-slate-700 mx-2" />
+
+              <div className="p-2">
+                <button 
+                  onClick={() => {
+                    setIsDropdownOpen(false);
+                    handleLogout();
+                  }}
+                  className="w-full text-left px-3 py-2 text-sm font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors flex items-center gap-2"
+                >
+                  <span className="text-lg">🚪</span> Sign Out
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Topbar;
+
+
+================================================================================
+FILE: src/components/Settings.jsx
+================================================================================
+import { useAuth } from "../context/AuthContext";
+
+const SettingsPanel = () => {
+  const { isSettingsOpen, onOpenSettingsHandler,handleResetData,handleDeleteAccount} = useAuth();
+
+
+ 
+
+  return (
+    <>
+      {/* 1. The Glass Backdrop */}
+      {isSettingsOpen && (
+        <div
+          className="fixed inset-0 bg-slate-900/30 backdrop-blur-sm z-[60] transition-opacity"
+          onClick={onOpenSettingsHandler}
+        ></div>
+      )}
+
+      {/* 2. The Sliding Right Panel */}
+      <div
+        className={`fixed inset-y-0 right-0 z-[70] w-full sm:w-[400px] bg-slate-50 shadow-2xl transform transition-transform duration-300 ease-in-out flex flex-col ${
+          isSettingsOpen ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
+        
+        {/* Header */}
+        <div className="h-16 flex items-center justify-between px-6 border-b border-slate-200 shrink-0 bg-white">
+          <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+            <span className="text-xl">⚙️</span> System Settings
+          </h2>
+          <button
+            onClick={onOpenSettingsHandler}
+            className="text-slate-400 hover:text-slate-700 hover:bg-slate-100 p-2 rounded-full transition-colors"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+
+        {/* Content Area */}
+        <div className="flex-1 overflow-y-auto p-6">
+
+          <div className="space-y-6">
+            
+            {/* Danger Zone Header */}
+            <div>
+              <h3 className="text-sm font-bold text-red-600 uppercase tracking-wider mb-1 flex items-center gap-2">
+                <span>⚠️</span> Danger Zone
+              </h3>
+              <p className="text-xs text-slate-500">
+                These actions are permanent and cannot be undone. Proceed with extreme caution.
+              </p>
+            </div>
+
+            <hr className="border-slate-200" />
+
+            {/* Reset Data Option (Orange Warning) */}
+            <div className="bg-white p-5 rounded-xl border border-orange-200 shadow-sm">
+              <h4 className="text-sm font-semibold text-slate-800 mb-1">Reset Dashboard Data</h4>
+              <p className="text-xs text-slate-500 mb-4 leading-relaxed">
+                This will clear all your sales, customers, and chart data, returning the dashboard to a blank state. Your account will remain active.
+              </p>
+              <button
+                onClick={handleResetData}
+                className="w-full bg-orange-50 hover:bg-orange-100 text-orange-700 font-semibold py-2.5 rounded-lg transition-colors border border-orange-200 text-sm flex items-center justify-center gap-2"
+              >
+                <span>🔄</span> Reset All Data
+              </button>
+            </div>
+
+            {/* Delete User Option (Red Danger) */}
+            <div className="bg-white p-5 rounded-xl border border-red-200 shadow-sm">
+              <h4 className="text-sm font-semibold text-slate-800 mb-1">Delete Account</h4>
+              <p className="text-xs text-slate-500 mb-4 leading-relaxed">
+                Permanently delete your account and all associated data. You will be logged out immediately.
+              </p>
+              <button
+                onClick={handleDeleteAccount}
+                className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 rounded-lg transition-colors text-sm flex items-center justify-center gap-2 shadow-sm"
+              >
+                <span>🗑️</span> Delete User Account
+              </button>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    </>
+  );
+};
+
+export default SettingsPanel;
+
+
+================================================================================
+FILE: src/components/Sidebar.jsx
+================================================================================
+import { NavLink } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+
+const Sidebar = () => {
+  const menuItems = [
+    { name: "Dashboard", path: "/dashboard", icon: "📊" },
+    { name: "Sales", path: "/dashboard/sales", icon: "💰" },
+    { name: "Customers", path: "/dashboard/customers", icon: "👥" },
+  ];
+
+  const { isSidebarOpen, onOpenSidebarHandler } = useAuth();
+
+  return (
+    <>
+      {/* Mobile Backdrop Overlay */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 md:hidden transition-opacity"
+          onClick={onOpenSidebarHandler} 
+        ></div>
+      )}
+
+      {/* The Sidebar Container */}
+      <div
+        className={`h-screen fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 text-slate-300 flex flex-col transform transition-transform duration-300 ease-in-out border-r border-slate-800 shadow-2xl md:shadow-none md:relative md:translate-x-0 ${
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        {/* Mobile Header inside Sidebar for closing */}
+        <div className="h-16 flex items-center justify-between px-6 border-b border-slate-800 shrink-0 md:hidden bg-slate-950">
+          <span className="text-sm font-semibold text-slate-400 uppercase tracking-widest">
+            Menu
+          </span>
+          <button
+            onClick={onOpenSidebarHandler}
+            className="text-slate-400 hover:text-white transition-colors p-2 -mr-2"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+
+        {/* 🔥 NEW: Mobile Search Bar (Only visible on screens smaller than 'md') */}
+        <div className="px-4 pt-6 pb-2 md:hidden">
+          <div className="flex items-center w-full bg-slate-950/50 rounded-xl px-3 py-2.5 border border-slate-800 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 transition-all">
+            <span className="text-slate-500 mr-2 text-sm">🔍</span>
+            <input 
+              type="text" 
+              placeholder="Search..." 
+              className="bg-transparent w-full focus:outline-none text-sm text-slate-200 placeholder-slate-500"
+            />
+          </div>
+        </div>
+
+        {/* Navigation Links Area */}
+        <nav className="flex-1 px-4 py-4 space-y-2 overflow-y-auto">
+          {menuItems.map((item) => (
+            <NavLink
+              key={item.name}
+              to={item.path}
+              end={item.path === "/dashboard"}
+              onClick={onOpenSidebarHandler}
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 font-medium group relative overflow-hidden ${
+                  isActive
+                    ? "bg-blue-600/90 text-white shadow-[0_0_15px_rgba(37,99,235,0.5)] border border-blue-500/50"
+                    : "hover:bg-slate-800/80 hover:text-white text-slate-400 hover:shadow-[0_0_10px_rgba(255,255,255,0.05)] border border-transparent hover:border-slate-700/50"
+                }`
+              }
+            >
+              <span className={`text-xl transition-transform duration-200 group-hover:scale-110`}>
+                {item.icon}
+              </span>
+              {item.name}
+            </NavLink>
+          ))}
+        </nav>
+
+        {/* Bottom Area */}
+        <div className="p-4 border-t border-slate-800 shrink-0 bg-slate-950/50">
+          <p className="px-4 py-2 text-xs text-slate-500 font-medium tracking-wider text-center">
+            SYSTEM v1.0.0
+          </p>
+        </div>
+      </div>
+    </>
+  );
+};
+
+export default Sidebar;
+
+
+================================================================================
+FILE: src/App.jsx
+================================================================================
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+
+// Layouts (The Picture Frames)
+import AuthLayouts from "./layouts/AuthLayouts";
+import DashBoardLayout from "./layouts/DashBoardLayout";
+
+// Auth Pages
+import Login from "./pages/auth/Login";
+import Signup from "./pages/auth/Signup";
+
+// Dashboard Pages
+import Dashboard from "./pages/Dashboard";
+import Sales from "./pages/Sales";
+import Customers from "./pages/Customers";
+// Auth Gate
+import { useAuth } from "./context/AuthContext";
+import { CustomerProvider } from "./context/CustomerContext";
+import { AuthProvider } from "./context/AuthContext";
+import { OrderProvider } from "./context/OrderContext";
+import { ThemeProvider } from "./context/ThemeContext";
+
+const ProtectedRoute = ({ children }) => {
+  const { isLoggedIn } = useAuth();
+  return isLoggedIn ? children : <Navigate to="/auth/login" replace />;
+};
+
+const App = () => {
+  return (
+    <ThemeProvider>
+      <AuthProvider>
+        <CustomerProvider>
+          <OrderProvider>
+            <BrowserRouter>
+              <Routes>
+                {/* Default Redirect: If they just type yourwebsite.com, send them to login */}
+                <Route path="/" element={<Navigate to="/auth/login" replace />} />
+
+                {/* Public Branch: Uses the blank, centered AuthLayout */}
+                <Route path="/auth" element={<AuthLayouts />}>
+                  <Route path="login" element={<Login />} />
+                  <Route path="signup" element={<Signup />} />
+                </Route>
+
+                {/* Private Branch: Uses the complex Sidebar/Topbar Layout */}
+                <Route path="/dashboard" element={<DashBoardLayout />}>
+                  <Route
+                    index
+                    element={
+                      <ProtectedRoute>
+                        <Dashboard />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="sales"
+                    element={
+                      <ProtectedRoute>
+                        <Sales />
+                      </ProtectedRoute>
+                    }
+                  />
+                  
+                    <Route
+                      path="customers"
+                      element={
+                        <ProtectedRoute>
+                          <Customers />
+                        </ProtectedRoute>
+                      }
+                    />
+                  
+                </Route>
+              </Routes>
+            </BrowserRouter>
+          </OrderProvider>
+        </CustomerProvider>
+      </AuthProvider>
+    </ThemeProvider>
+  );
+};
+
+export default App;
+
+
+================================================================================
+FILE: src/services/authService.js
+================================================================================
+import StorageService from "./storageService";
+
+const AuthService = {
+  login: (email, password) => {
+    const savedUser = StorageService.getUser();
+    
+    if (!savedUser) {
+      alert("User Not Found. Please sign up.");
+      return false;
+    }
+
+    if (email === savedUser.email && password === savedUser.password) {
+      StorageService.setLoginStatus(true);
+      return true;
+    }
+    
+    return false;
+  },
+
+  // Handles registering a new user
+  signUp: (userData) => {
+    StorageService.saveUser(userData);
+    StorageService.setLoginStatus(true);
+    return true; 
+  },
+
+  // Handles standard logout
+  logout: () => {
+    StorageService.logout();
+  },
+
+  // Handles account deletion
+  deleteAccount: () => {
+    StorageService.clearAll();
+   // a real backend, i would make an API call here to delete them from the database
+  },
+
+  // Handles data reset (Mock backend function)
+  resetDashboardData: () => {
+    // If i had a real backend, i would make an API call here to wipe their data tables
+    console.log("Mock API Call: All dashboard data wiped for this user.");
+  }
+};
+
+export default AuthService;
+
+
+================================================================================
+FILE: src/services/storageService.js
+================================================================================
+const StorageService = {
+  saveUser: (userData) => {
+    localStorage.setItem("userData", JSON.stringify(userData));
+  },
+
+  // Get user object safely (prevents JSON parse errors)
+  getUser: () => {
+    try {
+      const data = localStorage.getItem("userData");
+      return data ? JSON.parse(data) : null;
+    } catch (error) {
+      console.error("Failed to parse user data", error);
+      return null;
+    }
+  },
+
+  // Save login status
+  setLoginStatus: (status) => {
+    localStorage.setItem("isLoggedIn", status);
+  },
+
+  // Check login status
+  getLoginStatus: () => {
+    return localStorage.getItem("isLoggedIn") === "true";
+  },
+
+  // Wipe everything on logout or account deletion
+  clearAll: () => {
+    localStorage.removeItem("userData");
+    localStorage.removeItem("isLoggedIn");
+  },
+  logout: () => {
+    localStorage.removeItem("isLoggedIn");
+  },
+  getCustomers: () => {
+    return localStorage.getItem("customers");
+  },
+  saveCustomers: (customers) => {
+    localStorage.setItem("customers", JSON.stringify(customers));
+  },
+  deleteCustomer: (customerId) => {
+    const customers = JSON.parse(localStorage.getItem("customers"));
+    const newCustomers = customers.filter(
+      (customer) => customer.id !== customerId,
+    );
+    localStorage.setItem("customers", JSON.stringify(newCustomers));
+  },
+  // === ORDERS ===
+  getOrders: () => {
+    return localStorage.getItem("orders");
+  },
+
+  saveOrders: (orders) => {
+    localStorage.setItem("orders", JSON.stringify(orders));
+  },
+
+  clearOrders: () => {
+    localStorage.removeItem("orders");
+  }
+};
+
+export default StorageService;
+
+
+================================================================================
+FILE: src/utils/generatePdf.js
+================================================================================
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import  StorageService  from "../services/storageService";
+
+// ==========================================
+// UTILITY FUNCTIONS
+// ==========================================
+const user = StorageService.getUser();
+const calculateRowTotal = (item) => {
+  const itemTotal = item.qty * item.price;
+  const afterDiscount = itemTotal - (itemTotal * (item.discount / 100));
+  return afterDiscount + (afterDiscount * (item.gst / 100));
+};
+
+const formatCurrency = (amount) => {
+  return Number(amount).toLocaleString("en-IN", { 
+    minimumFractionDigits: 2, 
+    maximumFractionDigits: 2 
+  });
+};
+
+// ==========================================
+// MAIN INVOICE GENERATOR
+// ==========================================
+
+export const generateInvoicePDF = (order, customer) => {
+  const doc = new jsPDF();
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const rightMargin = pageWidth - 14;
+
+  // ------------------------------------------
+  // 1. TOP HEADER
+  // ------------------------------------------
+  
+  // Left Side: Company Branding
+  doc.setFontSize(24);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(30, 58, 138); 
+  doc.text(user.name, 14, 24);
+
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(100, 116, 139); 
+//   doc.text("Frontend Mentor", 14, 30);
+//   doc.text("Srinagar, Jammu & Kashmir", 14, 35);
+
+  // Right Side: "INVOICE" Watermark
+  doc.setFontSize(28);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(226, 232, 240); 
+  doc.text("INVOICE", rightMargin, 28, { align: "right" });
+
+  // Divider Line
+  doc.setDrawColor(226, 232, 240);
+  doc.setLineWidth(0.5);
+  doc.line(14, 42, rightMargin, 42);
+
+  // ------------------------------------------
+  // 2. INVOICE & CUSTOMER INFO
+  // ------------------------------------------
+  const infoStartY = 52;
+
+  // LEFT: Invoice Details
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(15, 23, 42);
+  doc.text("Invoice Details", 14, infoStartY);
+
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(100, 116, 139);
+  
+  doc.text("Invoice No:", 14, infoStartY + 7);
+  doc.text("Date:", 14, infoStartY + 13);
+  doc.text("Status:", 14, infoStartY + 19);
+
+  // Locked values at X: 40 for perfect column alignment
+  doc.setTextColor(15, 23, 42);
+  doc.text(order.id, 40, infoStartY + 7);
+  doc.text(order.date, 40, infoStartY + 13);
+  
+  doc.setFont("helvetica", "bold");
+  doc.text(order.status.toUpperCase(), 40, infoStartY + 19);
+
+  // RIGHT: Customer Details
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(15, 23, 42);
+  doc.text("Bill To:", rightMargin, infoStartY, { align: "right" });
+
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(100, 116, 139);
+
+  let currentY = infoStartY + 7;
+  doc.text(customer?.name || "Walk-in Customer", rightMargin, currentY, { align: "right" });
+
+  if (customer?.email) {
+    currentY += 6;
+    doc.text(customer.email, rightMargin, currentY, { align: "right" });
+  }
+  if (customer?.phone) {
+    currentY += 6;
+    doc.text(customer.phone, rightMargin, currentY, { align: "right" });
+  }
+  if (customer?.address) {
+    currentY += 6;
+    doc.text(customer.address, rightMargin, currentY, { align: "right" });
+  }
+
+  // ------------------------------------------
+  // 3. THE DATA TABLE
+  // ------------------------------------------
+  const tableColumn = ["#", "Item Description", "Qty", "Price", "Disc %", "GST %", "Total"];
+  const tableRows = [];
+  let subtotal = 0;
+
+  order.items.forEach((item, index) => {
+    const rowTotal = calculateRowTotal(item);
+    subtotal += rowTotal;
+
+    tableRows.push([
+      (index + 1).toString(),
+      item.name || "Unnamed Item",
+      item.qty.toString(),
+      `Rs. ${formatCurrency(item.price)}`,
+      `${item.discount}%`,
+      `${item.gst}%`,
+      `Rs. ${formatCurrency(rowTotal)}`
+    ]);
+  });
+
+  autoTable(doc, {
+    startY: Math.max(85, currentY + 10), 
+    head: [tableColumn],
+    body: tableRows,
+    theme: "plain",
+    headStyles: {
+      fillColor: [248, 250, 252],
+      textColor: [100, 116, 139],
+      fontStyle: "bold",
+      lineWidth: 0.1,
+      lineColor: [226, 232, 240]
+    },
+    bodyStyles: {
+      textColor: [15, 23, 42],
+      borderBottomWidth: 0.1,
+      borderBottomColor: [241, 245, 249],
+      cellPadding: { top: 4, right: 2, bottom: 4, left: 2 } // Cleaner cell spacing
+    },
+    columnStyles: {
+      0: { cellWidth: 10, halign: "center" },
+      1: { halign: "left" },
+      2: { halign: "center" },
+      3: { halign: "right" },
+      4: { halign: "center" },
+      5: { halign: "center" },
+      6: { halign: "right", fontStyle: "bold" }
+    },
+    margin: { left: 14, right: 14 }
+  });
+
+  // ------------------------------------------
+  // 4. TOTALS SECTION
+  // ------------------------------------------
+  const finalY = doc.lastAutoTable.finalY + 15;
+
+  const globalDiscountPct = Number(order.globalDiscount) || 0;
+  const globalDiscountAmt = subtotal * (globalDiscountPct / 100);
+  const finalTotal = subtotal - globalDiscountAmt;
+
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(100, 116, 139);
+
+  // Subtotal
+  doc.text("Subtotal:", rightMargin - 40, finalY, { align: "right" });
+  doc.setTextColor(15, 23, 42);
+  doc.text(`Rs. ${formatCurrency(subtotal)}`, rightMargin, finalY, { align: "right" });
+
+  // Discount
+  if (globalDiscountAmt > 0) {
+    doc.setTextColor(100, 116, 139);
+    doc.text(`Global Discount (${globalDiscountPct}%):`, rightMargin - 40, finalY + 8, { align: "right" });
+
+    doc.setTextColor(220, 38, 38);
+    doc.text(`- Rs. ${formatCurrency(globalDiscountAmt)}`, rightMargin, finalY + 8, { align: "right" });
+  }
+
+  // Final Total Box
+  const totalY = globalDiscountAmt > 0 ? finalY + 18 : finalY + 10;
+  doc.setFillColor(248, 250, 252);
+  doc.rect(rightMargin - 75, totalY - 6, 75, 10, "F");
+
+  doc.setFontSize(12);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(15, 23, 42);
+  doc.text("Total Due:", rightMargin - 40, totalY, { align: "right" });
+
+  doc.setTextColor(37, 99, 235);
+  doc.text(`Rs. ${formatCurrency(finalTotal)}`, rightMargin - 2, totalY, { align: "right" });
+
+  // ------------------------------------------
+  // 5. FOOTER
+  // ------------------------------------------
+  doc.setFont("helvetica", "italic");
+  doc.setFontSize(9);
+  doc.setTextColor(148, 163, 184);
+  doc.text(
+    "Thank you for your business. Please contact us if you have any questions.", 
+    pageWidth / 2, 
+    280, 
+    { align: "center" }
+  );
+
+  // ------------------------------------------
+  // 6. TRIGGER DOWNLOAD
+  // ------------------------------------------
+  doc.save(`Invoice_${order.id}.pdf`);
+};
+
+
+================================================================================
+FILE: src/utils/CustomerList.js
+================================================================================
+// just for mock customers list (optional)
+const initialCustomers = [
+    { id: "CUS-1001", name: "Sarah Jenkins", email: "sarah.j@example.com", status: "Active", spend: "$1,240.00", date: "Oct 12, 2023" },
+    { id: "CUS-1002", name: "Marcus Webb", email: "m.webb@techcorp.com", status: "Active", spend: "$8,450.00", date: "Oct 14, 2023" },
+    { id: "CUS-1003", name: "Elena Rodriguez", email: "elena_rod@gmail.com", status: "Inactive", spend: "$320.00", date: "Oct 18, 2023" },
+    { id: "CUS-1004", name: "David Chen", email: "david.c@startup.io", status: "Active", spend: "$4,100.50", date: "Nov 02, 2023" },
+    { id: "CUS-1005", name: "Olivia Benson", email: "obenson@lawfirm.com", status: "Active", spend: "$950.00", date: "Nov 15, 2023" },
+    { id: "CUS-1006", name: "James Wilson", email: "jwilson99@yahoo.com", status: "Inactive", spend: "$0.00", date: "Dec 01, 2023" },
+  ];
+
+
+
+
+export default initialCustomers
+
+
+================================================================================
+FILE: src/utils/generateReports.js
+================================================================================
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import StorageService from "../services/storageService";
+
+const user = StorageService.getUser();
+
+// ==========================================
+// UTILITY MATH FUNCTIONS
+// ==========================================
+const calculateRowTotal = (item) => {
+  const itemTotal = item.qty * item.price;
+  const afterDiscount = itemTotal - (itemTotal * (item.discount / 100));
+  return afterDiscount + (afterDiscount * (item.gst / 100));
+};
+
+const calculateOrderTotal = (order) => {
+  if (!order || !order.items) return 0;
+  const subtotal = order.items.reduce((sum, item) => sum + calculateRowTotal(item), 0);
+  const globalDiscountAmt = subtotal * ((Number(order.globalDiscount) || 0) / 100);
+  return subtotal - globalDiscountAmt;
+};
+
+const formatCurrency = (amount) => {
+  return Number(amount).toLocaleString("en-IN", { 
+    minimumFractionDigits: 2, 
+    maximumFractionDigits: 2 
+  });
+};
+
+// ==========================================
+// MAIN REPORT GENERATOR
+// ==========================================
+export const generateDashboardReport = (orders, metrics) => {
+  const doc = new jsPDF();
+  const pageWidth = doc.internal.pageSize.getWidth();
+
+  // --- 1. HEADER ---
+  doc.setFontSize(22);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(30, 58, 138); // blue-900
+  doc.text(user.name, 14, 22);
+
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(100, 116, 139); // slate-500
+  doc.text(`Generated on: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`, 14, 29);
+  
+  // Divider
+  doc.setDrawColor(226, 232, 240);
+  doc.setLineWidth(0.5);
+  doc.line(14, 35, pageWidth - 14, 35);
+
+  // --- 2. EXECUTIVE SUMMARY (METRICS) ---
+  doc.setFontSize(14);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(15, 23, 42); // slate-900
+  doc.text("Executive Summary", 14, 47);
+
+  doc.setFontSize(11);
+  doc.setFont("helvetica", "normal");
+  
+  // Revenue
+  doc.setTextColor(100, 116, 139);
+  doc.text("Total Confirmed Revenue:", 14, 56);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(5, 150, 105); // emerald-600
+  doc.text(`Rs. ${formatCurrency(metrics.totalRevenue)}`, 65, 56);
+
+  // Orders
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(100, 116, 139);
+  doc.text("Total Orders Processed:", 14, 64);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(15, 23, 42);
+  doc.text(`${metrics.totalOrdersCount}`, 65, 64);
+
+  // Customers
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(100, 116, 139);
+  doc.text("Active Unique Buyers:", 14, 72);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(15, 23, 42);
+  doc.text(`${metrics.activeCustomersCount}`, 65, 72);
+
+  // --- 3. ALL ORDERS DATA TABLE ---
+  doc.setFontSize(14);
+  doc.setFont("helvetica", "bold");
+  doc.text("Complete Order Ledger", 14, 90);
+
+  const tableColumn = ["Order ID", "Date", "Status", "Items", "Total Amount"];
+  const tableRows = [];
+
+  orders.forEach((order) => {
+    tableRows.push([
+      order.id,
+      order.date,
+      order.status,
+      order.items.length.toString(),
+      `Rs. ${formatCurrency(calculateOrderTotal(order))}`
+    ]);
+  });
+
+  autoTable(doc, {
+    startY: 96,
+    head: [tableColumn],
+    body: tableRows,
+    theme: "striped",
+    headStyles: {
+      fillColor: [37, 99, 235], // blue-600
+      textColor: [255, 255, 255],
+      fontStyle: "bold",
+    },
+    bodyStyles: {
+      textColor: [15, 23, 42],
+    },
+    columnStyles: {
+      0: { fontStyle: "bold" },
+      4: { halign: "right", fontStyle: "bold" } // Right align money
+    },
+    margin: { left: 14, right: 14 }
+  });
+
+  // --- 4. FOOTER ---
+  doc.setFont("helvetica", "italic");
+  doc.setFontSize(9);
+  doc.setTextColor(148, 163, 184);
+  doc.text(
+    "CodeDevPro Dashboard Analytics - Confidential", 
+    pageWidth / 2, 
+    doc.internal.pageSize.getHeight() - 10, 
+    { align: "center" }
+  );
+
+  // --- 5. TRIGGER DOWNLOAD ---
+  doc.save(`Business_Report_${new Date().toISOString().split('T')[0]}.pdf`);
+};
+
+
+================================================================================
+FILE: src/utils/financeUtils.js
+================================================================================
+// src/utils/financeUtils.js
+
+export const calculateRowTotal = (item) => {
+  const itemTotal = item.qty * item.price;
+  const afterDiscount = itemTotal - (itemTotal * (item.discount / 100));
+  return afterDiscount + (afterDiscount * (item.gst / 100));
+};
+
+export const calculateOrderTotal = (order) => {
+  if (!order || !order.items) return 0;
+  const subtotal = order.items.reduce((sum, item) => sum + calculateRowTotal(item), 0);
+  const globalDiscountAmt = subtotal * ((Number(order.globalDiscount) || 0) / 100);
+  return subtotal - globalDiscountAmt;
+};
+
+export const formatCurrency = (amount) => {
+  return Number(amount).toLocaleString('en-IN', { 
+    minimumFractionDigits: 2, 
+    maximumFractionDigits: 2 
+  });
+};
+
+
+================================================================================
+FILE: index.html
+================================================================================
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>smart-dashboard-panel</title>
+  </head>
+  <body>
+    <div id="root"></div>
+   <div id="PopModal"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
+
+
+================================================================================
+FILE: package.json
+================================================================================
+{
+  "name": "smart-dashboard-panel",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.7",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
+    "react-router-dom": "^7.15.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@tailwindcss/vite": "^4.3.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "eslint": "^10.2.1",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.2",
+    "globals": "^17.5.0",
+    "tailwindcss": "^4.3.0",
+    "vite": "^8.0.10"
+  }
+}
+
+
+================================================================================
+FILE: vite.config.js
+================================================================================
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
+
+// https://vite.dev/config/
+export default defineConfig({
+  plugins: [react(),tailwindcss()],
+})
