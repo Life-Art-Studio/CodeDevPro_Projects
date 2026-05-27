@@ -8,23 +8,33 @@ const CustomerContext = createContext(null);
 
 
 export const CustomerProvider = ({children}) => {
-    const { currentUser } = useAuth();
+    const { currentUser, viewAsUserId } = useAuth();
     const [customers, setCustomers] = useState([]);
 
     useEffect(() => {
         const allCustomers = StorageService.getCustomers() ?? initialCustomers;
         if (currentUser?.role === 'ADMIN') {
-            setCustomers(allCustomers);
+            if (viewAsUserId) {
+                setCustomers(allCustomers.filter(c => c.createdBy === viewAsUserId));
+            } else {
+                setCustomers(allCustomers);
+            }
         } else if (currentUser?.role === 'SALES') {
             setCustomers(allCustomers.filter(c => c.createdBy === currentUser.id));
         } else {
             setCustomers([]);
         }
-    }, [currentUser]);
+    }, [currentUser, viewAsUserId]);
 
-    const addCustomer = (customer) => {
+    const addCustomer = (customerData) => {
         const allCustomers = StorageService.getCustomers() ?? initialCustomers;
-        const newCustomer = { ...customer, createdBy: currentUser?.id };
+        const newCustomer = {
+            ...customerData,
+            id: `CUST-${Date.now()}`,
+            status: customerData.status || "Active", // Default to Active
+            date: new Date().toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" }),
+            createdBy: viewAsUserId || currentUser?.id, // Assign to current salesperson
+        };
         const updatedAll = [newCustomer, ...allCustomers];
         StorageService.saveCustomers(updatedAll);
         setCustomers([newCustomer, ...customers]);

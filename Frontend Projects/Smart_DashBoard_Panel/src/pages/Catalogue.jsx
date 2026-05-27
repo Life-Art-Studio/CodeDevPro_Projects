@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useProductContext } from '../context/ProductContext';
 import ProductCard from '../components/Catalogue/ProductCard';
 import ProductForm from '../components/Catalogue/ProductForm';
+import CustomSelect from '../components/ui/CustomSelect';
+import { Plus, Search, FileText } from 'lucide-react';
 
 const Catalogue = () => {
   const { products, addProduct, updateProduct, deleteProduct } = useProductContext();
@@ -44,7 +46,8 @@ const Catalogue = () => {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto h-full p-4 sm:p-6 lg:p-8 animate-in slide-in-from-right-8 duration-500 transition-colors w-full relative">
+    <div className="flex-1 min-h-0 flex flex-col z-0">
+      <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar p-4 sm:p-6 lg:p-8 animate-in slide-in-from-right-8 duration-300 transition-colors w-full relative">
       
       {/* Hide controls when printing */}
       <style>
@@ -62,37 +65,36 @@ const Catalogue = () => {
         <div className="max-w-7xl mx-auto flex flex-col h-full">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4 no-print">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Product Catalogue</h1>
-              <p className="text-slate-500 dark:text-slate-400 mt-1">Manage pricing, chained margins, and schemes.</p>
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 dark:text-zinc-100 tracking-tight">Product Catalogue</h1>
+              <p className="text-zinc-500 dark:text-zinc-400 mt-1">Manage pricing, chained margins, and schemes.</p>
             </div>
-            <div className="flex gap-3">
-              <button onClick={handleExportPDF} className="px-4 py-2 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-bold shadow-sm hover:bg-slate-100 dark:hover:bg-slate-800 transition-all flex items-center gap-2">
-                📄 Export PDF
+            <div className="flex gap-3 w-full sm:w-auto">
+              <button onClick={handleExportPDF} className="flex-1 sm:flex-none justify-center px-4 py-2 border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 rounded-xl text-sm font-semibold shadow-sm hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all flex items-center gap-2 min-h-[44px]">
+                <FileText className="w-4 h-4" /> Export PDF
               </button>
-              <button onClick={handleCreateNew} className="px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-500 hover:to-blue-400 text-white rounded-xl text-sm font-bold shadow-lg hover:shadow-purple-500/25 transition-all">
-                + New Product
+              <button onClick={handleCreateNew} className="flex-1 sm:flex-none justify-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold shadow-sm transition-all flex items-center gap-2 min-h-[44px]">
+                <Plus className="w-4 h-4" /> New Product
               </button>
             </div>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 mb-6 no-print">
             <div className="relative flex-1 max-w-md">
-              <span className="absolute left-3 top-2.5 text-slate-400">🔍</span>
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
               <input 
                 type="text" 
                 placeholder="Search products, SKUs..." 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-4 py-2.5 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none transition-all dark:text-white"
+                className="w-full pl-9 pr-4 py-2.5 bg-white dark:bg-[#1a1d27] border border-zinc-200 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all dark:text-zinc-100 min-h-[44px]"
               />
             </div>
-            <select 
+            <CustomSelect 
               value={categoryFilter} 
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              className="px-4 py-2.5 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none transition-all dark:text-white sm:w-48"
-            >
-              {categories.map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
+              onChange={setCategoryFilter}
+              className="px-4 py-2.5 bg-white dark:bg-[#1a1d27] border border-zinc-200 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all dark:text-zinc-100 sm:w-48 min-h-[44px] flex items-center justify-between outline-none cursor-pointer"
+              options={categories.map(c => ({ value: c, label: c }))}
+            />
           </div>
 
           <div id="catalogue-print-area" className="flex-1">
@@ -107,7 +109,7 @@ const Catalogue = () => {
                 ))}
              </div>
              {filteredProducts.length === 0 && (
-               <div className="text-center py-20 text-slate-500">
+               <div className="text-center py-20 text-zinc-500 dark:text-zinc-400 font-medium">
                  No products found.
                </div>
              )}
@@ -123,6 +125,7 @@ const Catalogue = () => {
           />
         </div>
       )}
+      </div>
     </div>
   );
 };

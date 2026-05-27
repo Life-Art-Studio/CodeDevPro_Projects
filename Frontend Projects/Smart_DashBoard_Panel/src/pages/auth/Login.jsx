@@ -29,14 +29,14 @@ const Login = () => {
 
   // Main Card: White background, rounded corners, subtle shadow
   return (
-    <div className="w-full max-w-md glass-panel rounded-3xl p-8 border border-white/20 transition-colors animate-in fade-in duration-500 relative overflow-hidden group">
+    <div className="w-full max-w-md bg-white dark:bg-[#1a1d27] shadow-sm rounded-3xl p-8 border border-white/20 transition-colors animate-in fade-in duration-500 relative overflow-hidden group">
       {/* Decorative Blob */}
       <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/20 rounded-full blur-[50px] -z-10 group-hover:bg-purple-500/30 transition-colors"></div>
 
       {/* Header Section */}
       <div className="text-center mb-8 relative z-10">
-        <h2 className="text-3xl font-bold text-gray-800 dark:text-slate-100 transition-colors tracking-tight">Welcome Back</h2>
-        <p className="text-gray-500 dark:text-slate-400 mt-2 text-sm transition-colors">
+        <h2 className="text-3xl font-bold text-gray-800 dark:text-zinc-100 transition-colors tracking-tight">Welcome Back</h2>
+        <p className="text-gray-500 dark:text-zinc-400 mt-2 text-sm transition-colors">
           Sign in to your account to continue
         </p>
       </div>
@@ -47,19 +47,19 @@ const Login = () => {
         <div>
           <label
             htmlFor="email"
-            className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5 transition-colors"
+            className="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1.5 transition-colors"
           >
             Email Address
           </label>
           <div className="relative">
-            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">✉️</span>
+            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-zinc-400">✉️</span>
             <input
               type="email"
               id="email"
               name="email"
               required
               placeholder="Enter Your Email Address"
-              className="w-full pl-10 pr-4 py-2.5 bg-white/50 dark:bg-white/5 border border-slate-200/50 dark:border-white/10 dark:text-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all shadow-inner focus:shadow-[0_0_15px_rgba(168,85,247,0.2)]"
+              className="w-full pl-10 pr-4 py-2.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all shadow-inner focus:shadow-[0_0_15px_rgba(168,85,247,0.2)] focus:bg-white dark:focus:bg-zinc-950"
               value={loginData.email}
               onChange={(e) =>
                 setLoginData({ ...loginData, email: e.target.value })
@@ -72,19 +72,19 @@ const Login = () => {
         <div>
           <label
             htmlFor="password"
-            className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5 transition-colors"
+            className="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1.5 transition-colors"
           >
             Password
           </label>
           <div className="relative">
-            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">🔒</span>
+            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-zinc-400">🔒</span>
             <input
               type="password"
               id="password"
               name="password"
               required
               placeholder="********"
-              className="w-full pl-10 pr-4 py-2.5 bg-white/50 dark:bg-white/5 border border-slate-200/50 dark:border-white/10 dark:text-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all shadow-inner focus:shadow-[0_0_15px_rgba(168,85,247,0.2)]"
+              className="w-full pl-10 pr-4 py-2.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all shadow-inner focus:shadow-[0_0_15px_rgba(168,85,247,0.2)] focus:bg-white dark:focus:bg-zinc-950"
               value={loginData.password}
               onChange={(e) =>
                 setLoginData({ ...loginData, password: e.target.value })
@@ -102,16 +102,10 @@ const Login = () => {
         </button>
       </form>
 
-      {/* Footer Link */}
+      {/* Public sign-up is disabled. Contact admin for an account. */}
       <div className="text-center mt-6 relative z-10">
-        <p className="text-sm text-gray-600 dark:text-slate-400 transition-colors">
-          Don't have an account?{" "}
-          <Link
-            to="/auth/signup"
-            className="text-purple-600 dark:text-purple-400 font-medium hover:text-pink-500 dark:hover:text-pink-400 hover:underline transition-colors"
-          >
-            Sign up
-          </Link>
+        <p className="text-sm text-gray-600 dark:text-zinc-400 transition-colors">
+          Need an account? Contact your system administrator.
         </p>
       </div>
     </div>

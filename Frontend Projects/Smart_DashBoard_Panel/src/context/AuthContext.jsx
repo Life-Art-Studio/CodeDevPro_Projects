@@ -14,6 +14,18 @@ export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(() => {
     return StorageService.getCurrentUser();
   });
+  
+  // 1.5 View As User State (For Admins)
+  const [viewAsUserId, setViewAsUserIdState] = useState(() => localStorage.getItem('viewAsUserId') || null);
+
+  const setViewAsUserId = (userId) => {
+    if (userId) {
+      localStorage.setItem('viewAsUserId', userId);
+    } else {
+      localStorage.removeItem('viewAsUserId');
+    }
+    setViewAsUserIdState(userId);
+  };
 
   // 2. UI States (No changes needed here)
   const [isSidebarOpen, setIsOpen] = useState(false);
@@ -105,6 +117,8 @@ export const AuthProvider = ({ children }) => {
         // Auth State & Actions
         isLoggedIn,
         currentUser,
+        viewAsUserId,
+        setViewAsUserId,
         handleLogin,
         handleLogout,
         handleSignUp,

@@ -10,8 +10,15 @@ const AuthService = {
       return false;
     }
 
+    if (user.status === 'Inactive') {
+      toast.error("Account deactivated. Please contact an admin.");
+      return false;
+    }
+
     if (password === user.password) {
-      StorageService.setCurrentUser(user);
+      StorageService.updateUser(user.id, { lastLogin: new Date().toISOString() });
+      const updatedUser = StorageService.getUserByEmail(email);
+      StorageService.setCurrentUser(updatedUser);
       StorageService.setLoginStatus(true);
       return true;
     }

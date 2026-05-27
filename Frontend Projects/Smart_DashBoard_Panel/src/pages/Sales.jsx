@@ -1,16 +1,44 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import useOrderContext from '../context/OrderContext';
 import useCustomerContext from '../context/CustomerContext';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { calculateOrderTotal, calculateRowTotal, formatCurrency, getOrderPaidAmount } from '../utils/financeUtils';
 import toast from 'react-hot-toast';
+import StorageService from '../services/storageService';
+import CustomSelect from '../components/ui/CustomSelect';
+import { Search } from 'lucide-react';
 
 const Sales = () => {
   const { orders } = useOrderContext();
   const { customers } = useCustomerContext();
+  const { currentUser, viewAsUserId } = useAuth();
   const navigate = useNavigate();
   const [timeframe, setTimeframe] = useState('This Month');
+  const [salespersonSearchQuery, setSalespersonSearchQuery] = useState('');
+  const [isSalespersonDropdownOpen, setIsSalespersonDropdownOpen] = useState(false);
+  const users = StorageService.getAllUsers();
+  
+  const isAdmin = currentUser?.role === 'ADMIN' && !viewAsUserId;
+
+  const filteredOrders = React.useMemo(() => {
+    let baseOrders = orders;
+    
+    // If not active admin, restrict to the active user's orders (real or viewed)
+    if (!isAdmin) {
+      const activeUserId = viewAsUserId || currentUser?.id;
+      baseOrders = orders.filter(o => o.createdBy === activeUserId);
+    } else {
+      if (salespersonSearchQuery.trim() !== '') {
+        const matchedUserIds = users
+          .filter(u => u.role === 'SALES' && u.name.toLowerCase().includes(salespersonSearchQuery.toLowerCase()))
+          .map(u => u.id);
+        baseOrders = orders.filter(o => matchedUserIds.includes(o.createdBy));
+      }
+    }
+    return baseOrders;
+  }, [orders, salespersonSearchQuery, isAdmin, viewAsUserId, currentUser, users]);
   const [isSalesDetailOpen, setIsSalesDetailOpen] = useState(false);
   const [isProductBreakdownOpen, setIsProductBreakdownOpen] = useState(false);
   const [selectedSaleOrder, setSelectedSaleOrder] = useState(null);
@@ -24,10 +52,10 @@ const Sales = () => {
   // DATA FILTERING
   // ==========================================
   const completedSales = React.useMemo(() => {
-    return orders.filter(
+    return filteredOrders.filter(
       (order) => order.status === "Paid" || order.status === "Delivered" || order.status === "Partially Paid"
     );
-  }, [orders]);
+  }, [filteredOrders]);
 
   const totalSalesRevenue = React.useMemo(() => {
     return completedSales.reduce((sum, order) => sum + getOrderPaidAmount(order), 0);
@@ -72,13 +100,13 @@ const Sales = () => {
     }, []);
   }, [completedSales]);
   const dailySales = React.useMemo(() => {
-    return orders.reduce((acc, order) => {
+    return filteredOrders.reduce((acc, order) => {
       const date = order.date;
       if (!acc[date]) acc[date] = [];
       acc[date].push(order);
       return acc;
     }, {});
-  }, [orders]);
+  }, [filteredOrders]);
 
   const salesByCustomer = React.useMemo(() => {
     return completedSales.reduce((acc, order) => {
@@ -144,35 +172,78 @@ const Sales = () => {
     document.body.removeChild(link);
   };
 
+  const salesUsers = users.filter(u => u.role === 'SALES');
+  const filteredSalesUsers = salesUsers.filter(u => u.name.toLowerCase().includes(salespersonSearchQuery.toLowerCase()));
+
   return (
-    <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-transparent font-sans h-full transition-colors animate-in fade-in duration-500">
-      <div className="max-w-7xl mx-auto h-full flex flex-col">
+    <div className="flex-1 min-h-0 flex flex-col z-0">
+      <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-zinc-50 dark:bg-[#0f1117] font-sans transition-colors animate-in slide-in-from-right-8 duration-300 custom-scrollbar">
+        <div className="max-w-7xl mx-auto flex flex-col">
       {/* HEADER SECTION */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-8 ">
         <div>
-          <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100 transition-colors tracking-tight">Sales Analytics</h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 transition-colors">Deep dive into your revenue streams and transaction history.</p>
+          <h1 className="text-3xl font-bold text-zinc-800 dark:text-zinc-100 transition-colors tracking-tight">Sales Analytics</h1>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1 transition-colors">Deep dive into your revenue streams and transaction history.</p>
         </div>
         
-        <div className="flex items-center gap-3 shrink-0">
-          <select 
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
+          {isAdmin && (
+            <div className="relative z-50">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+              <input 
+                type="text" 
+                placeholder="Search Salesperson..." 
+                value={salespersonSearchQuery}
+                onFocus={() => setIsSalespersonDropdownOpen(true)}
+                onBlur={() => setTimeout(() => setIsSalespersonDropdownOpen(false), 200)}
+                onChange={(e) => {
+                  setSalespersonSearchQuery(e.target.value);
+                  setIsSalespersonDropdownOpen(true);
+                }}
+                className="w-full sm:w-48 pl-9 pr-4 py-1.5 sm:py-2 bg-white dark:bg-[#1a1d27] border border-zinc-200 dark:border-zinc-700 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all dark:text-zinc-100 min-h-[36px] sm:min-h-[44px] text-sm"
+              />
+              {isSalespersonDropdownOpen && (
+                <div className="absolute top-[calc(100%+4px)] left-0 w-full sm:w-48 bg-white dark:bg-[#1a1d27] border border-zinc-200 dark:border-zinc-700 rounded-lg sm:rounded-xl shadow-xl max-h-60 overflow-y-auto custom-scrollbar">
+                  {filteredSalesUsers.length > 0 ? (
+                    filteredSalesUsers.map(user => (
+                      <div 
+                        key={user.id}
+                        onClick={() => {
+                          setSalespersonSearchQuery(user.name);
+                          setIsSalespersonDropdownOpen(false);
+                        }}
+                        className="px-4 py-2.5 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer transition-colors border-b border-zinc-100 dark:border-zinc-800 last:border-0"
+                      >
+                        {user.name}
+                      </div>
+                    ))
+                  ) : (
+                    <div className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">No matching salespeople</div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+          
+          <CustomSelect
             value={timeframe}
-            onChange={(e) => setTimeframe(e.target.value)}
-            className="text-sm border border-slate-200/50 dark:border-white/10 rounded-xl text-slate-600 dark:text-slate-300 bg-white/50 dark:bg-white/5 px-4 py-2 outline-none focus:ring-2 focus:ring-purple-500 shadow-sm font-medium transition-colors cursor-pointer backdrop-blur-md"
-          >
-            <option>Today</option>
-            <option>This Week</option>
-            <option>This Month</option>
-            <option>This Year</option>
-            <option>All Time</option>
-          </select>
+            onChange={setTimeframe}
+            minWidth="110px"
+            options={[
+              { value: 'Today', label: 'Today' },
+              { value: 'This Week', label: 'This Week' },
+              { value: 'This Month', label: 'This Month' },
+              { value: 'This Year', label: 'This Year' },
+              { value: 'All Time', label: 'All Time' }
+            ]}
+          />
           
           {/* NOW ATTACHED TO handleExportCSV */}
           <button 
             onClick={handleExportCSV}
-            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-500 text-white rounded-xl text-sm font-semibold hover:shadow-[0_0_20px_rgba(79,70,229,0.4)] transition-all"
+            className="flex-1 sm:flex-none justify-center flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-blue-600 to-indigo-500 text-white rounded-lg sm:rounded-xl text-[11px] sm:text-sm font-semibold hover:shadow-[0_0_20px_rgba(79,70,229,0.4)] transition-all whitespace-nowrap min-w-[100px]"
           >
-            <span>📊</span> Export CSV
+            <span>📊</span> Export <span className="hidden sm:inline">CSV</span>
           </button>
         </div>
       </div>
@@ -181,20 +252,20 @@ const Sales = () => {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
         <div 
           onClick={() => setIsSalesDetailOpen(true)}
-          className="glass-panel p-6 rounded-2xl border-b-4 border-b-emerald-500 relative overflow-hidden group cursor-pointer hover:scale-[1.02] transition-transform"
+          className="bg-white dark:bg-[#1a1d27] shadow-sm p-6 rounded-2xl border-b-4 border-b-emerald-500 relative overflow-hidden group cursor-pointer hover:scale-[1.02] transition-transform"
         >
           <div className="absolute top-0 right-0 p-4 opacity-10 text-4xl group-hover:scale-110 transition-transform">💰</div>
-          <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1 group-hover:text-emerald-400 transition-colors">Gross Sales Volume</p>
-          <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-800 dark:text-slate-100 neon-text transition-colors tracking-tighter">₹{formatCurrency(totalSalesRevenue)}</h3>
+          <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400 mb-1 group-hover:text-emerald-400 transition-colors">Gross Sales Volume</p>
+          <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-zinc-800 dark:text-zinc-100 neon-text transition-colors tracking-tighter">₹{formatCurrency(totalSalesRevenue)}</h3>
           <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium mt-3 flex items-center gap-1 transition-colors bg-emerald-500/10 inline-block px-2 py-1 rounded-md">
             <span>Based on {completedSales.length} successful transactions</span>
           </p>
         </div>
 
-        <div className="glass-panel p-6 rounded-2xl border-b-4 border-b-blue-500 relative overflow-hidden group animate-slide-up-fade" style={{ animationDelay: '100ms' }}>
+        <div className="bg-white dark:bg-[#1a1d27] shadow-sm p-6 rounded-2xl border-b-4 border-b-blue-500 relative overflow-hidden group animate-slide-up-fade" style={{ animationDelay: '100ms' }}>
           <div className="absolute top-0 right-0 p-4 opacity-10 text-4xl group-hover:scale-110 transition-transform">📈</div>
-          <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1 group-hover:text-blue-400 transition-colors">Average Order Value (AOV)</p>
-          <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-800 dark:text-slate-100 neon-text transition-colors tracking-tighter">₹{formatCurrency(averageOrderValue)}</h3>
+          <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400 mb-1 group-hover:text-blue-400 transition-colors">Average Order Value (AOV)</p>
+          <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-zinc-800 dark:text-zinc-100 neon-text transition-colors tracking-tighter">₹{formatCurrency(averageOrderValue)}</h3>
           <p className="text-xs text-blue-500 dark:text-blue-400 font-medium mt-3 flex items-center gap-1 transition-colors bg-blue-500/10 inline-block px-2 py-1 rounded-md">
             <span>Revenue per customer checkout</span>
           </p>
@@ -202,11 +273,11 @@ const Sales = () => {
 
         <div 
           onClick={() => setIsProductBreakdownOpen(true)}
-          className="glass-panel p-6 rounded-2xl border-b-4 border-b-purple-500 relative overflow-hidden group animate-slide-up-fade cursor-pointer hover:scale-[1.02] transition-transform" style={{ animationDelay: '200ms' }}
+          className="bg-white dark:bg-[#1a1d27] shadow-sm p-6 rounded-2xl border-b-4 border-b-purple-500 relative overflow-hidden group animate-slide-up-fade cursor-pointer hover:scale-[1.02] transition-transform" style={{ animationDelay: '200ms' }}
         >
           <div className="absolute top-0 right-0 p-4 opacity-10 text-4xl group-hover:scale-110 transition-transform">📦</div>
-          <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1 group-hover:text-purple-400 transition-colors">Total Units Sold</p>
-          <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-800 dark:text-slate-100 neon-text-pink transition-colors tracking-tighter">{totalItemsSold}</h3>
+          <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400 mb-1 group-hover:text-purple-400 transition-colors">Total Units Sold</p>
+          <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-zinc-800 dark:text-zinc-100 neon-text-pink transition-colors tracking-tighter">{totalItemsSold}</h3>
           <p className="text-xs text-purple-500 dark:text-purple-400 font-medium mt-3 flex items-center gap-1 transition-colors bg-purple-500/10 inline-block px-2 py-1 rounded-md">
             <span>Individual items shipped</span>
           </p>
@@ -215,14 +286,14 @@ const Sales = () => {
 
       {/* CHARTS PLACEHOLDERS */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8 animate-slide-up-fade" style={{ animationDelay: '300ms' }}>
-        <div className="glass-panel rounded-2xl flex flex-col transition-colors overflow-hidden">
-          <div className="p-5 border-b border-slate-200/50 dark:border-white/10 bg-white/10 dark:bg-[#0a0c14]/30">
-            <h2 className="text-md font-bold text-slate-800 dark:text-slate-100">Sales Trend ({timeframe})</h2>
+        <div className="bg-white dark:bg-[#1a1d27] shadow-sm rounded-2xl flex flex-col transition-colors overflow-hidden">
+          <div className="p-5 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#0a0c14]">
+            <h2 className="text-md font-bold text-zinc-800 dark:text-zinc-100">Sales Trend ({timeframe})</h2>
           </div>
           <div className="h-64 p-6 flex items-center justify-center relative">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-emerald-500/20 rounded-full blur-[60px]"></div>
-            <div className="w-full h-52 p-4 border border-dashed border-emerald-500/30 rounded-xl flex items-center justify-center text-emerald-400/50 bg-white/5 dark:bg-[#0a0c14]/30 backdrop-blur-sm transition-colors relative z-10">
-              <ResponsiveContainer width="100%" height={200}>
+            <div className="w-full h-52 p-4 border border-dashed border-emerald-500/30 rounded-xl flex items-center justify-center text-emerald-400/50 bg-white dark:bg-[#0a0c14] backdrop-blur-sm transition-colors relative z-10">
+              <ResponsiveContainer width="99%" height={200} minWidth={1} minHeight={1}>
                 <LineChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="date" />
@@ -235,14 +306,14 @@ const Sales = () => {
           </div>
         </div>
 
-        <div className="glass-panel rounded-2xl flex flex-col transition-colors overflow-hidden">
-          <div className="p-5 border-b border-slate-200/50 dark:border-white/10 bg-white/10 dark:bg-[#0a0c14]/30">
-            <h2 className="text-md font-bold text-slate-800 dark:text-slate-100">Sales by Category</h2>
+        <div className="bg-white dark:bg-[#1a1d27] shadow-sm rounded-2xl flex flex-col transition-colors overflow-hidden">
+          <div className="p-5 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#0a0c14]">
+            <h2 className="text-md font-bold text-zinc-800 dark:text-zinc-100">Sales by Category</h2>
           </div>
           <div className="h-64 p-6 flex items-center justify-center relative">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-blue-500/20 rounded-full blur-[60px]"></div>
-            <div className="w-full h-52 p-4 border border-dashed border-blue-500/30 rounded-xl flex items-center justify-center text-blue-400/50 bg-white/5 dark:bg-[#0a0c14]/30 backdrop-blur-sm transition-colors relative z-10">
-              <ResponsiveContainer width="100%" height={200}>
+            <div className="w-full h-52 p-4 border border-dashed border-blue-500/30 rounded-xl flex items-center justify-center text-blue-400/50 bg-white dark:bg-[#0a0c14] backdrop-blur-sm transition-colors relative z-10">
+              <ResponsiveContainer width="99%" height={200} minWidth={1} minHeight={1}>
                 <PieChart>
                   <Pie
                     data={categoryData}
@@ -267,15 +338,15 @@ const Sales = () => {
       </div>
 
       {/* TRANSACTION TABLE */}
-      <div className="glass-panel rounded-2xl overflow-hidden transition-colors animate-slide-up-fade" style={{ animationDelay: '400ms' }}>
-        <div className="p-5 border-b border-slate-200/50 dark:border-white/10 flex justify-between items-center bg-white/10 dark:bg-[#0a0c14]/30 transition-colors">
-          <h2 className="text-md font-bold text-slate-800 dark:text-slate-100">Recent Transactions</h2>
+      <div className="bg-white dark:bg-[#1a1d27] shadow-sm rounded-2xl overflow-hidden transition-colors animate-slide-up-fade" style={{ animationDelay: '400ms' }}>
+        <div className="p-5 border-b border-zinc-200 dark:border-zinc-800 flex justify-between items-center bg-white dark:bg-[#0a0c14] transition-colors">
+          <h2 className="text-md font-bold text-zinc-800 dark:text-zinc-100">Recent Transactions</h2>
         </div>
         
         <div className="overflow-x-auto scrollbar-hide">
           <table className="w-full text-left text-sm border-collapse">
-            <thead className="bg-white/5 dark:bg-white/5 border-b border-slate-200/50 dark:border-white/10 transition-colors">
-              <tr className="text-slate-500 dark:text-slate-400">
+            <thead className="bg-white dark:bg-[#1a1d27] border-b border-zinc-200 dark:border-zinc-800 transition-colors">
+              <tr className="text-zinc-500 dark:text-zinc-400">
                 <th className="py-4 px-6 font-semibold uppercase tracking-wider text-xs">Order ID</th>
                 <th className="py-4 px-6 font-semibold uppercase tracking-wider text-xs">Date</th>
                 <th className="py-4 px-6 font-semibold uppercase tracking-wider text-xs">Customer</th>
@@ -284,10 +355,10 @@ const Sales = () => {
                 <th className="py-4 px-6 font-semibold uppercase tracking-wider text-xs text-right">Amount</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200/50 dark:divide-white/5">
+            <tbody className="divide-y divide-zinc-200/50 dark:divide-white/5">
               {completedSales.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="py-8 text-center text-slate-500 dark:text-slate-400">
+                  <td colSpan="6" className="py-8 text-center text-zinc-500 dark:text-zinc-400">
                     No completed sales found.
                   </td>
                 </tr>
@@ -295,27 +366,27 @@ const Sales = () => {
                 completedSales.slice(0, 8).map(order => (
                   <tr key={order.id} 
                       onClick={() => setSelectedSaleOrder(order)}
-                      className="hover:bg-white/40 dark:hover:bg-white/5 transition-colors group cursor-pointer hover:ring-1 hover:ring-purple-500/30">
+                      className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors group cursor-pointer hover:ring-1 hover:ring-purple-500/30">
                     <td className="py-4 px-6 font-medium text-purple-600 dark:text-purple-400 group-hover:text-purple-500">{order.id}</td>
-                    <td className="py-4 px-6 text-slate-600 dark:text-slate-300">{order.date}</td>
-                    <td className="py-4 px-6 text-slate-700 dark:text-slate-200">{getCustomerName(order.customerId)}</td>
+                    <td className="py-4 px-6 text-zinc-600 dark:text-zinc-300">{order.date}</td>
+                    <td className="py-4 px-6 text-zinc-700 dark:text-zinc-200">{getCustomerName(order.customerId)}</td>
                     <td className="py-4 px-6">
                       <span className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
                         order.status === 'Paid' ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/30 dark:text-emerald-400' : 
                         order.status === 'Partially Paid' ? 'bg-teal-500/10 text-teal-600 border-teal-500/30 dark:text-teal-400' :
-                        'bg-white/10 text-slate-600 border-white/20 dark:text-slate-300'
+                        'bg-white text-zinc-600 border-white/20 dark:text-zinc-300'
                       }`}>
                         {order.status}
                       </span>
                     </td>
                     <td className="py-4 px-6 text-right text-xs whitespace-nowrap">
-                      <span className={getOrderPaidAmount(order) < calculateOrderTotal(order) ? "text-teal-600 dark:text-teal-400 font-bold" : "text-slate-600 dark:text-slate-400"}>
+                      <span className={getOrderPaidAmount(order) < calculateOrderTotal(order) ? "text-teal-600 dark:text-teal-400 font-bold" : "text-zinc-600 dark:text-zinc-400"}>
                         ₹{formatCurrency(getOrderPaidAmount(order))}
                       </span>
-                      <span className="text-slate-400 dark:text-slate-500 mx-1">/</span>
-                      <span className="text-slate-500 dark:text-slate-400">₹{formatCurrency(calculateOrderTotal(order))}</span>
+                      <span className="text-zinc-400 dark:text-zinc-500 mx-1">/</span>
+                      <span className="text-zinc-500 dark:text-zinc-400">₹{formatCurrency(calculateOrderTotal(order))}</span>
                     </td>
-                    <td className="py-4 px-6 font-bold text-slate-800 dark:text-slate-100 text-right">
+                    <td className="py-4 px-6 font-bold text-zinc-800 dark:text-zinc-100 text-right">
                       ₹{formatCurrency(calculateOrderTotal(order))}
                     </td>
                   </tr>
@@ -327,14 +398,14 @@ const Sales = () => {
       </div>
 
       {/* DAILY SALES BREAKDOWN */}
-      <div className="glass-panel rounded-2xl overflow-hidden transition-colors animate-slide-up-fade mt-8" style={{ animationDelay: '500ms' }}>
-        <div className="p-5 border-b border-slate-200/50 dark:border-white/10 flex justify-between items-center bg-white/10 dark:bg-[#0a0c14]/30 transition-colors">
-          <h2 className="text-md font-bold text-slate-800 dark:text-slate-100">Daily Sales Breakdown</h2>
+      <div className="bg-white dark:bg-[#1a1d27] shadow-sm rounded-2xl overflow-hidden transition-colors animate-slide-up-fade mt-8" style={{ animationDelay: '500ms' }}>
+        <div className="p-5 border-b border-zinc-200 dark:border-zinc-800 flex justify-between items-center bg-white dark:bg-[#0a0c14] transition-colors">
+          <h2 className="text-md font-bold text-zinc-800 dark:text-zinc-100">Daily Sales Breakdown</h2>
         </div>
         <div className="overflow-x-auto scrollbar-hide">
           <table className="w-full text-left text-sm border-collapse">
-            <thead className="bg-white/5 dark:bg-white/5 border-b border-slate-200/50 dark:border-white/10 transition-colors">
-              <tr className="text-slate-500 dark:text-slate-400">
+            <thead className="bg-white dark:bg-[#1a1d27] border-b border-zinc-200 dark:border-zinc-800 transition-colors">
+              <tr className="text-zinc-500 dark:text-zinc-400">
                 <th className="py-4 px-6 font-semibold uppercase tracking-wider text-xs whitespace-nowrap">Date</th>
                 <th className="py-4 px-6 font-semibold uppercase tracking-wider text-xs whitespace-nowrap">Customer Name</th>
                 <th className="py-4 px-6 font-semibold uppercase tracking-wider text-xs text-right whitespace-nowrap">Paid Amount</th>
@@ -342,9 +413,9 @@ const Sales = () => {
                 <th className="py-4 px-6 font-semibold uppercase tracking-wider text-xs whitespace-nowrap">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200/50 dark:divide-white/5">
+            <tbody className="divide-y divide-zinc-200/50 dark:divide-white/5">
               {Object.keys(dailySales).length === 0 ? (
-                <tr><td colSpan="5" className="py-8 text-center text-slate-500 dark:text-slate-400">No orders found.</td></tr>
+                <tr><td colSpan="5" className="py-8 text-center text-zinc-500 dark:text-zinc-400">No orders found.</td></tr>
               ) : Object.entries(dailySales).map(([date, dailyOrders]) => (
                 <React.Fragment key={date}>
                   {dailyOrders.map((order, idx) => {
@@ -352,18 +423,18 @@ const Sales = () => {
                     const isPaid = order.status === 'Paid' || order.status === 'Delivered';
                     const isPending = order.status === 'Pending' || order.status === 'Processing';
                     return (
-                      <tr key={order.id} className="hover:bg-white/40 dark:hover:bg-white/5 transition-colors group">
+                      <tr key={order.id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors group">
                         {idx === 0 ? (
-                          <td className="py-4 px-6 font-medium text-slate-800 dark:text-slate-200 whitespace-nowrap border-r border-slate-200/50 dark:border-white/10 align-top" rowSpan={dailyOrders.length}>{date}</td>
+                          <td className="py-4 px-6 font-medium text-zinc-800 dark:text-zinc-200 whitespace-nowrap border-r border-zinc-200 dark:border-zinc-800 align-top" rowSpan={dailyOrders.length}>{date}</td>
                         ) : null}
-                        <td className="py-4 px-6 text-slate-600 dark:text-slate-300 whitespace-nowrap">{getCustomerName(order.customerId)} <span className="text-xs opacity-50">({order.customerId})</span></td>
+                        <td className="py-4 px-6 text-zinc-600 dark:text-zinc-300 whitespace-nowrap">{getCustomerName(order.customerId)} <span className="text-xs opacity-50">({order.customerId})</span></td>
                         <td className="py-4 px-6 text-emerald-600 dark:text-emerald-400 font-medium text-right whitespace-nowrap">{isPaid ? `₹${formatCurrency(total)}` : '-'}</td>
                         <td className="py-4 px-6 text-amber-600 dark:text-amber-400 font-medium text-right whitespace-nowrap">{isPending ? `₹${formatCurrency(total)}` : '-'}</td>
                         <td className="py-4 px-6 whitespace-nowrap">
                           <span className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
                             isPaid ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/30 dark:text-emerald-400' :
                             isPending ? 'bg-amber-500/10 text-amber-600 border-amber-500/30 dark:text-amber-400' :
-                            'bg-white/10 text-slate-600 border-white/20 dark:text-slate-300'
+                            'bg-white text-zinc-600 border-white/20 dark:text-zinc-300'
                           }`}>
                             {order.status}
                           </span>
@@ -380,25 +451,25 @@ const Sales = () => {
 
       {/* Gross Sales Panel */}
       {isSalesDetailOpen && (
-        <div className="fixed inset-0 z-[100] flex">
+        <div className="fixed inset-0 z-60 flex">
           <div className="absolute inset-0 bg-[#0a0c14]/60 backdrop-blur-sm" onClick={() => setIsSalesDetailOpen(false)}></div>
-          <div className="absolute inset-y-0 right-0 w-full sm:w-[480px] glass-panel border-l border-white/10 shadow-2xl animate-in slide-in-from-right duration-300 flex flex-col">
-            <div className="p-6 border-b border-white/10 flex justify-between items-center bg-white/5 backdrop-blur-md">
-              <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">Sales by Customer</h2>
-              <button onClick={() => setIsSalesDetailOpen(false)} className="text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white p-2 rounded-full hover:bg-slate-200 dark:hover:bg-white/10 transition-colors">✕</button>
+          <div className="absolute inset-y-0 right-0 w-full sm:w-[480px] bg-white dark:bg-[#1a1d27] shadow-sm border-l border-white/10 shadow-2xl animate-in slide-in-from-right duration-300 flex flex-col">
+            <div className="p-6 border-b border-white/10 flex justify-between items-center bg-white backdrop-blur-md">
+              <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-100">Sales by Customer</h2>
+              <button onClick={() => setIsSalesDetailOpen(false)} className="text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-white p-2 rounded-full hover:bg-zinc-200 dark:hover:bg-white transition-colors">✕</button>
             </div>
             <div className="p-6 overflow-y-auto flex-1 space-y-4">
               {Object.entries(salesByCustomer).map(([custId, custOrders]) => (
-                <div key={custId} className="glass-panel p-4 rounded-xl border border-slate-200/50 dark:border-white/5">
+                <div key={custId} className="bg-white dark:bg-[#1a1d27] shadow-sm p-4 rounded-xl border border-zinc-200 dark:border-zinc-800">
                   <div className="flex justify-between items-center mb-3">
-                    <p className="font-bold text-slate-800 dark:text-slate-200">{getCustomerName(custId)}</p>
+                    <p className="font-bold text-zinc-800 dark:text-zinc-200">{getCustomerName(custId)}</p>
                     <p className="font-bold text-emerald-600 dark:text-emerald-400">₹{formatCurrency(custOrders.reduce((sum, o) => sum + calculateOrderTotal(o), 0))}</p>
                   </div>
                   <div className="space-y-2">
                     {custOrders.map(order => (
-                      <div key={order.id} className="flex justify-between text-sm bg-slate-50 dark:bg-white/5 p-2 rounded-lg">
-                        <span className="text-slate-600 dark:text-slate-400">{order.id} ({order.date})</span>
-                        <span className="text-slate-700 dark:text-slate-300 font-medium">₹{formatCurrency(calculateOrderTotal(order))}</span>
+                      <div key={order.id} className="flex justify-between text-sm bg-zinc-50 dark:bg-zinc-900 p-2 rounded-lg">
+                        <span className="text-zinc-600 dark:text-zinc-400">{order.id} ({order.date})</span>
+                        <span className="text-zinc-700 dark:text-zinc-300 font-medium">₹{formatCurrency(calculateOrderTotal(order))}</span>
                       </div>
                     ))}
                   </div>
@@ -411,24 +482,24 @@ const Sales = () => {
 
       {/* Product Breakdown Panel */}
       {isProductBreakdownOpen && (
-        <div className="fixed inset-0 z-[100] flex">
+        <div className="fixed inset-0 z-60 flex">
           <div className="absolute inset-0 bg-[#0a0c14]/60 backdrop-blur-sm" onClick={() => setIsProductBreakdownOpen(false)}></div>
-          <div className="absolute inset-y-0 right-0 w-full sm:w-[480px] glass-panel border-l border-white/10 shadow-2xl animate-in slide-in-from-right duration-300 flex flex-col">
-            <div className="p-6 border-b border-white/10 flex justify-between items-center bg-white/5 backdrop-blur-md">
-              <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">Product Breakdown</h2>
-              <button onClick={() => setIsProductBreakdownOpen(false)} className="text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white p-2 rounded-full hover:bg-slate-200 dark:hover:bg-white/10 transition-colors">✕</button>
+          <div className="absolute inset-y-0 right-0 w-full sm:w-[480px] bg-white dark:bg-[#1a1d27] shadow-sm border-l border-white/10 shadow-2xl animate-in slide-in-from-right duration-300 flex flex-col">
+            <div className="p-6 border-b border-white/10 flex justify-between items-center bg-white backdrop-blur-md">
+              <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-100">Product Breakdown</h2>
+              <button onClick={() => setIsProductBreakdownOpen(false)} className="text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-white p-2 rounded-full hover:bg-zinc-200 dark:hover:bg-white transition-colors">✕</button>
             </div>
             <div className="p-6 overflow-y-auto flex-1 space-y-4">
               {Object.values(productBreakdown).sort((a,b) => b.totalQty - a.totalQty).map((prod, idx) => (
-                <div key={idx} className="glass-panel p-4 rounded-xl border border-slate-200/50 dark:border-white/5">
+                <div key={idx} className="bg-white dark:bg-[#1a1d27] shadow-sm p-4 rounded-xl border border-zinc-200 dark:border-zinc-800">
                   <div className="flex justify-between items-start mb-2">
-                    <p className="font-bold text-slate-800 dark:text-slate-200">{prod.name}</p>
+                    <p className="font-bold text-zinc-800 dark:text-zinc-200">{prod.name}</p>
                     <div className="text-right">
                       <p className="font-bold text-purple-600 dark:text-purple-400">{prod.totalQty} units</p>
                       <p className="text-sm font-medium text-emerald-600 dark:text-emerald-400">₹{formatCurrency(prod.totalRevenue)}</p>
                     </div>
                   </div>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">Bought by {prod.customers.size} customers</p>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">Bought by {prod.customers.size} customers</p>
                 </div>
               ))}
             </div>
@@ -438,44 +509,44 @@ const Sales = () => {
 
       {/* Recent Transactions Inline Modal */}
       {selectedSaleOrder && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-60 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-[#0a0c14]/80 backdrop-blur-sm" onClick={() => setSelectedSaleOrder(null)}></div>
-          <div className="relative glass-modal rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-300 transition-colors border border-white/20 flex flex-col max-h-[90vh]">
-            <div className="px-6 py-5 border-b border-slate-200/50 dark:border-white/10 flex items-center justify-between bg-white/5 backdrop-blur-md">
-              <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">Order {selectedSaleOrder.id}</h3>
-              <button onClick={() => setSelectedSaleOrder(null)} className="text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white p-2 rounded-full hover:bg-slate-200 dark:hover:bg-white/10 transition-colors">✕</button>
+          <div className="relative bg-white dark:bg-[#1a1d27] shadow-xl rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-300 transition-colors border border-white/20 flex flex-col max-h-[90vh]">
+            <div className="px-6 py-5 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between bg-white backdrop-blur-md">
+              <h3 className="text-xl font-bold text-zinc-800 dark:text-zinc-100">Order {selectedSaleOrder.id}</h3>
+              <button onClick={() => setSelectedSaleOrder(null)} className="text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-white p-2 rounded-full hover:bg-zinc-200 dark:hover:bg-white transition-colors">✕</button>
             </div>
             <div className="p-6 overflow-y-auto">
               <div className="flex justify-between mb-6">
                 <div>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">Date: {selectedSaleOrder.date}</p>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">Status: <span className="text-emerald-600 dark:text-emerald-400 font-semibold">{selectedSaleOrder.status}</span></p>
+                  <p className="text-sm text-zinc-600 dark:text-zinc-400">Date: {selectedSaleOrder.date}</p>
+                  <p className="text-sm text-zinc-600 dark:text-zinc-400">Status: <span className="text-emerald-600 dark:text-emerald-400 font-semibold">{selectedSaleOrder.status}</span></p>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm text-slate-600 dark:text-slate-400">Customer: <span className="font-bold text-slate-800 dark:text-slate-200">{getCustomerName(selectedSaleOrder.customerId)}</span></p>
+                  <p className="text-sm text-zinc-600 dark:text-zinc-400">Customer: <span className="font-bold text-zinc-800 dark:text-zinc-200">{getCustomerName(selectedSaleOrder.customerId)}</span></p>
                 </div>
               </div>
-              <div className="bg-slate-50 dark:bg-white/5 rounded-xl border border-slate-200/50 dark:border-white/10 overflow-hidden mb-6">
+              <div className="bg-zinc-50 dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden mb-6">
                 <table className="w-full text-left text-sm">
-                  <thead className="bg-slate-100 dark:bg-white/5 border-b border-slate-200/50 dark:border-white/10 text-slate-500 dark:text-slate-400">
+                  <thead className="bg-zinc-100 dark:bg-white border-b border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400">
                     <tr>
                       <th className="px-4 py-2 font-medium">Item</th>
                       <th className="px-4 py-2 font-medium">Qty</th>
                       <th className="px-4 py-2 font-medium text-right">Total</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-200/50 dark:divide-white/5">
+                  <tbody className="divide-y divide-zinc-200/50 dark:divide-white/5">
                     {selectedSaleOrder.items.map((item, idx) => (
                       <tr key={idx}>
-                        <td className="px-4 py-3 text-slate-700 dark:text-slate-300">{item.name}</td>
-                        <td className="px-4 py-3 text-slate-700 dark:text-slate-300">{item.qty}</td>
-                        <td className="px-4 py-3 text-right text-slate-700 dark:text-slate-300 font-medium">₹{formatCurrency(calculateRowTotal(item))}</td>
+                        <td className="px-4 py-3 text-zinc-700 dark:text-zinc-300">{item.name}</td>
+                        <td className="px-4 py-3 text-zinc-700 dark:text-zinc-300">{item.qty}</td>
+                        <td className="px-4 py-3 text-right text-zinc-700 dark:text-zinc-300 font-medium">₹{formatCurrency(calculateRowTotal(item))}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
-                <div className="p-4 bg-slate-100 dark:bg-white/5 text-right border-t border-slate-200/50 dark:border-white/10">
-                  <p className="text-sm text-slate-600 dark:text-slate-400">Total: <span className="text-xl font-bold text-emerald-600 dark:text-emerald-400 ml-2">₹{formatCurrency(calculateOrderTotal(selectedSaleOrder))}</span></p>
+                <div className="p-4 bg-zinc-100 dark:bg-white text-right border-t border-zinc-200 dark:border-zinc-800">
+                  <p className="text-sm text-zinc-600 dark:text-zinc-400">Total: <span className="text-xl font-bold text-emerald-600 dark:text-emerald-400 ml-2">₹{formatCurrency(calculateOrderTotal(selectedSaleOrder))}</span></p>
                 </div>
               </div>
               <div className="flex justify-end">
@@ -490,6 +561,7 @@ const Sales = () => {
           </div>
         </div>
       )}
+        </div>
       </div>
     </div>
   );

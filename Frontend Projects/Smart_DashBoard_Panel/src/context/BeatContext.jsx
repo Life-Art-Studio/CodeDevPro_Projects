@@ -7,19 +7,23 @@ const BeatContext = createContext();
 export const useBeatContext = () => useContext(BeatContext);
 
 export const BeatProvider = ({ children }) => {
-  const { currentUser } = useAuth();
+  const { currentUser, viewAsUserId } = useAuth();
   const [beats, setBeats] = useState([]);
 
   useEffect(() => {
     const allBeats = StorageService.getBeats() || [];
     if (currentUser?.role === 'ADMIN') {
-      setBeats(allBeats);
+      if (viewAsUserId) {
+        setBeats(allBeats.filter(b => b.createdBy === viewAsUserId));
+      } else {
+        setBeats(allBeats);
+      }
     } else if (currentUser?.role === 'SALES') {
       setBeats(allBeats.filter(b => b.createdBy === currentUser.id));
     } else {
       setBeats([]);
     }
-  }, [currentUser]);
+  }, [currentUser, viewAsUserId]);
 
   const addBeat = (beatData) => {
     const allBeats = StorageService.getBeats() || [];
@@ -27,7 +31,7 @@ export const BeatProvider = ({ children }) => {
       ...beatData,
       id: StorageService.getNextBeatId(),
       createdAt: new Date().toISOString(),
-      createdBy: currentUser?.id
+      createdBy: viewAsUserId || currentUser?.id
     };
     const updatedAll = [...allBeats, newBeat];
     StorageService.saveBeats(updatedAll);

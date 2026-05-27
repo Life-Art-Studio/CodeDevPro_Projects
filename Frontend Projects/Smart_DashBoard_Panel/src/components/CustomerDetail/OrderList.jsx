@@ -1,166 +1,206 @@
 import React, { useState } from 'react';
 import { generateInvoicePDF } from '../../utils/generatePdf'; 
-import { calculateOrderTotal, getOrderPaidAmount, getOrderOutstanding } from '../../utils/financeUtils';
+import { calculateOrderTotal, getOrderPaidAmount } from '../../utils/financeUtils';
 import PaymentModal from './PaymentModal';
+import { useAuth } from '../../context/AuthContext';
+import ResponsiveTable from '../ui/ResponsiveTable';
+import StatusBadge from '../ui/StatusBadge';
+import CustomSelect from '../ui/CustomSelect';
+import { Plus, CreditCard, FileText, Edit2, Trash2, PackageSearch, Eye } from 'lucide-react';
 
-// Added onStatusChange to props
 const OrderList = ({ orders, customer, onCreateNew, onEdit, onDelete, onStatusChange, defaultFilter, onRecordPayment }) => {
-
-  // --- NEW: Color Coded Status Helper ---
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'Paid': return 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800/50';
-      case 'Pending': return 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800/50';
-      case 'Partially Paid': return 'bg-teal-50 text-teal-700 border-teal-200 dark:bg-teal-900/30 dark:text-teal-400 dark:border-teal-800/50';
-      case 'Processing': return 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800/50';
-      case 'Shipped': return 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-800/50';
-      case 'Delivered': return 'bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-400 dark:border-indigo-800/50';
-      case 'Cancelled': return 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800/50';
-      default: return 'bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700';
-    }
-  };
-    
+  const { currentUser } = useAuth();
+  
   const [filterStatus, setFilterStatus] = useState(defaultFilter || "All");
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [paymentTargetOrder, setPaymentTargetOrder] = useState(null);
 
   const filteredOrders = filterStatus === "All" ? orders : orders.filter(o => o.status === filterStatus);
 
+  const columns = [
+    { key: "id", label: "Order ID" },
+    { key: "date", label: "Date" },
+    { key: "status", label: "Status" },
+    { key: "total", label: "Total Amount" },
+    { key: "actions", label: "Actions", align: "right" },
+  ];
+
+  const renderStatusDropdown = (order) => (
+    <div onClick={(e) => e.stopPropagation()}>
+      <CustomSelect
+        value={order.status}
+        onChange={(newStatus) => {
+          if (newStatus === 'Paid' && order.status !== 'Paid') {
+            const mode = window.prompt("Enter Payment Mode (Cash, UPI, Cheque):", "Cash");
+            if (mode) {
+              onStatusChange(order.id, newStatus, mode);
+            }
+          } else {
+            onStatusChange(order.id, newStatus);
+          }
+        }}
+        className="px-3 py-1.5 sm:py-1 rounded-xl sm:rounded-full text-[11px] sm:text-xs font-semibold border outline-none focus:ring-2 focus:ring-indigo-500 transition-colors w-[120px] bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 flex items-center justify-between cursor-pointer"
+        options={[
+          { value: 'Pending', label: 'Pending' },
+          { value: 'Partially Paid', label: 'Partially Paid' },
+          { value: 'Processing', label: 'Processing' },
+          { value: 'Shipped', label: 'Shipped' },
+          { value: 'Delivered', label: 'Delivered' },
+          { value: 'Paid', label: 'Paid' },
+          { value: 'Cancelled', label: 'Cancelled' }
+        ]}
+      />
+    </div>
+  );
+
+  const rowData = filteredOrders.map(order => {
+    const listTotal = calculateOrderTotal(order);
+    const paidAmount = getOrderPaidAmount(order);
+    const isPartial = paidAmount > 0 && order.status !== 'Paid';
+    const progressWidth = Math.min(100, (paidAmount / listTotal) * 100) || 0;
+
+    return {
+      id: order.id,
+      date: order.date,
+      status: currentUser?.role === 'ADMIN' ? (
+        <StatusBadge status={order.status} />
+      ) : renderStatusDropdown(order),
+      total: (
+        <div>
+          <div className="font-bold text-zinc-900 dark:text-zinc-100 tabular-nums">
+            ₹{listTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </div>
+          {isPartial && (
+            <div className="mt-1">
+              <div className="w-24 h-1.5 bg-zinc-200 dark:bg-zinc-700/50 rounded-full overflow-hidden">
+                <div className="h-full bg-emerald-500 rounded-full transition-all" style={{ width: `${progressWidth}%` }}></div>
+              </div>
+              <div className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-0.5 font-medium tabular-nums">
+                Paid: ₹{paidAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </div>
+            </div>
+          )}
+        </div>
+      ),
+      actions: (
+        <div className="flex justify-end items-center gap-1 lg:gap-2">
+          {currentUser?.role !== 'ADMIN' && order.status !== 'Paid' && order.status !== 'Cancelled' && (
+            <button 
+              onClick={(e) => { e.stopPropagation(); setPaymentTargetOrder(order); setIsPaymentModalOpen(true); }}
+              className="p-1 lg:p-2 text-emerald-600 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-500/10 rounded-lg transition-colors min-h-[32px] min-w-[32px] lg:min-h-[44px] lg:min-w-[44px] flex items-center justify-center"
+              title="Record Payment"
+            >
+              <CreditCard className="w-3.5 h-3.5 lg:w-4 lg:h-4" />
+            </button>
+          )}
+          {currentUser?.role === 'ADMIN' && (
+            <button 
+              onClick={(e) => { e.stopPropagation(); generateInvoicePDF(order, customer); }}
+              className="p-1 lg:p-2 text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-500/10 rounded-lg transition-colors min-h-[32px] min-w-[32px] lg:min-h-[44px] lg:min-w-[44px] flex items-center justify-center"
+              title="Download PDF"
+            >
+              <FileText className="w-3.5 h-3.5 lg:w-4 lg:h-4" />
+            </button>
+          )}
+          
+          {/* View/Edit Button */}
+          <button 
+            onClick={(e) => { e.stopPropagation(); onEdit(order); }}
+            className="p-1 lg:p-2 text-zinc-500 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800 rounded-lg transition-colors min-h-[32px] min-w-[32px] lg:min-h-[44px] lg:min-w-[44px] flex items-center justify-center"
+            title={currentUser?.role === 'ADMIN' ? "View Details" : "Edit Order"}
+          >
+            {currentUser?.role === 'ADMIN' ? <Eye className="w-3.5 h-3.5 lg:w-4 lg:h-4" /> : <Edit2 className="w-3.5 h-3.5 lg:w-4 lg:h-4" />}
+          </button>
+
+          {/* Delete Button (Only for Non-Admins) */}
+          {currentUser?.role !== 'ADMIN' && (
+            <button 
+              onClick={(e) => { e.stopPropagation(); onDelete(order.id); }}
+              className="p-1 lg:p-2 text-red-500 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-500/10 rounded-lg transition-colors min-h-[32px] min-w-[32px] lg:min-h-[44px] lg:min-w-[44px] flex items-center justify-center"
+              title="Delete Order"
+            >
+              <Trash2 className="w-3.5 h-3.5 lg:w-4 lg:h-4" />
+            </button>
+          )}
+        </div>
+      )
+    };
+  });
+
+  const renderMobileCard = (row, index) => {
+    const order = filteredOrders[index];
+    const listTotal = calculateOrderTotal(order);
+    const paidAmount = getOrderPaidAmount(order);
+    const isPartial = paidAmount > 0 && order.status !== 'Paid';
+
+    return (
+      <div key={row.id} className="bg-white dark:bg-[#1a1d27] p-3 lg:p-4 border-b border-zinc-200 dark:border-zinc-800 space-y-2 lg:space-y-3">
+        <div className="flex justify-between items-start">
+           <div>
+             <span className="font-bold text-zinc-900 dark:text-zinc-100 text-sm lg:text-base">{row.id}</span>
+             <p className="text-[10px] lg:text-xs text-zinc-500">{row.date}</p>
+           </div>
+           <div className="scale-90 origin-top-right lg:scale-100">{row.status}</div>
+        </div>
+        
+        <div className="flex justify-between items-center bg-zinc-50 dark:bg-zinc-900/50 p-2 lg:p-3 rounded-xl border border-zinc-100 dark:border-zinc-800/50">
+           <div>
+             <p className="text-[9px] lg:text-[10px] text-zinc-500 uppercase tracking-wider font-bold">Total Amount</p>
+             <p className="font-bold text-zinc-900 dark:text-zinc-100 text-base lg:text-lg tabular-nums leading-none mt-1">
+               ₹{listTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+             </p>
+             {isPartial && <p className="text-[10px] lg:text-xs text-emerald-600 dark:text-emerald-400 mt-1 tabular-nums">Paid: ₹{paidAmount.toLocaleString('en-IN')}</p>}
+           </div>
+           <div>{row.actions}</div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-6 animate-in fade-in">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div className="flex flex-wrap items-center gap-3">
-          <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 transition-colors">Order History</h3>
-          <select 
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 lg:gap-4">
+        <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+          <CustomSelect 
             value={filterStatus} 
-            onChange={(e) => setFilterStatus(e.target.value)}
-            className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none"
-          >
-            <option value="All">All Statuses</option>
-            <option value="Pending">Pending</option>
-            <option value="Partially Paid">Partially Paid</option>
-            <option value="Processing">Processing</option>
-            <option value="Shipped">Shipped</option>
-            <option value="Delivered">Delivered</option>
-            <option value="Paid">Paid</option>
-            <option value="Cancelled">Cancelled</option>
-          </select>
+            onChange={setFilterStatus}
+            className="w-full sm:w-auto px-3 lg:px-4 py-1.5 lg:py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-[#1a1d27] text-xs lg:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors min-h-[36px] lg:min-h-[44px] flex items-center justify-between outline-none cursor-pointer"
+            options={[
+              { value: 'All', label: 'All Statuses' },
+              { value: 'Pending', label: 'Pending' },
+              { value: 'Partially Paid', label: 'Partially Paid' },
+              { value: 'Processing', label: 'Processing' },
+              { value: 'Shipped', label: 'Shipped' },
+              { value: 'Delivered', label: 'Delivered' },
+              { value: 'Paid', label: 'Paid' },
+              { value: 'Cancelled', label: 'Cancelled' }
+            ]}
+            minWidth="140px"
+          />
         </div>
-        <button onClick={onCreateNew} className="w-full sm:w-auto bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 shadow-sm flex items-center justify-center gap-2 transition-colors">
-          <span>➕</span> New Order
-        </button>
+        {currentUser?.role !== 'ADMIN' && (
+          <button onClick={onCreateNew} className="w-full sm:w-auto bg-indigo-600 text-white px-4 lg:px-5 py-2 lg:py-2.5 rounded-xl text-xs lg:text-sm font-semibold hover:bg-indigo-700 shadow-sm flex items-center justify-center gap-1.5 lg:gap-2 transition-colors min-h-[36px] lg:min-h-[44px]">
+            <Plus className="w-3.5 h-3.5 lg:w-4 lg:h-4" /> New Order
+          </button>
+        )}
       </div>
 
-      <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden transition-colors -mx-4 sm:mx-0">
-        <div className="w-full overflow-x-auto">
-          <table className="w-full text-left text-sm border-collapse min-w-[600px]">
-            <thead className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 transition-colors">
-              <tr className="text-slate-500 dark:text-slate-400">
-                <th className="py-3 px-4 font-semibold uppercase tracking-wider text-xs whitespace-nowrap">Order ID</th>
-                <th className="py-3 px-4 font-semibold uppercase tracking-wider text-xs whitespace-nowrap">Date</th>
-              <th className="py-3 px-4 font-semibold uppercase tracking-wider text-xs">Status</th>
-              <th className="py-3 px-4 font-semibold uppercase tracking-wider text-xs">Total Amount</th>
-              <th className="py-3 px-4 font-semibold uppercase tracking-wider text-xs text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50">
-            {filteredOrders.map(order => {
-               
-               // Look how clean this is now! 
-               // Just one line calling our utility function.
-               const listTotal = calculateOrderTotal(order);
-               const paidAmount = getOrderPaidAmount(order);
-               const isPartial = paidAmount > 0 && order.status !== 'Paid';
-               const progressWidth = Math.min(100, (paidAmount / listTotal) * 100) || 0;
-
-               return (
-                <tr key={order.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
-                  <td className="py-3 px-4 font-medium text-slate-800 dark:text-slate-200 whitespace-nowrap">{order.id}</td>
-                  <td className="py-3 px-4 text-slate-500 dark:text-slate-400 whitespace-nowrap">{order.date}</td>
-                  <td className="py-3 px-4">
-                    
-                    {/* --- NEW: Interactive Status Dropdown --- */}
-                    <select
-                      value={order.status}
-                      onChange={(e) => onStatusChange(order.id, e.target.value)}
-                      className={`px-3 py-1 rounded-full text-xs font-semibold border appearance-none cursor-pointer outline-none focus:ring-2 focus:ring-blue-500 transition-colors min-w-[110px] ${getStatusColor(order.status)}`}
-                      style={{ 
-                        // Adds a tiny custom dropdown arrow via CSS
-                        backgroundImage: `url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E")`, 
-                        backgroundRepeat: 'no-repeat', 
-                        backgroundPosition: 'right 0.4rem center', 
-                        backgroundSize: '1em',
-                        paddingRight: '1.5rem' // Make room for the arrow
-                      }}
-                    >
-                      <option className="dark:bg-slate-900" value="Pending">Pending</option>
-                      <option className="dark:bg-slate-900" value="Partially Paid">Partially Paid</option>
-                      <option className="dark:bg-slate-900" value="Processing">Processing</option>
-                      <option className="dark:bg-slate-900" value="Shipped">Shipped</option>
-                      <option className="dark:bg-slate-900" value="Delivered">Delivered</option>
-                      <option className="dark:bg-slate-900" value="Paid">Paid</option>
-                      <option className="dark:bg-slate-900" value="Cancelled">Cancelled</option>
-                    </select>
-
-                  </td>
-                  <td className="py-3 px-4">
-                    <div className="font-bold text-slate-800 dark:text-slate-100">
-                      ₹{listTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </div>
-                    {isPartial && (
-                      <div className="mt-1">
-                        <div className="w-24 h-1.5 bg-slate-200 dark:bg-slate-700/50 rounded-full overflow-hidden">
-                          <div className="h-full bg-teal-500 rounded-full transition-all" style={{ width: `${progressWidth}%` }}></div>
-                        </div>
-                        <div className="text-[10px] text-teal-600 dark:text-teal-400 mt-0.5 font-medium">
-                          Paid: ₹{paidAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        </div>
-                      </div>
-                    )}
-                  </td>
-                  <td className="py-3 px-4 text-right">
-                    
-                    {order.status !== 'Paid' && order.status !== 'Cancelled' && (
-                      <button 
-                        onClick={() => {
-                          setPaymentTargetOrder(order);
-                          setIsPaymentModalOpen(true);
-                        }} 
-                        className="text-teal-600 dark:text-teal-400 hover:text-teal-800 dark:hover:text-teal-300 font-medium px-3 py-1 bg-teal-50 dark:bg-teal-900/30 hover:bg-teal-100 dark:hover:bg-teal-900/50 rounded transition-colors mr-2"
-                        title="Record Payment"
-                      >
-                        💳 Pay
-                      </button>
-                    )}
-
-                    <button 
-                      onClick={() => generateInvoicePDF(order, customer)} 
-                      className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 font-medium px-3 py-1 bg-emerald-50 dark:bg-emerald-900/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 rounded transition-colors mr-2"
-                      title="Download PDF Invoice"
-                    >
-                      PDF
-                    </button>
-                    
-                    <button onClick={() => onEdit(order)} className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium px-3 py-1 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded transition-colors mr-2">
-                      Edit
-                    </button>
-                    <button onClick={() => onDelete(order.id)} className="text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 font-medium px-3 py-1 bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 rounded transition-colors">
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-               )
-            })}
-          </tbody>
-        </table>
-        </div>
-        {filteredOrders.length === 0 && (
-          <div className="py-12 text-center text-slate-500 dark:text-slate-400 flex flex-col items-center justify-center">
-            <span className="text-4xl mb-4">📭</span>
-            <p className="mb-4">No orders found.</p>
-            <button onClick={onCreateNew} className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 shadow-sm transition-colors">
-              Create First Order
-            </button>
+      <div className="border border-zinc-200 dark:border-zinc-800 rounded-2xl overflow-hidden transition-colors bg-white dark:bg-[#1a1d27]">
+        {filteredOrders.length > 0 ? (
+          <ResponsiveTable 
+            columns={columns}
+            data={rowData}
+            renderMobileCard={renderMobileCard}
+          />
+        ) : (
+          <div className="py-12 text-center text-zinc-500 dark:text-zinc-400 flex flex-col items-center justify-center">
+            <PackageSearch className="w-12 h-12 mb-4 text-zinc-300 dark:text-zinc-600" />
+            <p className="mb-4 font-medium text-zinc-600 dark:text-zinc-300">No orders found.</p>
+            {currentUser?.role !== 'ADMIN' && (
+              <button onClick={onCreateNew} className="bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-400 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors min-h-[44px]">
+                Create First Order
+              </button>
+            )}
           </div>
         )}
       </div>

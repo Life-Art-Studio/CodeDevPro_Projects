@@ -34,7 +34,7 @@ const BeatsCalendar = () => {
     const yearStr = currentDate.getFullYear();
 
     for (let i = 0; i < firstDayOfMonth; i++) {
-      cells.push(<div key={`empty-${i}`} className="bg-slate-50/50 dark:bg-slate-900/30 min-h-[100px] border border-slate-200/50 dark:border-white/5"></div>);
+      cells.push(<div key={`empty-${i}`} className="bg-zinc-50/50 dark:bg-zinc-900 min-h-[100px] border border-zinc-200 dark:border-zinc-800"></div>);
     }
 
     for (let day = 1; day <= daysInMonth; day++) {
@@ -44,8 +44,8 @@ const BeatsCalendar = () => {
       const dayVisits = visits.filter(v => v.visitDate === dateString);
 
       cells.push(
-        <div key={day} className="bg-white dark:bg-[#0a0c14] min-h-[100px] p-2 border border-slate-200/50 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors">
-          <p className="text-xs font-bold text-slate-400 mb-1">{day}</p>
+        <div key={day} className="bg-white dark:bg-[#0a0c14] min-h-[100px] p-2 border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900/50 transition-colors">
+          <p className="text-xs font-bold text-zinc-400 mb-1">{day}</p>
           <div className="space-y-1">
             {dayVisits.map(visit => {
               const customer = customers.find(c => c.id === visit.customerId);
@@ -77,26 +77,26 @@ const BeatsCalendar = () => {
   return (
     <div className="flex flex-col h-full animate-in fade-in">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">
+        <h2 className="text-2xl font-bold text-zinc-800 dark:text-zinc-100">
           {currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
         </h2>
         <div className="flex gap-2">
-          <button onClick={prevMonth} className="p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+          <button onClick={prevMonth} className="p-2 rounded-lg bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors">
             &larr;
           </button>
-          <button onClick={() => setCurrentDate(new Date())} className="px-4 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm font-semibold hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-slate-700 dark:text-slate-300">
+          <button onClick={() => setCurrentDate(new Date())} className="px-4 py-2 rounded-lg bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-sm font-semibold hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors text-zinc-700 dark:text-zinc-300">
             Today
           </button>
-          <button onClick={nextMonth} className="p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+          <button onClick={nextMonth} className="p-2 rounded-lg bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors">
             &rarr;
           </button>
         </div>
       </div>
 
-      <div className="flex-1 glass-panel rounded-2xl border border-slate-200/50 dark:border-white/10 overflow-hidden flex flex-col">
-        <div className="grid grid-cols-7 bg-slate-100 dark:bg-slate-900/50 border-b border-slate-200/50 dark:border-white/10">
+      <div className="flex-1 bg-white dark:bg-[#1a1d27] shadow-sm rounded-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden flex flex-col">
+        <div className="grid grid-cols-7 bg-zinc-100 dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800">
           {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-            <div key={day} className="py-2 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">
+            <div key={day} className="py-2 text-center text-xs font-bold text-zinc-500 uppercase tracking-wider">
               {day}
             </div>
           ))}

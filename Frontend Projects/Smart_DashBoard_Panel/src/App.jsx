@@ -11,7 +11,6 @@ import NotificationPanel from "./components/NotificationPanel";
 
 // Auth Pages (Lazy)
 const Login = lazy(() => import('./pages/auth/Login'));
-const Signup = lazy(() => import('./pages/auth/Signup'));
 
 // Dashboard Pages (Lazy)
 const Dashboard = lazy(() => import('./pages/Dashboard'));
@@ -21,9 +20,11 @@ const Beats = lazy(() => import('./pages/Beats'));
 const MapPage = lazy(() => import('./pages/MapPage'));
 const Catalogue = lazy(() => import('./pages/Catalogue'));
 const Users = lazy(() => import('./pages/Users'));
+const AuditLogs = lazy(() => import('./pages/AuditLogs'));
 
 // Auth Gate
 import { useAuth } from "./context/AuthContext";
+import { AuditProvider } from "./context/AuditContext";
 import { CustomerProvider } from "./context/CustomerContext";
 import { AuthProvider } from "./context/AuthContext";
 import { OrderProvider } from "./context/OrderContext";
@@ -43,6 +44,7 @@ const App = () => {
   return (
     <ThemeProvider>
       <AuthProvider>
+        <AuditProvider>
         <CustomerProvider>
           <OrderProvider>
             <BeatProvider>
@@ -57,7 +59,6 @@ const App = () => {
                         {/* Public Branch: Uses the blank, centered AuthLayout */}
                         <Route path="/auth" element={<AuthLayouts />}>
                           <Route path="login" element={<Login />} />
-                          <Route path="signup" element={<Signup />} />
                         </Route>
 
                         {/* Private Branch: Uses the complex Sidebar/Topbar Layout */}
@@ -83,6 +84,14 @@ const App = () => {
                             element={
                               <ProtectedRoute adminOnly>
                                 <Users />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="audit-logs"
+                            element={
+                              <ProtectedRoute adminOnly>
+                                <AuditLogs />
                               </ProtectedRoute>
                             }
                           />
@@ -131,6 +140,7 @@ const App = () => {
             </BeatProvider>
           </OrderProvider>
         </CustomerProvider>
+        </AuditProvider>
       </AuthProvider>
     </ThemeProvider>
   );

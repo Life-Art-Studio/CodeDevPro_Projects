@@ -7,26 +7,30 @@ const VisitContext = createContext();
 export const useVisitContext = () => useContext(VisitContext);
 
 export const VisitProvider = ({ children }) => {
-  const { currentUser } = useAuth();
+  const { currentUser, viewAsUserId } = useAuth();
   const [visits, setVisits] = useState([]);
 
   useEffect(() => {
     const allVisits = StorageService.getVisits() || [];
     if (currentUser?.role === 'ADMIN') {
-      setVisits(allVisits);
+      if (viewAsUserId) {
+        setVisits(allVisits.filter(v => v.createdBy === viewAsUserId));
+      } else {
+        setVisits(allVisits);
+      }
     } else if (currentUser?.role === 'SALES') {
       setVisits(allVisits.filter(v => v.createdBy === currentUser.id));
     } else {
       setVisits([]);
     }
-  }, [currentUser]);
+  }, [currentUser, viewAsUserId]);
 
   const addVisit = (visitData) => {
     const allVisits = StorageService.getVisits() || [];
     const newVisit = {
       ...visitData,
       id: `VISIT-${Date.now()}`,
-      createdBy: currentUser?.id
+      createdBy: viewAsUserId || currentUser?.id
     };
     const updatedAll = [...allVisits, newVisit];
     StorageService.saveVisits(updatedAll);

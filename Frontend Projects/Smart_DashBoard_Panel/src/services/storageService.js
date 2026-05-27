@@ -1,7 +1,7 @@
 const StorageService = {
   saveUser: (userData) => {
     const users = StorageService.getAllUsers();
-    const newUser = { ...userData, id: `USR-${Date.now()}` };
+    const newUser = { ...userData, id: `USR-${Date.now()}`, status: userData.status || 'Active', lastLogin: null };
     users.push(newUser);
     localStorage.setItem("users", JSON.stringify(users));
     return newUser;
@@ -13,10 +13,38 @@ const StorageService = {
     localStorage.setItem("users", JSON.stringify(filteredUsers));
   },
 
+  updateUser: (userId, updatedData) => {
+    const users = StorageService.getAllUsers();
+    const updatedUsers = users.map(u => u.id === userId ? { ...u, ...updatedData } : u);
+    localStorage.setItem("users", JSON.stringify(updatedUsers));
+    
+    const currentUser = StorageService.getCurrentUser();
+    if (currentUser && currentUser.id === userId) {
+       StorageService.setCurrentUser({ ...currentUser, ...updatedData });
+    }
+  },
+
   getAllUsers: () => {
     try {
       const data = localStorage.getItem("users");
-      return data ? JSON.parse(data) : [];
+      let users = data ? JSON.parse(data) : [];
+      
+      // Initialize default Admin if no users exist
+      if (users.length === 0) {
+        const defaultAdmin = {
+          id: "USR-ADMIN",
+          name: "System Admin",
+          email: "admin@admin.com",
+          password: "admin",
+          role: "ADMIN",
+          status: "Active",
+          lastLogin: null
+        };
+        users.push(defaultAdmin);
+        localStorage.setItem("users", JSON.stringify(users));
+      }
+      
+      return users;
     } catch (error) {
       return [];
     }
@@ -162,6 +190,32 @@ const StorageService = {
 
   saveProducts: (products) => {
     localStorage.setItem("products", JSON.stringify(products));
+  },
+
+  // === AUDIT LOGS ===
+  getAuditLogs: () => {
+    try {
+      return JSON.parse(localStorage.getItem("auditLogs")) ?? [];
+    } catch {
+      return [];
+    }
+  },
+
+  saveAuditLogs: (logs) => {
+    localStorage.setItem("auditLogs", JSON.stringify(logs));
+  },
+
+  batchUpdate: (key, updaterFn) => {
+    const data = localStorage.getItem(key);
+    let parsed = [];
+    try {
+      parsed = data ? JSON.parse(data) : [];
+    } catch {
+      parsed = [];
+    }
+    const updated = updaterFn(parsed);
+    localStorage.setItem(key, JSON.stringify(updated));
+    return updated;
   }
 };
 

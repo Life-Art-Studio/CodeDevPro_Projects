@@ -113,32 +113,24 @@ const Topbar = () => { // Make sure to accept the prop!
   };
 
   return (
-    <div className="h-14 md:h-16 w-full bg-white/40 dark:bg-[#0a0c14]/40 backdrop-blur-2xl flex items-center justify-between px-4 md:px-6 border-b border-slate-200/50 dark:border-white/10 shadow-sm relative z-10 transition-colors duration-500">
+    <div className="h-14 md:h-16 w-full bg-white dark:bg-[#0a0c14] backdrop-blur-2xl flex items-center justify-between px-4 md:px-6 border-b border-zinc-200 dark:border-zinc-800 shadow-sm relative z-10 transition-colors duration-500">
       
       {/* LEFT SIDE: Hamburger, Logo, Search */}
       <div className="flex items-center gap-4 flex-1">
         
-        {/* Mobile Hamburger Button */}
-        <button 
-          onClick={onOpenSidebarHandler}
-          className="md:hidden text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors p-1"
-        >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path>
-          </svg>
-        </button>
+
 
         {/* Brand Logo (Visible on all screens) */}
         <div className="flex items-center shrink-0">
-          <h1 className="text-slate-800 dark:text-slate-100 text-xl font-extrabold tracking-tight transition-colors duration-500">
+          <h1 className="text-zinc-800 dark:text-zinc-100 text-xl font-extrabold tracking-tight transition-colors duration-500">
             Smart<span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-pink-500">SaaS</span>
           </h1>
         </div>
 
         {/* Search Input (Hidden on mobile) */}
         <div className="hidden sm:flex relative w-full max-w-md ml-4" ref={searchRef}>
-          <div className="flex items-center w-full bg-white/50 dark:bg-white/5 hover:bg-white/80 dark:hover:bg-white/10 rounded-full px-4 py-2 transition-all duration-300 border border-slate-200/50 dark:border-white/10 focus-within:border-purple-500 focus-within:bg-white dark:focus-within:bg-[#0a0c14]/80 focus-within:ring-2 focus-within:ring-purple-500/20 dark:focus-within:ring-purple-500/30 focus-within:shadow-[0_0_15px_rgba(168,85,247,0.2)]">
-            <span className="text-slate-400 mr-2 text-sm">🔍</span>
+          <div className="flex items-center w-full bg-white dark:bg-white hover:bg-white dark:hover:bg-white rounded-full px-4 py-2 transition-all duration-300 border border-zinc-200 dark:border-zinc-800 focus-within:border-purple-500 focus-within:bg-white dark:focus-within:bg-[#0a0c14]/80 focus-within:ring-2 focus-within:ring-purple-500/20 dark:focus-within:ring-purple-500/30 focus-within:shadow-[0_0_15px_rgba(168,85,247,0.2)]">
+            <span className="text-zinc-400 mr-2 text-sm">🔍</span>
             <input 
               type="text" 
               placeholder="Search customers, orders..." 
@@ -150,7 +142,7 @@ const Topbar = () => { // Make sure to accept the prop!
               onFocus={() => {
                 if (searchQuery.trim() !== "") setIsSearchOpen(true);
               }}
-              className="bg-transparent w-full focus:outline-none text-sm text-slate-700 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500"
+              className="bg-transparent w-full focus:outline-none text-sm text-zinc-700 dark:text-zinc-200 placeholder-zinc-400 dark:placeholder-zinc-500"
             />
             {searchQuery && (
               <button 
@@ -158,40 +150,40 @@ const Topbar = () => { // Make sure to accept the prop!
                   setSearchQuery("");
                   setIsSearchOpen(false);
                 }} 
-                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 ml-2"
+                className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 ml-2"
               >✕</button>
             )}
           </div>
 
           {/* Search Dropdown */}
           {isSearchOpen && searchQuery.trim() !== "" && (
-            <div className="absolute top-full left-0 right-0 mt-2 glass-modal rounded-2xl shadow-2xl overflow-hidden z-50 animate-slide-up-fade border border-white/20">
+            <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-[#1a1d27] shadow-xl rounded-2xl shadow-2xl overflow-hidden z-50 animate-slide-up-fade border border-white/20">
               <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
                 
                 {filteredCustomers.length > 0 && (
                   <div className="p-2">
-                    <h3 className="px-3 py-1 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Customers</h3>
+                    <h3 className="px-3 py-1 text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Customers</h3>
                     {filteredCustomers.map(customer => (
                       <div 
                         key={customer.id} 
                         onClick={() => handleResultClick('customer', customer)}
-                        className="px-3 py-2 hover:bg-purple-50 dark:hover:bg-white/10 rounded-xl cursor-pointer transition-colors"
+                        className="px-3 py-2 hover:bg-purple-50 dark:hover:bg-white rounded-xl cursor-pointer transition-colors"
                       >
-                        <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">{customer.name}</p>
-                        <p className="text-xs text-slate-500 dark:text-slate-400">{customer.email || 'No email'} • {customer.phone || 'No phone'}</p>
+                        <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">{customer.name}</p>
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400">{customer.email || 'No email'} • {customer.phone || 'No phone'}</p>
                       </div>
                     ))}
                   </div>
                 )}
 
                 {filteredOrders.length > 0 && (
-                  <div className="p-2 border-t border-slate-200/50 dark:border-white/10">
-                    <h3 className="px-3 py-1 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Orders</h3>
+                  <div className="p-2 border-t border-zinc-200 dark:border-zinc-800">
+                    <h3 className="px-3 py-1 text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Orders</h3>
                     {filteredOrders.map(order => (
                       <div 
                         key={order.id} 
                         onClick={() => handleResultClick('order', order)}
-                        className="px-3 py-2 hover:bg-purple-50 dark:hover:bg-white/10 rounded-xl cursor-pointer transition-colors"
+                        className="px-3 py-2 hover:bg-purple-50 dark:hover:bg-white rounded-xl cursor-pointer transition-colors"
                       >
                         <div className="flex justify-between items-center">
                           <p className="text-sm font-semibold text-purple-600 dark:text-purple-400">{order.id}</p>
@@ -202,14 +194,14 @@ const Topbar = () => { // Make sure to accept the prop!
                             'bg-amber-500/10 text-amber-600 border-amber-500/30 dark:text-amber-400'
                           }`}>{order.status}</span>
                         </div>
-                        <p className="text-xs text-slate-500 dark:text-slate-400">{order.date}</p>
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400">{order.date}</p>
                       </div>
                     ))}
                   </div>
                 )}
 
                 {!hasSearchResults && (
-                  <div className="p-4 text-center text-slate-500 dark:text-slate-400 text-sm">
+                  <div className="p-4 text-center text-zinc-500 dark:text-zinc-400 text-sm">
                     No results found for "{searchQuery}"
                   </div>
                 )}
@@ -226,7 +218,7 @@ const Topbar = () => { // Make sure to accept the prop!
         {/* Theme Toggle Button */}
         <button 
           onClick={toggleTheme}
-          className="relative text-slate-500 hover:text-purple-600 dark:text-slate-400 dark:hover:text-purple-400 transition-colors p-2 rounded-full hover:bg-slate-100 dark:hover:bg-white/10"
+          className="relative text-zinc-500 hover:text-purple-600 dark:text-zinc-400 dark:hover:text-purple-400 transition-colors p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-white"
         >
           {isDarkMode ? "🌙" : "☀️"}
         </button>
@@ -234,7 +226,7 @@ const Topbar = () => { // Make sure to accept the prop!
         {/* Notifications Bell */}
         <button 
           onClick={onOpenNotificationsHandler}
-          className="relative text-slate-500 hover:text-purple-600 dark:text-slate-400 dark:hover:text-purple-400 transition-colors p-2 rounded-full hover:bg-slate-100 dark:hover:bg-white/10"
+          className="relative text-zinc-500 hover:text-purple-600 dark:text-zinc-400 dark:hover:text-purple-400 transition-colors p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-white"
         >
           🔔
           {notifCount > 0 && (
@@ -245,17 +237,17 @@ const Topbar = () => { // Make sure to accept the prop!
         </button>
 
 
-        <div className="h-6 w-px bg-slate-200/50 dark:bg-white/10 hidden sm:block"></div>
+        <div className="h-6 w-px bg-zinc-200/50 dark:bg-white hidden sm:block"></div>
 
         {/* User Profile Trigger Area */}
         <div className="relative" ref={dropdownRef}>
           <div 
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="flex items-center gap-2 sm:gap-3 cursor-pointer hover:bg-slate-100/50 dark:hover:bg-white/5 p-1 sm:p-2 rounded-full transition-colors select-none"
+            className="flex items-center gap-2 sm:gap-3 cursor-pointer hover:bg-zinc-100/50 dark:hover:bg-white p-1 sm:p-2 rounded-full transition-colors select-none"
           >
             <div className="flex flex-col text-right hidden md:block">
-              <span className="text-sm font-semibold text-slate-700 dark:text-slate-200 block">{userData.name}</span>
-              <span className="text-xs text-slate-500 dark:text-slate-400 block truncate w-32">{userData.email}</span>
+              <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-200 block">{userData.name}</span>
+              <span className="text-xs text-zinc-500 dark:text-zinc-400 block truncate w-32">{userData.email}</span>
             </div>
             
             {/* Avatar Circle */}
@@ -264,35 +256,35 @@ const Topbar = () => { // Make sure to accept the prop!
             </div>
             
             {/* Tiny arrow */}
-            <span className={`text-[10px] text-slate-400 transition-transform duration-300 hidden sm:block ${isDropdownOpen ? "rotate-180" : ""}`}>
+            <span className={`text-[10px] text-zinc-400 transition-transform duration-300 hidden sm:block ${isDropdownOpen ? "rotate-180" : ""}`}>
               ▼
             </span>
           </div>
 
           {/* Dropdown Card */}
           {isDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-56 glass-modal rounded-2xl shadow-2xl py-2 z-50 animate-slide-up-fade">
-              <div className="px-4 py-3 border-b border-slate-200/50 dark:border-white/10 md:hidden bg-white/10 dark:bg-[#0a0c14]/50">
-                <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">{userData.name}</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">{userData.email}</p>
+            <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#1a1d27] shadow-xl rounded-2xl shadow-2xl py-2 z-50 animate-slide-up-fade">
+              <div className="px-4 py-3 border-b border-zinc-200 dark:border-zinc-800 md:hidden bg-white dark:bg-[#0a0c14]">
+                <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-100">{userData.name}</p>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 truncate mt-0.5">{userData.email}</p>
               </div>
 
               <div className="p-2 space-y-1">
                 <button 
                   onClick={profileHandler}
-                  className="w-full text-left px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50 dark:hover:bg-white/10 rounded-xl transition-colors flex items-center gap-2"
+                  className="w-full text-left px-3 py-2 text-sm font-medium text-zinc-600 dark:text-zinc-300 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50 dark:hover:bg-white rounded-xl transition-colors flex items-center gap-2"
                 >
                   <span className="text-lg opacity-70" >👤</span> My Profile
                 </button>
                 <button 
                   onClick={settingsHandler}
-                  className="w-full text-left px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50 dark:hover:bg-white/10 rounded-xl transition-colors flex items-center gap-2"
+                  className="w-full text-left px-3 py-2 text-sm font-medium text-zinc-600 dark:text-zinc-300 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50 dark:hover:bg-white rounded-xl transition-colors flex items-center gap-2"
                 >
                   <span className="text-lg opacity-70">⚙️</span> Settings
                 </button>
               </div>
               
-              <hr className="my-1 border-slate-200/50 dark:border-white/10 mx-2" />
+              <hr className="my-1 border-zinc-200 dark:border-zinc-800 mx-2" />
 
               <div className="p-2">
                 <button 

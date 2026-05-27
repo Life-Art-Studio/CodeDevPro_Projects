@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 import useCustomerContext from '../../context/CustomerContext';
+import CustomSelect from '../ui/CustomSelect';
+import toast from 'react-hot-toast';
 
 // Use the standard modal target we already have in index.html
 const modalRoot = document.getElementById('PopModal');
@@ -22,7 +24,10 @@ const LogVisitModal = ({ isOpen, onClose, onSubmit, beat, initialData = null, fi
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!customerId) return;
+    if (!customerId) {
+      toast.error('Please select a customer first');
+      return;
+    }
     
     onSubmit({
       id: initialData?.id,
@@ -43,10 +48,10 @@ const LogVisitModal = ({ isOpen, onClose, onSubmit, beat, initialData = null, fi
     : customers;
 
   const modalContent = (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-60 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={onClose}></div>
-      <div className="relative bg-white dark:bg-[#0a0c14] w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-800 animate-slide-up-fade">
-        <div className="p-5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-white/5">
+      <div className="relative flex flex-col max-h-[calc(100dvh-2rem)] bg-white dark:bg-[#0a0c14] w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-800 animate-slide-up-fade">
+        <div className="shrink-0 p-5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-white/5">
           <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">
             {initialData ? 'Edit Visit' : 'Log New Visit'}
           </h2>
@@ -55,21 +60,21 @@ const LogVisitModal = ({ isOpen, onClose, onSubmit, beat, initialData = null, fi
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-5 space-y-4">
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
+          <div className="p-5 space-y-4 overflow-y-auto overscroll-contain flex-1 custom-scrollbar">
           {!fixedCustomerId && (
             <div>
               <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Customer</label>
-              <select 
+              <CustomSelect 
                 value={customerId} 
-                onChange={(e) => setCustomerId(e.target.value)}
-                required
-                className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-200 outline-none focus:border-purple-500"
-              >
-                <option value="" disabled>Select Customer</option>
-                {availableCustomers.map(c => (
-                  <option key={c.id} value={c.id}>{c.name} ({c.id})</option>
-                ))}
-              </select>
+                onChange={setCustomerId}
+                className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-200 outline-none focus:border-purple-500 flex items-center justify-between cursor-pointer"
+                options={[
+                  { value: "", label: "Select Customer" },
+                  ...availableCustomers.map(c => ({ value: c.id, label: `${c.name} (${c.id})` }))
+                ]}
+                minWidth="100%"
+              />
             </div>
           )}
 
@@ -106,9 +111,9 @@ const LogVisitModal = ({ isOpen, onClose, onSubmit, beat, initialData = null, fi
                   onClick={() => setStatus(s)}
                   className={`py-2 rounded-lg text-sm font-semibold transition-all border ${
                     status === s 
-                      ? (s === 'Visited' ? 'bg-emerald-100 border-emerald-500 text-emerald-700 dark:bg-emerald-500/20 dark:border-emerald-500/50 dark:text-emerald-400' :
-                         s === 'Missed' ? 'bg-red-100 border-red-500 text-red-700 dark:bg-red-500/20 dark:border-red-500/50 dark:text-red-400' :
-                         'bg-amber-100 border-amber-500 text-amber-700 dark:bg-amber-500/20 dark:border-amber-500/50 dark:text-amber-400')
+                      ? (s === 'Visited' ? 'bg-emerald-50 border-emerald-600 text-emerald-700 dark:bg-emerald-500/10 dark:border-emerald-600 dark:text-emerald-400' :
+                         s === 'Missed' ? 'bg-red-50 border-red-600 text-red-700 dark:bg-red-500/10 dark:border-red-600 dark:text-red-400' :
+                         'bg-amber-50 border-amber-600 text-amber-700 dark:bg-amber-500/10 dark:border-amber-600 dark:text-amber-400')
                       : 'bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100 dark:bg-slate-900/50 dark:border-slate-800 dark:text-slate-400 dark:hover:bg-slate-800'
                   }`}
                 >
@@ -138,7 +143,8 @@ const LogVisitModal = ({ isOpen, onClose, onSubmit, beat, initialData = null, fi
             />
           </div>
 
-          <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-3">
+          </div>
+          <div className="shrink-0 p-5 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-3 bg-white dark:bg-[#0a0c14]">
             <button type="button" onClick={onClose} className="px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
               Cancel
             </button>

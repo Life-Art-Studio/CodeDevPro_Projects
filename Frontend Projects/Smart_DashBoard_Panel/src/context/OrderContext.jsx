@@ -1,30 +1,37 @@
 import { createContext, useState, useContext, useEffect } from "react";
 import StorageService from "../services/storageService";
 import { useAuth } from "./AuthContext";
+import { useAudit } from "./AuditContext";
 
 const OrderContext = createContext([]);
 
 export const OrderProvider = ({ children }) => {
-  const { currentUser } = useAuth();
+  const { currentUser, viewAsUserId } = useAuth();
+  const { logAction } = useAudit();
   const [orders, setOrders] = useState([]);
 
   useEffect(() => {
     const allOrders = StorageService.getOrders() ?? [];
     if (currentUser?.role === 'ADMIN') {
-      setOrders(allOrders);
+      if (viewAsUserId) {
+        setOrders(allOrders.filter(o => o.createdBy === viewAsUserId));
+      } else {
+        setOrders(allOrders);
+      }
     } else if (currentUser?.role === 'SALES') {
       setOrders(allOrders.filter(o => o.createdBy === currentUser.id));
     } else {
       setOrders([]);
     }
-  }, [currentUser]);
+  }, [currentUser, viewAsUserId]);
 
   const addOrder = (order) => {
     const allOrders = StorageService.getOrders() ?? [];
-    const newOrder = { ...order, createdBy: currentUser?.id };
+    const newOrder = { ...order, createdBy: viewAsUserId || currentUser?.id };
     const updatedAll = [newOrder, ...allOrders];
     StorageService.saveOrders(updatedAll);
     setOrders([newOrder, ...orders]);
+    logAction("Create Order", "Orders", `Created order ${newOrder.id}`);
   };
 
   const deleteOrder = (id) => {
@@ -32,6 +39,7 @@ export const OrderProvider = ({ children }) => {
     const updatedAll = allOrders.filter(o => o.id !== id);
     StorageService.saveOrders(updatedAll);
     setOrders(orders.filter((order) => order.id !== id));
+    logAction("Delete Order", "Orders", `Deleted order ${id}`);
   };
 
   const updateOrder = (id, updatedOrder) => {
@@ -39,6 +47,7 @@ export const OrderProvider = ({ children }) => {
     const updatedAll = allOrders.map(o => o.id === id ? { ...o, ...updatedOrder } : o);
     StorageService.saveOrders(updatedAll);
     setOrders(orders.map((order) => order.id === id ? { ...order, ...updatedOrder } : order));
+    logAction("Update Order", "Orders", `Updated order ${id} (Status: ${updatedOrder.status})`);
   };
   const clearAllOrders = () => {
     const allOrders = StorageService.getOrders() ?? [];

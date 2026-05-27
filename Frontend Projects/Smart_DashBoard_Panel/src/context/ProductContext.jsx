@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import StorageService from "../services/storageService";
 import toast from 'react-hot-toast';
+import { useAuth } from "./AuthContext";
 
 const ProductContext = createContext(null);
 
@@ -20,7 +21,8 @@ const defaultProducts = [
     scheme: { buy: 10, free: 1 },
     schemeLabel: "Summer Promo",
     schemeEndDate: "2026-12-31",
-    inStock: true
+    inStock: true,
+    createdBy: "USR-ADMIN"
   },
   {
     id: "PROD-002",
@@ -36,24 +38,49 @@ const defaultProducts = [
     scheme: { buy: 5, free: 1 },
     schemeLabel: "Monsoon Offer",
     schemeEndDate: "2026-08-15",
-    inStock: true
+    inStock: true,
+    createdBy: "USR-ADMIN"
   }
 ];
 
 export const ProductProvider = ({ children }) => {
-  const [products, setProducts] = useState(StorageService.getProducts() ?? defaultProducts);
+  const { currentUser, viewAsUserId } = useAuth();
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+    const allProducts = StorageService.getProducts() ?? defaultProducts;
+    if (currentUser?.role === 'ADMIN') {
+        if (viewAsUserId) {
+            setProducts(allProducts.filter(p => p.createdBy === viewAsUserId));
+        } else {
+            setProducts(allProducts);
+        }
+    } else if (currentUser?.role === 'SALES') {
+        setProducts(allProducts.filter(p => p.createdBy === currentUser.id));
+    } else {
+        setProducts([]);
+    }
+  }, [currentUser, viewAsUserId]);
 
   const addProduct = (product) => {
-    const newProducts = [product, ...products];
-    setProducts(newProducts);
-    StorageService.saveProducts(newProducts);
+    const allProducts = StorageService.getProducts() ?? defaultProducts;
+    const newProduct = {
+      ...product,
+      createdBy: viewAsUserId || currentUser?.id,
+    };
+    const updatedAll = [newProduct, ...allProducts];
+    setProducts([newProduct, ...products]);
+    StorageService.saveProducts(updatedAll);
     toast.success("Product added to catalogue.");
   };
 
   const updateProduct = (updatedProduct) => {
-    const newProducts = products.map(p => (p.id === updatedProduct.id ? updatedProduct : p));
-    setProducts(newProducts);
-    StorageService.saveProducts(newProducts);
+    const allProducts = StorageService.getProducts() ?? defaultProducts;
+    const updatedAll = allProducts.map(p => (p.id === updatedProduct.id ? updatedProduct : p));
+    StorageService.saveProducts(updatedAll);
+
+    const updatedLocal = products.map(p => (p.id === updatedProduct.id ? updatedProduct : p));
+    setProducts(updatedLocal);
     toast.success("Product updated.");
   };
 
@@ -65,9 +92,12 @@ export const ProductProvider = ({ children }) => {
           <button 
             onClick={() => {
               toast.dismiss(t.id);
+              const allProducts = StorageService.getProducts() ?? defaultProducts;
+              const updatedAll = allProducts.filter(p => p.id !== productId);
+              StorageService.saveProducts(updatedAll);
+              
               const newProducts = products.filter(p => p.id !== productId);
               setProducts(newProducts);
-              StorageService.saveProducts(newProducts);
               toast.success("Product deleted.");
             }}
             className="bg-red-500 text-white px-3 py-1 rounded-lg text-xs font-semibold hover:bg-red-600 transition-colors"

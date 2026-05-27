@@ -58,15 +58,15 @@ const PaymentModal = ({ isOpen, onClose, order, onRecordPayment }) => {
   };
 
   return ReactDOM.createPortal(
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#0a0c14]/80 backdrop-blur-md animate-in fade-in duration-300">
-      <div className="glass-modal flex flex-col max-h-[90vh] rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-300 transition-colors border border-white/20">
+    <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-[#0a0c14]/80 backdrop-blur-md animate-in fade-in duration-300">
+      <div className="bg-white dark:bg-[#1a1d27] shadow-xl flex flex-col max-h-[calc(100dvh-2rem)] rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-300 transition-colors border border-white/20">
         
         {/* Modal Header */}
-        <div className="shrink-0 px-6 py-5 border-b border-white/10 flex items-center justify-between bg-white/5 dark:bg-white/5 transition-colors backdrop-blur-md">
-          <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 transition-colors tracking-tight">Record Payment</h3>
+        <div className="shrink-0 px-6 py-5 border-b border-white/10 flex items-center justify-between bg-zinc-50 dark:bg-zinc-900/50 transition-colors backdrop-blur-md">
+          <h3 className="text-xl font-bold text-zinc-800 dark:text-zinc-100 transition-colors tracking-tight">Record Payment</h3>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-pink-500 dark:hover:text-pink-400 hover:bg-white/10 p-2 rounded-full transition-colors"
+            className="text-zinc-400 hover:text-pink-500 dark:hover:text-pink-400 hover:bg-white p-2 rounded-full transition-colors"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -76,25 +76,25 @@ const PaymentModal = ({ isOpen, onClose, order, onRecordPayment }) => {
 
         {/* Modal Body */}
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
-          <div className="p-6 space-y-6 overflow-y-auto custom-scrollbar flex-1">
+          <div className="p-6 space-y-6 overflow-y-auto overscroll-contain custom-scrollbar flex-1">
             
             {/* Stats Overview */}
-            <div className="space-y-3 bg-white/50 dark:bg-white/5 p-4 rounded-2xl border border-slate-200/50 dark:border-white/10">
+            <div className="space-y-3 bg-zinc-50 dark:bg-zinc-800/50 p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800">
               <div className="flex justify-between items-center text-sm font-medium">
-                <span className="text-slate-600 dark:text-slate-400">Order Total</span>
-                <span className="text-slate-800 dark:text-slate-200">₹{formatCurrency(orderTotal)}</span>
+                <span className="text-zinc-600 dark:text-zinc-400">Order Total</span>
+                <span className="text-zinc-800 dark:text-zinc-200">₹{formatCurrency(orderTotal)}</span>
               </div>
               <div className="flex justify-between items-center text-sm font-medium">
-                <span className="text-slate-600 dark:text-slate-400">Already Paid</span>
+                <span className="text-zinc-600 dark:text-zinc-400">Already Paid</span>
                 <span className="text-teal-600 dark:text-teal-400">₹{formatCurrency(alreadyPaid)}</span>
               </div>
-              <div className="flex justify-between items-center text-sm font-bold border-t border-slate-200/50 dark:border-white/10 pt-2 mt-2">
-                <span className="text-slate-800 dark:text-slate-200">Outstanding</span>
+              <div className="flex justify-between items-center text-sm font-bold border-t border-zinc-200 dark:border-zinc-800 pt-2 mt-2">
+                <span className="text-zinc-800 dark:text-zinc-200">Outstanding</span>
                 <span className="text-amber-600 dark:text-amber-400">₹{formatCurrency(outstanding)}</span>
               </div>
 
               {/* Progress Bar */}
-              <div className="w-full h-2 bg-slate-200 dark:bg-slate-700/50 rounded-full overflow-hidden mt-3">
+              <div className="w-full h-2 bg-zinc-200 dark:bg-zinc-700 rounded-full overflow-hidden mt-3">
                 <div 
                   className="h-full bg-teal-500 rounded-full transition-all duration-500"
                   style={{ width: `${progressPct}%` }}
@@ -104,18 +104,18 @@ const PaymentModal = ({ isOpen, onClose, order, onRecordPayment }) => {
 
             {/* Amount Input */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
                 Payment Amount *
               </label>
               <div className="relative">
-                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 font-bold">₹</span>
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-zinc-400 font-bold">₹</span>
                 <input
                   type="number"
                   step="0.01"
                   required
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
-                  className="w-full pl-8 pr-3 py-2.5 bg-white/50 dark:bg-white/5 border border-slate-200/50 dark:border-white/10 dark:text-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm transition-all shadow-inner"
+                  className="w-full pl-8 pr-3 py-2.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:text-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm transition-all shadow-inner"
                   placeholder="0.00"
                 />
               </div>
@@ -124,14 +124,14 @@ const PaymentModal = ({ isOpen, onClose, order, onRecordPayment }) => {
                 <button
                   type="button"
                   onClick={() => setAmount(orderTotal.toString())}
-                  className="text-xs px-3 py-1 rounded-full border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors"
+                  className="text-xs px-3 py-1 rounded-full border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
                 >
                   Pay in Full
                 </button>
                 <button
                   type="button"
                   onClick={() => setAmount(outstanding.toString())}
-                  className="text-xs px-3 py-1 rounded-full border border-teal-200 dark:border-teal-900/50 text-teal-600 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-500/10 transition-colors"
+                  className="text-xs px-3 py-1 rounded-full border border-zinc-200 dark:border-zinc-700 text-teal-600 dark:text-teal-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
                 >
                   Pay Outstanding
                 </button>
@@ -140,7 +140,7 @@ const PaymentModal = ({ isOpen, onClose, order, onRecordPayment }) => {
 
             {/* Payment Method */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
                 Payment Method *
               </label>
               <div className="flex flex-wrap gap-2">
@@ -163,20 +163,20 @@ const PaymentModal = ({ isOpen, onClose, order, onRecordPayment }) => {
 
             {/* Date Input */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
                 Payment Date
               </label>
               <input
                 type="text"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="w-full px-3 py-2.5 bg-white/50 dark:bg-white/5 border border-slate-200/50 dark:border-white/10 dark:text-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm transition-all shadow-inner"
+                className="w-full px-3 py-2.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:text-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm transition-all shadow-inner"
               />
             </div>
 
             {/* Optional Note */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
                 Note (Optional)
               </label>
               <input
@@ -184,7 +184,7 @@ const PaymentModal = ({ isOpen, onClose, order, onRecordPayment }) => {
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 placeholder="Transaction ID, Cheque No, etc."
-                className="w-full px-3 py-2.5 bg-white/50 dark:bg-white/5 border border-slate-200/50 dark:border-white/10 dark:text-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm transition-all shadow-inner"
+                className="w-full px-3 py-2.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:text-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm transition-all shadow-inner"
               />
             </div>
 
@@ -198,11 +198,11 @@ const PaymentModal = ({ isOpen, onClose, order, onRecordPayment }) => {
           </div>
 
           {/* Modal Footer */}
-          <div className="shrink-0 px-6 py-5 border-t border-white/10 bg-white/5 dark:bg-white/5 flex justify-end gap-3 transition-colors backdrop-blur-md">
+          <div className="shrink-0 px-6 py-5 border-t border-white/10 bg-zinc-50 dark:bg-zinc-900/50 flex justify-end gap-3 transition-colors backdrop-blur-md">
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2.5 text-sm font-medium text-slate-600 dark:text-slate-300 bg-white/50 dark:bg-white/5 border border-slate-200/50 dark:border-white/10 rounded-xl hover:bg-white/80 dark:hover:bg-white/10 transition-colors"
+              className="px-5 py-2.5 text-sm font-medium text-zinc-600 dark:text-zinc-300 bg-white dark:bg-[#1a1d27] border border-zinc-200 dark:border-zinc-800 rounded-xl hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
             >
               Cancel
             </button>

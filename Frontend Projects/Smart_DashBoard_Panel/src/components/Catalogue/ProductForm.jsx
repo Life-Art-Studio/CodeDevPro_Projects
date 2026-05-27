@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { calculateChainedPrices } from '../../utils/pricingUtils';
 import CameraCapture from './CameraCapture';
+import { Camera, Save, X, Trash2 } from 'lucide-react';
+import CustomSelect from '../ui/CustomSelect';
 
 const ProductForm = ({ initialData, onSave, onCancel, onDelete }) => {
   const [formData, setFormData] = useState(
@@ -24,6 +26,7 @@ const ProductForm = ({ initialData, onSave, onCancel, onDelete }) => {
 
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [preview, setPreview] = useState(null);
+  const [isCalculatorExpanded, setIsCalculatorExpanded] = useState(false);
 
   // Auto-calculate based on current form state
   const calcResults = calculateChainedPrices(
@@ -48,162 +51,188 @@ const ProductForm = ({ initialData, onSave, onCancel, onDelete }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (formData.retailerDivisor < 1.01 || formData.dbDivisor < 1.01 || formData.ssDivisor < 1.01) {
+      alert("Price Chain Error: Divisors must be at least 1.01 to ensure a valid margin chain.");
+      return;
+    }
     onSave(formData);
   };
 
   return (
     <div className="flex flex-col lg:flex-row gap-6 animate-in fade-in h-full">
       {/* LEFT: Calculator Form */}
-      <div className="w-full lg:w-2/3 glass-panel p-6 rounded-3xl border border-slate-200/50 dark:border-white/10 overflow-y-auto custom-scrollbar h-full">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-bold text-slate-800 dark:text-white">
+      <div className="w-full lg:w-2/3 bg-white dark:bg-[#1a1d27] p-4 lg:p-6 rounded-3xl border border-zinc-200 dark:border-zinc-800 overflow-y-auto custom-scrollbar h-full shadow-sm">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 mb-4 lg:mb-6">
+          <h2 className="text-lg lg:text-xl font-bold text-zinc-900 dark:text-zinc-100">
             {initialData ? "Edit Product Pricing" : "Create New Product"}
           </h2>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2 w-full sm:w-auto">
              {initialData && onDelete && (
-               <button onClick={() => { onDelete(initialData.id); onCancel(); }} type="button" className="px-4 py-2 bg-red-100 text-red-600 dark:bg-red-500/10 dark:text-red-400 rounded-xl text-sm font-semibold hover:bg-red-200 dark:hover:bg-red-500/20 transition-colors">Delete</button>
+               <button onClick={() => { onDelete(initialData.id); onCancel(); }} type="button" className="px-3 py-1.5 lg:px-4 lg:py-2 bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400 rounded-xl text-xs lg:text-sm font-semibold hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors flex items-center gap-1.5 lg:gap-2 min-h-[36px] lg:min-h-[44px] flex-1 sm:flex-none justify-center">
+                 <Trash2 className="w-3.5 h-3.5 lg:w-4 lg:h-4" /> Delete
+               </button>
              )}
-             <button onClick={onCancel} type="button" className="px-4 py-2 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 rounded-xl text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">Cancel</button>
-             <button onClick={handleSubmit} type="button" className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-500 text-white rounded-xl text-sm font-bold shadow-lg hover:shadow-purple-500/30 transition-all">Save Product</button>
+             <button onClick={onCancel} type="button" className="px-3 py-1.5 lg:px-4 lg:py-2 border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 rounded-xl text-xs lg:text-sm font-semibold hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors flex items-center gap-1.5 lg:gap-2 min-h-[36px] lg:min-h-[44px] flex-1 sm:flex-none justify-center">
+               <X className="w-3.5 h-3.5 lg:w-4 lg:h-4" /> Cancel
+             </button>
+             <button onClick={handleSubmit} type="button" className="px-3 py-1.5 lg:px-4 lg:py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs lg:text-sm font-semibold shadow-sm transition-all flex items-center gap-1.5 lg:gap-2 min-h-[36px] lg:min-h-[44px] flex-1 sm:flex-none justify-center">
+               <Save className="w-3.5 h-3.5 lg:w-4 lg:h-4" /> Save
+             </button>
           </div>
         </div>
 
-        <form className="space-y-6" onSubmit={handleSubmit}>
+        <form className="space-y-4 lg:space-y-6" onSubmit={handleSubmit}>
           {/* Basic Info */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 lg:gap-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-500 mb-1">Product Name</label>
-              <input type="text" required value={formData.name} onChange={e => handleChange('name', e.target.value)} className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none transition-all dark:text-white" placeholder="e.g. Premium Engine Oil" />
+              <label className="block text-xs font-semibold text-zinc-500 mb-1">Product Name</label>
+              <input type="text" required value={formData.name} onChange={e => handleChange('name', e.target.value)} className="w-full px-3 py-2 lg:px-4 lg:py-2.5 bg-zinc-50 dark:bg-[#0f1117] border border-zinc-200 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all dark:text-zinc-100 text-sm min-h-[40px] lg:min-h-[44px]" placeholder="e.g. Premium Engine Oil" />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-500 mb-1">SKU</label>
-              <input type="text" required value={formData.sku} onChange={e => handleChange('sku', e.target.value)} className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none transition-all dark:text-white" placeholder="e.g. LUB-10W30" />
+              <label className="block text-xs font-semibold text-zinc-500 mb-1">SKU</label>
+              <input type="text" required value={formData.sku} onChange={e => handleChange('sku', e.target.value)} className="w-full px-3 py-2 lg:px-4 lg:py-2.5 bg-zinc-50 dark:bg-[#0f1117] border border-zinc-200 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all dark:text-zinc-100 text-sm min-h-[40px] lg:min-h-[44px]" placeholder="e.g. LUB-10W30" />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-500 mb-1">Category</label>
-              <input type="text" value={formData.category} onChange={e => handleChange('category', e.target.value)} className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none transition-all dark:text-white" placeholder="e.g. Lubricants" />
+              <label className="block text-xs font-semibold text-zinc-500 mb-1">Category</label>
+              <input type="text" value={formData.category} onChange={e => handleChange('category', e.target.value)} className="w-full px-3 py-2 lg:px-4 lg:py-2.5 bg-zinc-50 dark:bg-[#0f1117] border border-zinc-200 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all dark:text-zinc-100 text-sm min-h-[40px] lg:min-h-[44px]" placeholder="e.g. Lubricants" />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-500 mb-1">Unit of Measure</label>
-              <select value={formData.uom} onChange={e => handleChange('uom', e.target.value)} className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none transition-all dark:text-white">
-                <option value="Piece">Piece</option>
-                <option value="Liter">Liter</option>
-                <option value="Kg">Kg</option>
-                <option value="Box">Box</option>
-              </select>
+              <label className="block text-xs font-semibold text-zinc-500 mb-1">Unit of Measure</label>
+              <CustomSelect 
+                value={formData.uom} 
+                onChange={val => handleChange('uom', val)} 
+                className="w-full px-3 py-2 lg:px-4 lg:py-2.5 bg-zinc-50 dark:bg-[#0f1117] border border-zinc-200 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all dark:text-zinc-100 text-sm min-h-[40px] lg:min-h-[44px] flex items-center justify-between outline-none cursor-pointer"
+                options={[
+                  { value: 'Piece', label: 'Piece' },
+                  { value: 'Liter', label: 'Liter' },
+                  { value: 'Kg', label: 'Kg' },
+                  { value: 'Box', label: 'Box' }
+                ]}
+              />
             </div>
             <div className="md:col-span-2">
-              <label className="block text-xs font-semibold text-slate-500 mb-1">Image (URL or Capture)</label>
+              <label className="block text-xs font-semibold text-zinc-500 mb-1">Image (URL or Capture)</label>
               <div className="flex gap-2">
-                <input type="text" value={formData.image} onChange={e => handleChange('image', e.target.value)} className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none transition-all dark:text-white text-sm" placeholder="https://... or base64" />
+                <input type="text" value={formData.image} onChange={e => handleChange('image', e.target.value)} className="w-full px-3 py-2 lg:px-4 lg:py-2.5 bg-zinc-50 dark:bg-[#0f1117] border border-zinc-200 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all dark:text-zinc-100 text-sm min-h-[40px] lg:min-h-[44px]" placeholder="https://... or base64" />
                 <button 
                   type="button" 
                   onClick={() => setIsCameraOpen(true)}
-                  className="px-4 py-2 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl font-bold hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors whitespace-nowrap flex items-center gap-2"
+                  className="px-3 py-2 lg:px-4 lg:py-2.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs lg:text-sm font-bold hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors whitespace-nowrap flex items-center gap-1.5 lg:gap-2 min-h-[40px] lg:min-h-[44px]"
                 >
-                  📸 <span>Capture</span>
+                  <Camera className="w-3.5 h-3.5 lg:w-4 lg:h-4" /> <span>Capture</span>
                 </button>
               </div>
             </div>
           </div>
 
-          <hr className="border-slate-200 dark:border-slate-800" />
+          <hr className="border-zinc-200 dark:border-zinc-800" />
 
           {/* Pricing & Margins */}
           <div>
-            <h3 className="text-sm font-bold text-purple-600 dark:text-purple-400 mb-4 uppercase tracking-wider">Pricing & Margins</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <h3 className="text-sm font-bold text-indigo-600 dark:text-indigo-400 mb-3 lg:mb-4 uppercase tracking-wider">Pricing & Margins</h3>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 lg:gap-4">
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">MRP (₹)</label>
-                <input type="number" required min="0" step="0.01" value={formData.mrp} onChange={e => handleChange('mrp', Number(e.target.value))} className="w-full px-4 py-2 bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:border-purple-500 focus:ring-0 focus:outline-none transition-all dark:text-white font-bold text-lg" />
+                <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">MRP (₹)</label>
+                <input type="number" required min="0" step="0.01" value={formData.mrp} onChange={e => handleChange('mrp', Number(e.target.value))} className="w-full px-3 py-2 lg:px-4 lg:py-2.5 bg-white dark:bg-[#0f1117] border-2 border-zinc-200 dark:border-zinc-700 rounded-xl focus:border-indigo-500 focus:ring-0 focus:outline-none transition-all dark:text-zinc-100 font-bold text-base lg:text-lg min-h-[40px] lg:min-h-[44px]" />
               </div>
               <div>
-                <label className="block text-xs font-bold text-emerald-600 dark:text-emerald-400 mb-1">Retailer Divisor</label>
-                <input type="number" required min="1" step="0.01" value={formData.retailerDivisor} onChange={e => handleChange('retailerDivisor', Number(e.target.value))} className="w-full px-4 py-2 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all dark:text-emerald-100 font-bold" />
+                <label className="block text-xs font-bold text-emerald-700 dark:text-emerald-400 mb-1">Retailer Divisor</label>
+                <input type="number" required min="1.01" step="0.01" value={formData.retailerDivisor} onChange={e => handleChange('retailerDivisor', Number(e.target.value))} className="w-full px-3 py-2 lg:px-4 lg:py-2.5 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all dark:text-emerald-100 text-sm font-bold min-h-[40px] lg:min-h-[44px]" />
               </div>
               <div>
-                <label className="block text-xs font-bold text-blue-600 dark:text-blue-400 mb-1">DB Divisor</label>
-                <input type="number" required min="1" step="0.01" value={formData.dbDivisor} onChange={e => handleChange('dbDivisor', Number(e.target.value))} className="w-full px-4 py-2 bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/30 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all dark:text-blue-100 font-bold" />
+                <label className="block text-xs font-bold text-blue-700 dark:text-blue-400 mb-1">DB Divisor</label>
+                <input type="number" required min="1.01" step="0.01" value={formData.dbDivisor} onChange={e => handleChange('dbDivisor', Number(e.target.value))} className="w-full px-3 py-2 lg:px-4 lg:py-2.5 bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/30 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all dark:text-blue-100 text-sm font-bold min-h-[40px] lg:min-h-[44px]" />
               </div>
               <div>
-                <label className="block text-xs font-bold text-purple-600 dark:text-purple-400 mb-1">SS Divisor</label>
-                <input type="number" required min="1" step="0.01" value={formData.ssDivisor} onChange={e => handleChange('ssDivisor', Number(e.target.value))} className="w-full px-4 py-2 bg-purple-50 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/30 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none transition-all dark:text-purple-100 font-bold" />
+                <label className="block text-xs font-bold text-indigo-700 dark:text-indigo-400 mb-1">SS Divisor</label>
+                <input type="number" required min="1.01" step="0.01" value={formData.ssDivisor} onChange={e => handleChange('ssDivisor', Number(e.target.value))} className="w-full px-3 py-2 lg:px-4 lg:py-2.5 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/30 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all dark:text-indigo-100 text-sm font-bold min-h-[40px] lg:min-h-[44px]" />
               </div>
             </div>
           </div>
 
-          <hr className="border-slate-200 dark:border-slate-800" />
+          <hr className="border-zinc-200 dark:border-zinc-800" />
 
           {/* Scheme */}
           <div>
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-sm font-bold text-pink-500 dark:text-pink-400 uppercase tracking-wider">Active Scheme</h3>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" checked={formData.inStock} onChange={e => handleChange('inStock', e.target.checked)} className="rounded text-purple-600 focus:ring-purple-500 bg-slate-100 border-slate-300 dark:border-slate-600 dark:bg-slate-700" />
-                <span className="text-sm font-bold text-slate-700 dark:text-slate-300">In Stock</span>
+            <div className="flex justify-between items-center mb-3 lg:mb-4">
+              <h3 className="text-sm font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">Active Scheme</h3>
+              <label className="flex items-center gap-2 cursor-pointer min-h-[40px] lg:min-h-[44px]">
+                <input type="checkbox" checked={formData.inStock} onChange={e => handleChange('inStock', e.target.checked)} className="w-4 h-4 lg:w-5 lg:h-5 rounded text-indigo-600 focus:ring-indigo-500 bg-zinc-100 border-zinc-300 dark:border-zinc-600 dark:bg-zinc-700" />
+                <span className="text-xs lg:text-sm font-bold text-zinc-700 dark:text-zinc-300">In Stock</span>
               </label>
             </div>
             
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-pink-50/50 dark:bg-pink-500/5 border border-pink-100 dark:border-pink-500/20 rounded-2xl">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 lg:gap-4 p-3 lg:p-4 bg-indigo-50/50 dark:bg-indigo-500/5 border border-indigo-100 dark:border-indigo-500/20 rounded-2xl">
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Buy Qty</label>
-                <input type="number" min="0" value={formData.scheme.buy} onChange={e => handleSchemeChange('buy', e.target.value)} className="w-full px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pink-500 focus:outline-none transition-all dark:text-white font-bold" />
+                <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">Buy Qty</label>
+                <input type="number" min="0" value={formData.scheme.buy} onChange={e => handleSchemeChange('buy', e.target.value)} className="w-full px-3 py-2 lg:px-4 lg:py-2.5 bg-white dark:bg-[#0f1117] border border-zinc-200 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all dark:text-zinc-100 text-sm font-bold min-h-[40px] lg:min-h-[44px]" />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Free Qty</label>
-                <input type="number" min="0" value={formData.scheme.free} onChange={e => handleSchemeChange('free', e.target.value)} className="w-full px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pink-500 focus:outline-none transition-all dark:text-white font-bold" />
-              </div>
-              <div className="md:col-span-2">
-                <label className="block text-xs font-semibold text-slate-500 mb-1">Scheme Label</label>
-                <input type="text" value={formData.schemeLabel} onChange={e => handleChange('schemeLabel', e.target.value)} className="w-full px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pink-500 focus:outline-none transition-all dark:text-white" placeholder="e.g. Diwali Offer" />
+                <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">Free Qty</label>
+                <input type="number" min="0" value={formData.scheme.free} onChange={e => handleSchemeChange('free', e.target.value)} className="w-full px-3 py-2 lg:px-4 lg:py-2.5 bg-white dark:bg-[#0f1117] border border-zinc-200 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all dark:text-zinc-100 text-sm font-bold min-h-[40px] lg:min-h-[44px]" />
               </div>
               <div className="col-span-2">
-                <label className="block text-xs font-semibold text-slate-500 mb-1">Validity (End Date)</label>
-                <input type="date" value={formData.schemeEndDate} onChange={e => handleChange('schemeEndDate', e.target.value)} className="w-full px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pink-500 focus:outline-none transition-all dark:text-white" />
+                <label className="block text-xs font-semibold text-zinc-500 mb-1">Scheme Label</label>
+                <input type="text" value={formData.schemeLabel} onChange={e => handleChange('schemeLabel', e.target.value)} className="w-full px-3 py-2 lg:px-4 lg:py-2.5 bg-white dark:bg-[#0f1117] border border-zinc-200 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all dark:text-zinc-100 text-sm min-h-[40px] lg:min-h-[44px]" placeholder="e.g. Diwali Offer" />
+              </div>
+              <div className="col-span-2">
+                <label className="block text-xs font-semibold text-zinc-500 mb-1">Validity (End Date)</label>
+                <input type="date" value={formData.schemeEndDate} onChange={e => handleChange('schemeEndDate', e.target.value)} className="w-full px-3 py-2 lg:px-4 lg:py-2.5 bg-white dark:bg-[#0f1117] border border-zinc-200 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all dark:text-zinc-100 text-sm min-h-[40px] lg:min-h-[44px]" />
               </div>
             </div>
           </div>
         </form>
       </div>
 
+      {/* Mobile Toggle for Calculator */}
+      <div className="lg:hidden w-full">
+        <button 
+          type="button" 
+          onClick={() => setIsCalculatorExpanded(!isCalculatorExpanded)}
+          className="w-full py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-sm font-bold rounded-full shadow-md flex items-center justify-center gap-2 transition-all min-h-[44px] hover:shadow-lg active:scale-95"
+        >
+          {isCalculatorExpanded ? "Hide Live Margin Calculator" : "View Live Margin Calculator"}
+        </button>
+      </div>
+
       {/* RIGHT: Live Preview & Math */}
-      <div className="w-full lg:w-1/3 flex flex-col gap-4">
+      <div className={`w-full lg:w-1/3 flex-col gap-3 lg:gap-4 lg:flex ${isCalculatorExpanded ? 'flex animate-in slide-in-from-top-4 duration-300' : 'hidden'}`}>
         {/* Step-by-Step Strip */}
-        <div className="glass-panel p-4 rounded-2xl border border-slate-200/50 dark:border-white/10 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-950">
-           <h3 className="text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">Live Calculation Chain</h3>
-           <div className="p-3 bg-slate-800 dark:bg-black rounded-xl border border-slate-700 shadow-inner">
-             <code className="text-sm text-green-400 font-mono break-words leading-relaxed">
+        <div className="bg-zinc-50 dark:bg-[#0f1117] p-3 lg:p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm">
+           <h3 className="text-[10px] lg:text-xs font-bold text-zinc-400 mb-1.5 lg:mb-2 uppercase tracking-wider">Live Calculation Chain</h3>
+           <div className="p-2.5 lg:p-3 bg-zinc-900 dark:bg-black rounded-xl border border-zinc-800 shadow-inner">
+             <code className="text-xs lg:text-sm text-emerald-400 font-mono break-words leading-relaxed">
                {calcResults.formulaStrip}
              </code>
            </div>
         </div>
 
         {/* Calculated Margin Cards */}
-        <div className="glass-panel p-5 rounded-2xl border border-slate-200/50 dark:border-white/10 flex-1 space-y-4 bg-white/40 dark:bg-[#0a0c14]/40">
-           <h3 className="text-sm font-bold text-slate-800 dark:text-white border-b border-slate-200 dark:border-slate-800 pb-2">Resulting Landing Costs</h3>
+        <div className="bg-white dark:bg-[#1a1d27] p-4 lg:p-5 rounded-2xl border border-zinc-200 dark:border-zinc-800 flex-1 space-y-3 shadow-sm">
+           <h3 className="text-xs lg:text-sm font-bold text-zinc-900 dark:text-zinc-100 border-b border-zinc-200 dark:border-zinc-800 pb-2">Resulting Landing Costs</h3>
            
-           <div className="flex justify-between items-center p-3 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20">
+           <div className="flex justify-between items-center p-3 lg:p-4 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20">
               <div>
-                <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase">Retailer</p>
-                <p className="text-[10px] text-emerald-500">Margin: {calcResults.retailerMarginPercent.toFixed(1)}%</p>
+                <p className="text-[10px] lg:text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase">Retailer</p>
+                <p className="text-[9px] lg:text-[10px] text-emerald-600 dark:text-emerald-500">Margin: {calcResults.retailerMarginPercent.toFixed(1)}%</p>
               </div>
-              <span className="text-xl font-black text-slate-800 dark:text-white">₹{calcResults.retailerCost.toFixed(2)}</span>
+              <span className="text-lg lg:text-xl font-black text-zinc-900 dark:text-zinc-100">₹{calcResults.retailerCost.toFixed(2)}</span>
            </div>
 
-           <div className="flex justify-between items-center p-3 rounded-xl bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20">
+           <div className="flex justify-between items-center p-3 lg:p-4 rounded-xl bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20">
               <div>
-                <p className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase">Distributor (DB)</p>
-                <p className="text-[10px] text-blue-500">Margin: {calcResults.dbMarginPercent.toFixed(1)}%</p>
+                <p className="text-[10px] lg:text-xs font-bold text-blue-700 dark:text-blue-400 uppercase">Distributor (DB)</p>
+                <p className="text-[9px] lg:text-[10px] text-blue-600 dark:text-blue-500">Margin: {calcResults.dbMarginPercent.toFixed(1)}%</p>
               </div>
-              <span className="text-xl font-black text-slate-800 dark:text-white">₹{calcResults.dbCost.toFixed(2)}</span>
+              <span className="text-lg lg:text-xl font-black text-zinc-900 dark:text-zinc-100">₹{calcResults.dbCost.toFixed(2)}</span>
            </div>
 
-           <div className="flex justify-between items-center p-3 rounded-xl bg-purple-50 dark:bg-purple-500/10 border border-purple-100 dark:border-purple-500/20">
+           <div className="flex justify-between items-center p-3 lg:p-4 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20">
               <div>
-                <p className="text-xs font-bold text-purple-600 dark:text-purple-400 uppercase">Super Stockist (SS)</p>
-                <p className="text-[10px] text-purple-500">Margin: {calcResults.ssMarginPercent.toFixed(1)}%</p>
+                <p className="text-[10px] lg:text-xs font-bold text-indigo-700 dark:text-indigo-400 uppercase">Super Stockist (SS)</p>
+                <p className="text-[9px] lg:text-[10px] text-indigo-600 dark:text-indigo-500">Margin: {calcResults.ssMarginPercent.toFixed(1)}%</p>
               </div>
-              <span className="text-xl font-black text-slate-800 dark:text-white">₹{calcResults.ssCost.toFixed(2)}</span>
+              <span className="text-lg lg:text-xl font-black text-zinc-900 dark:text-zinc-100">₹{calcResults.ssCost.toFixed(2)}</span>
            </div>
         </div>
       </div>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import useCustomerContext from "../../context/CustomerContext";
 import ReactDOM from "react-dom";
 import toast from 'react-hot-toast';
+import CustomSelect from "../../components/ui/CustomSelect";
 
 const AddCustomerModal = ({ isOpen, onClose }) => {
   const { customers, addCustomer } = useCustomerContext();
@@ -128,15 +129,15 @@ const AddCustomerModal = ({ isOpen, onClose }) => {
 
   return ReactDOM.createPortal(
     // 1. The Dark Overlay Backdrop
-    <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-[#0a0c14]/80 backdrop-blur-md animate-in fade-in duration-300">
+    <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-[#0a0c14]/80 backdrop-blur-md animate-in fade-in duration-300">
       {/* 2. The Modal Box */}
-      <div className="glass-modal rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-300 transition-colors border border-white/20">
+      <div className="bg-white dark:bg-[#1a1d27] flex flex-col max-h-[calc(100dvh-2rem)] shadow-xl rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-300 transition-colors border border-white/20">
         {/* Modal Header */}
-        <div className="px-6 py-5 border-b border-white/10 flex items-center justify-between bg-white/5 dark:bg-white/5 transition-colors backdrop-blur-md">
-          <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 transition-colors tracking-tight">Add New Customer</h3>
+        <div className="shrink-0 px-6 py-5 border-b border-white/10 flex items-center justify-between bg-zinc-50 dark:bg-zinc-900 transition-colors backdrop-blur-md">
+          <h3 className="text-xl font-bold text-zinc-800 dark:text-zinc-100 transition-colors tracking-tight">Add New Customer</h3>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-pink-500 dark:hover:text-pink-400 hover:bg-white/10 p-2 rounded-full transition-colors"
+            className="text-zinc-400 hover:text-pink-500 dark:hover:text-pink-400 hover:bg-white p-2 rounded-full transition-colors"
           >
             <svg
               className="w-5 h-5"
@@ -155,18 +156,18 @@ const AddCustomerModal = ({ isOpen, onClose }) => {
         </div>
 
         {/* Modal Form Body */}
-        <form onSubmit={handleSubmit}>
-          <div className="p-6 space-y-5">
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
+          <div className="p-6 space-y-5 overflow-y-auto overscroll-contain flex-1 custom-scrollbar">
             {/* Full Name Input */}
             <div>
               <label
                 htmlFor="name"
-                className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5 transition-colors"
+                className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5 transition-colors"
               >
                 Full Name *
               </label>
               <div className="relative">
-                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">👤</span>
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-zinc-400">👤</span>
                 <input
                   type="text"
                   id="name"
@@ -177,7 +178,7 @@ const AddCustomerModal = ({ isOpen, onClose }) => {
                   onChange={(e) =>
                     setFormData({ ...formData, name: e.target.value })
                   }
-                  className="w-full pl-10 pr-3 py-2.5 bg-white/50 dark:bg-white/5 border border-slate-200/50 dark:border-white/10 dark:text-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm transition-all shadow-inner focus:shadow-[0_0_15px_rgba(168,85,247,0.2)]"
+                  className="w-full pl-10 pr-3 py-2.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:text-zinc-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm transition-all shadow-inner focus:shadow-[0_0_15px_rgba(168,85,247,0.2)]"
                 />
               </div>
             </div>
@@ -186,12 +187,12 @@ const AddCustomerModal = ({ isOpen, onClose }) => {
             <div>
               <label
                 htmlFor="email"
-                className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5 transition-colors"
+                className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5 transition-colors"
               >
                 Email Address
               </label>
               <div className="relative">
-                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">✉️</span>
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-zinc-400">✉️</span>
                 <input
                   type="email"
                   id="email"
@@ -201,7 +202,7 @@ const AddCustomerModal = ({ isOpen, onClose }) => {
                   onChange={(e) =>
                     setFormData({ ...formData, email: e.target.value })
                   }
-                  className="w-full pl-10 pr-3 py-2.5 bg-white/50 dark:bg-white/5 border border-slate-200/50 dark:border-white/10 dark:text-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm transition-all shadow-inner focus:shadow-[0_0_15px_rgba(168,85,247,0.2)]"
+                  className="w-full pl-10 pr-3 py-2.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:text-zinc-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm transition-all shadow-inner focus:shadow-[0_0_15px_rgba(168,85,247,0.2)]"
                 />
               </div>
             </div>
@@ -210,12 +211,12 @@ const AddCustomerModal = ({ isOpen, onClose }) => {
             <div>
               <label
                 htmlFor="address"
-                className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5 transition-colors"
+                className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5 transition-colors"
               >
                 Address *
               </label>
               <div className="relative">
-                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">📍</span>
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-zinc-400">📍</span>
                 <input
                   type="text"
                   id="address"
@@ -226,7 +227,7 @@ const AddCustomerModal = ({ isOpen, onClose }) => {
                   onChange={(e) =>
                     setFormData({ ...formData, address: e.target.value })
                   }
-                  className="w-full pl-10 pr-3 py-2.5 bg-white/50 dark:bg-white/5 border border-slate-200/50 dark:border-white/10 dark:text-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm transition-all shadow-inner focus:shadow-[0_0_15px_rgba(168,85,247,0.2)]"
+                  className="w-full pl-10 pr-3 py-2.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:text-zinc-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm transition-all shadow-inner focus:shadow-[0_0_15px_rgba(168,85,247,0.2)]"
                 />
               </div>
             </div>
@@ -235,12 +236,12 @@ const AddCustomerModal = ({ isOpen, onClose }) => {
             <div>
               <label
                 htmlFor="phone"
-                className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5 transition-colors"
+                className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5 transition-colors"
               >
                 Phone *
               </label>
               <div className="relative">
-                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">📱</span>
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-zinc-400">📱</span>
                 <input
                   type="tel"
                   id="phone"
@@ -251,7 +252,7 @@ const AddCustomerModal = ({ isOpen, onClose }) => {
                   onChange={(e) =>
                     setFormData({ ...formData, phone: e.target.value })
                   }
-                  className="w-full pl-10 pr-3 py-2.5 bg-white/50 dark:bg-white/5 border border-slate-200/50 dark:border-white/10 dark:text-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm transition-all shadow-inner focus:shadow-[0_0_15px_rgba(168,85,247,0.2)]"
+                  className="w-full pl-10 pr-3 py-2.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:text-zinc-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm transition-all shadow-inner focus:shadow-[0_0_15px_rgba(168,85,247,0.2)]"
                 />
               </div>
             </div>
@@ -261,43 +262,40 @@ const AddCustomerModal = ({ isOpen, onClose }) => {
               <div className="flex-1">
                 <label
                   htmlFor="status"
-                  className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5 transition-colors"
+                  className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5 transition-colors"
                 >
                   Status
                 </label>
                 <div className="relative">
-                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">⚡</span>
-                  <select
-                    id="status"
-                    name="status"
+                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-zinc-400">⚡</span>
+                  <CustomSelect
                     value={formData.status}
-                    onChange={(e) =>
-                      setFormData({ ...formData, status: e.target.value })
-                    }
-                    className="w-full pl-10 pr-3 py-2.5 bg-white/50 dark:bg-white/5 border border-slate-200/50 dark:border-white/10 dark:text-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm transition-all shadow-inner focus:shadow-[0_0_15px_rgba(168,85,247,0.2)] appearance-none"
-                  >
-                    <option className="bg-slate-900" value="Active">Active</option>
-                    <option className="bg-slate-900" value="Inactive">Inactive</option>
-                  </select>
+                    onChange={(val) => setFormData({ ...formData, status: val })}
+                    className="w-full pl-10 pr-3 py-2.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:text-zinc-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm transition-all shadow-inner focus:shadow-[0_0_15px_rgba(168,85,247,0.2)] flex items-center justify-between outline-none cursor-pointer"
+                    options={[
+                      { value: 'Active', label: 'Active' },
+                      { value: 'Inactive', label: 'Inactive' }
+                    ]}
+                  />
                 </div>
               </div>
 
               <div className="flex-1">
-                <label htmlFor="spend" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5 transition-colors">Total Spend</label>
+                <label htmlFor="spend" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5 transition-colors">Total Spend</label>
                 <div className="relative">
-                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">₹</span>
-                  <input type="number" id="spend" name="spend" step="0.01" value={formData.spend} onChange={(e) => setFormData({...formData, spend: e.target.value})} className="w-full pl-9 pr-3 py-2.5 bg-white/50 dark:bg-white/5 border border-slate-200/50 dark:border-white/10 dark:text-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm transition-all shadow-inner focus:shadow-[0_0_15px_rgba(168,85,247,0.2)]" />
+                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-zinc-400">₹</span>
+                  <input type="number" id="spend" name="spend" step="0.01" value={formData.spend} onChange={(e) => setFormData({...formData, spend: e.target.value})} className="w-full pl-9 pr-3 py-2.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:text-zinc-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm transition-all shadow-inner focus:shadow-[0_0_15px_rgba(168,85,247,0.2)]" />
                 </div>
               </div>
 
             </div>
             
             {/* Location Section */}
-            <div className="col-span-1 md:col-span-2 pt-2 border-t border-slate-200/50 dark:border-white/10">
+            <div className="col-span-1 md:col-span-2 pt-2 border-t border-zinc-200 dark:border-zinc-800">
               <div className="flex items-center justify-between">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-0.5">Store Location</label>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-0.5">Store Location</label>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">
                     {formData.lat && formData.lng 
                       ? `Captured: ${formData.lat.toFixed(4)}, ${formData.lng.toFixed(4)}` 
                       : "No location captured yet."}
@@ -324,11 +322,11 @@ const AddCustomerModal = ({ isOpen, onClose }) => {
           </div>
 
           {/* Modal Footer (Action Buttons) */}
-          <div className="px-6 py-5 border-t border-white/10 bg-white/5 dark:bg-white/5 flex justify-end gap-3 transition-colors backdrop-blur-md">
+          <div className="shrink-0 px-6 py-5 border-t border-white/10 bg-zinc-50 dark:bg-zinc-900 flex justify-end gap-3 transition-colors backdrop-blur-md">
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2.5 text-sm font-medium text-slate-600 dark:text-slate-300 bg-white/50 dark:bg-white/5 border border-slate-200/50 dark:border-white/10 rounded-xl hover:bg-white/80 dark:hover:bg-white/10 transition-colors"
+              className="px-5 py-2.5 text-sm font-medium text-zinc-600 dark:text-zinc-300 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl hover:bg-white dark:hover:bg-white transition-colors"
             >
               Cancel
             </button>
