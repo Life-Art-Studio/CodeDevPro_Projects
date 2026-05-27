@@ -3,15 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CodeDevPro - Premium Frontend Portfolio</title>
+    <title>Adil Khan - Cinematic Tech Minimalist Portfolio</title>
     <meta
       name="description"
-      content="A cinematic showcase of frontend web development projects by CodeDevPro."
+      content="A cinematic showcase of frontend web development projects by Adil Khan."
     />
     <link rel="stylesheet" href="main.css" />
-    <!-- Google Fonts -->
+    <!-- Google Fonts: Syne for massive headers, JetBrains Mono for code/subtext -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@400;500;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@400;600;700;800&display=swap"
       rel="stylesheet"
     />
     <!-- Font Awesome for Icons -->
@@ -42,73 +44,126 @@
     <!-- Navigation / Header -->
     <header class="glass-header">
       <div class="logo">
-        <i class="fa-solid fa-code"></i> CodeDev<span>Pro</span>
+        Adil<span>.dev</span>
       </div>
       <nav>
-        <a href="#portfolio" class="nav-link active">Projects</a>
+        <a href="#about" class="nav-link">About</a>
+        <a href="#experience" class="nav-link">Experience</a>
+        <a href="#projects" class="nav-link active">Work</a>
         <a href="https://github.com/CodeDevPro" target="_blank" class="nav-link"
-          ><i class="fa-brands fa-github"></i> GitHub</a
+          ><i class="fa-brands fa-github"></i> Source</a
         >
       </nav>
     </header>
 
-    <!-- Hero Section -->
-    <section class="hero">
-      <div class="hero-content">
-        <h1 class="glitch" data-text="FULL STACK!">FULL STACK!</h1>
-        <p class="subtitle">
-          A curated collection of web applications, UI experiments, and creative
-          coding projects.
-        </p>
-        <a href="#portfolio" class="cta-btn magnetic">
-          Explore The Vault <i class="fa-solid fa-arrow-down"></i>
-        </a>
-      </div>
-    </section>
-
-    <!-- Portfolio Grid Section -->
-    <section id="portfolio" class="portfolio-section">
-      <div class="section-header">
-        <h2><i class="fa-solid fa-folder-open"></i> Project Vault</h2>
-        <div class="filter-controls">
-          <input
-            type="text"
-            id="search-input"
-            placeholder="Search projects..."
-            class="glass-input"
-          />
+    <main>
+      <!-- Hero Section -->
+      <section class="hero">
+        <div class="hero-content reveal-text">
+          <h1 class="massive-text">I build high-performance user interfaces that feel like magic.</h1>
+          <p class="subtitle">
+            <span class="code-font">&lt;Adil Khan /&gt;</span> Frontend Developer specializing in React, UI/UX, and cinematic motion.
+          </p>
+          <a href="#projects" class="cta-btn magnetic">
+            View The Architecture <i class="fa-solid fa-arrow-down"></i>
+          </a>
         </div>
-      </div>
+      </section>
 
-      <div class="projects-grid" id="projects-grid">
-        <!-- Project Cards will be injected here by script.js -->
-      </div>
-    </section>
+      <!-- About Section -->
+      <section id="about" class="about-section scroll-reveal">
+        <div class="section-container">
+          <div class="about-grid">
+            <div class="about-text">
+              <h2 class="section-title">01. <span class="highlight">About</span></h2>
+              <p class="body-text">
+                I am a dedicated frontend engineer with a passion for bridging the gap between design and engineering. 
+                I believe that static is the enemy, and motion is the handshake of the modern web. 
+                My focus is on creating premium, ultra-sleek web applications that are as performant as they are beautiful.
+              </p>
+              <div class="skills-container">
+                <span class="skill-tag">JavaScript (ES6+)</span>
+                <span class="skill-tag">React</span>
+                <span class="skill-tag">HTML & CSS</span>
+                <span class="skill-tag">Tailwind CSS</span>
+                <span class="skill-tag">Framer Motion</span>
+                <span class="skill-tag">Performance Optimization</span>
+              </div>
+            </div>
+            <div class="about-visual">
+              <div class="glass-container geometric-shape">
+                 <i class="fa-brands fa-react shape-icon"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Experience Section -->
+      <section id="experience" class="experience-section scroll-reveal">
+        <div class="section-container">
+          <h2 class="section-title">02. <span class="highlight">Experience</span></h2>
+          <div class="timeline">
+            <div class="timeline-item">
+              <div class="timeline-node"></div>
+              <div class="timeline-content glass-card">
+                <span class="timeline-date code-font">2024 - Present</span>
+                <h3 class="timeline-role">Frontend Developer</h3>
+                <p class="timeline-desc">Architecting robust and cinematic user interfaces, focusing on dynamic dashboards, performance tuning, and custom micro-interactions.</p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-node"></div>
+              <div class="timeline-content glass-card">
+                <span class="timeline-date code-font">2022 - 2024</span>
+                <h3 class="timeline-role">Web Developer / UI Enthusiast</h3>
+                <p class="timeline-desc">Built a diverse portfolio of web applications, focusing on responsive design, API integration, and utility-driven component creation.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Portfolio Grid Section -->
+      <section id="projects" class="portfolio-section scroll-reveal">
+        <div class="section-container">
+          <div class="section-header">
+            <h2 class="section-title">03. <span class="highlight">Selected Work</span></h2>
+            <div class="filter-controls">
+              <input
+                type="text"
+                id="search-input"
+                placeholder="search_projects();"
+                class="glass-input code-font"
+              />
+            </div>
+          </div>
+
+          <!-- Asymmetrical Bento Grid -->
+          <div class="bento-grid" id="projects-grid">
+            <!-- Project Cards will be injected here by main.js -->
+          </div>
+        </div>
+      </section>
+    </main>
 
     <!-- Footer -->
     <footer class="glass-footer">
       <div class="footer-info">
-        <p>&copy; 2026 CodeDevPro. Crafted with passion and code.</p>
+        <p class="code-font">&copy; 2026 Adil Khan. Engineered with precision.</p>
         <a
           href="https://app.netlify.com/projects/codedevpro/deploys"
           target="_blank"
-          style="
-            display: inline-block;
-            margin-top: 10px;
-            border-radius: 4px;
-            overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-          "
+          class="status-badge"
         >
           <img
             src="https://api.netlify.com/api/v1/badges/97e99383-03c0-422b-81e5-5e86df31577b/deploy-status"
             alt="Netlify Status"
-            style="display: block"
           />
         </a>
       </div>
       <div class="social-links">
-        <a href="#" class="magnetic"><i class="fa-brands fa-twitter"></i></a>
+        <a href="https://github.com/CodeDevPro" target="_blank" class="magnetic"><i class="fa-brands fa-github"></i></a>
         <a
           href="https://www.linkedin.com/in/adil-khan-357202377/"
           target="_blank"

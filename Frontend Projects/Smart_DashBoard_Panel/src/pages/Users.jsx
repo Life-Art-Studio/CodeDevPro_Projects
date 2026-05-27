@@ -93,7 +93,7 @@ const Users = () => {
     }
   };
 
-  const userMetrics = users.map(user => {
+  const userMetrics = users.filter(user => user.role !== 'ADMIN').map(user => {
     const userCustomers = customers.filter(c => c.createdBy === user.id);
     const userOrders = orders.filter(o => o.createdBy === user.id);
     
