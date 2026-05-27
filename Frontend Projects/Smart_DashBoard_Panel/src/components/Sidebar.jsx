@@ -5,16 +5,19 @@ import useCustomerContext from "../context/CustomerContext";
 import useOrderContext from "../context/OrderContext";
 
 const Sidebar = () => {
-  const menuItems = [
+  const { isSidebarOpen, onOpenSidebarHandler, currentUser } = useAuth();
+
+  const menuItems = currentUser?.role === 'ADMIN' ? [
     { name: "Dashboard", path: "/dashboard", icon: "📊" },
     { name: "Sales", path: "/dashboard/sales", icon: "💰" },
+    { name: "Users", path: "/dashboard/users", icon: "🧑‍💼" },
+    { name: "Catalogue", path: "/dashboard/catalogue", icon: "📦" },
+  ] : [
     { name: "Customers", path: "/dashboard/customers", icon: "👥" },
     { name: "Beats", path: "/dashboard/beats", icon: "🗺️" },
     { name: "Map View", path: "/dashboard/map", icon: "📍" },
     { name: "Catalogue", path: "/dashboard/catalogue", icon: "📦" },
   ];
-
-  const { isSidebarOpen, onOpenSidebarHandler } = useAuth();
   
   // --- Search Logic ---
   const { customers } = useCustomerContext();

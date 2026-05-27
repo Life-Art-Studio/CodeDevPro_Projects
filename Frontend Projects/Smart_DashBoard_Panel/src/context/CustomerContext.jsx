@@ -1,17 +1,33 @@
-import { createContext,useContext,useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import initialCustomers from "../utils/CustomerList";
 import StorageService from "../services/storageService";
 import toast from 'react-hot-toast';
+import { useAuth } from "./AuthContext";
 
 const CustomerContext = createContext(null);
 
 
 export const CustomerProvider = ({children}) => {
-    const [customers,setCustomers] = useState(StorageService.getCustomers() ?? initialCustomers);
+    const { currentUser } = useAuth();
+    const [customers, setCustomers] = useState([]);
+
+    useEffect(() => {
+        const allCustomers = StorageService.getCustomers() ?? initialCustomers;
+        if (currentUser?.role === 'ADMIN') {
+            setCustomers(allCustomers);
+        } else if (currentUser?.role === 'SALES') {
+            setCustomers(allCustomers.filter(c => c.createdBy === currentUser.id));
+        } else {
+            setCustomers([]);
+        }
+    }, [currentUser]);
+
     const addCustomer = (customer) => {
-        const newCustomers = [customer, ...customers];
-        setCustomers(newCustomers);
-        StorageService.saveCustomers(newCustomers);
+        const allCustomers = StorageService.getCustomers() ?? initialCustomers;
+        const newCustomer = { ...customer, createdBy: currentUser?.id };
+        const updatedAll = [newCustomer, ...allCustomers];
+        StorageService.saveCustomers(updatedAll);
+        setCustomers([newCustomer, ...customers]);
     }
    
     const deleteCustomer = (customer) => {
@@ -22,9 +38,10 @@ export const CustomerProvider = ({children}) => {
                 <button 
                   onClick={() => {
                     toast.dismiss(t.id);
-                    const newCustomers = customers.filter((c) => c.id !== customer.id);
-                    setCustomers(newCustomers);
-                    StorageService.saveCustomers(newCustomers);
+                    const allCustomers = StorageService.getCustomers() ?? initialCustomers;
+                    const updatedAll = allCustomers.filter((c) => c.id !== customer.id);
+                    StorageService.saveCustomers(updatedAll);
+                    setCustomers(customers.filter((c) => c.id !== customer.id));
                     toast.success("Customer deleted.");
                   }}
                   className="bg-red-500 text-white px-3 py-1 rounded-lg text-xs font-semibold hover:bg-red-600 transition-colors"
@@ -35,12 +52,16 @@ export const CustomerProvider = ({children}) => {
           ), { duration: Infinity });
     }
     const updateCustomer = (updatedCustomer) => {
-        const updatedCustomers = customers.map(customer => 
-            // If the ID matches, replace the old data with the new data
+        const allCustomers = StorageService.getCustomers() ?? initialCustomers;
+        const updatedAll = allCustomers.map(c => 
+            c.id === updatedCustomer.id ? updatedCustomer : c
+        );
+        StorageService.saveCustomers(updatedAll);
+        
+        const updatedLocal = customers.map(customer => 
             customer.id === updatedCustomer.id ? updatedCustomer : customer
         );
-        setCustomers(updatedCustomers);
-        StorageService.saveCustomers(updatedCustomers);
+        setCustomers(updatedLocal);
     };
     return (
         <CustomerContext.Provider value={{customers,addCustomer,deleteCustomer,updateCustomer}}>

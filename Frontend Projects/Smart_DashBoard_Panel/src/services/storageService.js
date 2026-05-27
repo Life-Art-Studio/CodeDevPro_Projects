@@ -1,17 +1,60 @@
 const StorageService = {
   saveUser: (userData) => {
-    localStorage.setItem("userData", JSON.stringify(userData));
+    const users = StorageService.getAllUsers();
+    const newUser = { ...userData, id: `USR-${Date.now()}` };
+    users.push(newUser);
+    localStorage.setItem("users", JSON.stringify(users));
+    return newUser;
   },
 
-  // Get user object safely (prevents JSON parse errors)
-  getUser: () => {
+  deleteUser: (userId) => {
+    const users = StorageService.getAllUsers();
+    const filteredUsers = users.filter(user => user.id !== userId);
+    localStorage.setItem("users", JSON.stringify(filteredUsers));
+  },
+
+  getAllUsers: () => {
     try {
-      const data = localStorage.getItem("userData");
-      return data ? JSON.parse(data) : null;
+      const data = localStorage.getItem("users");
+      return data ? JSON.parse(data) : [];
     } catch (error) {
-      console.error("Failed to parse user data", error);
+      return [];
+    }
+  },
+
+  getUserByEmail: (email) => {
+    const users = StorageService.getAllUsers();
+    return users.find(u => u.email === email) || null;
+  },
+
+  getCurrentUser: () => {
+    try {
+      const data = localStorage.getItem("currentUser");
+      return data ? JSON.parse(data) : null;
+    } catch {
       return null;
     }
+  },
+
+  setCurrentUser: (user) => {
+    if (user) {
+      localStorage.setItem("currentUser", JSON.stringify(user));
+    } else {
+      localStorage.removeItem("currentUser");
+    }
+  },
+
+  updateCurrentUser: (updatedData) => {
+    const currentUser = StorageService.getCurrentUser();
+    if (!currentUser) return;
+    const mergedUser = { ...currentUser, ...updatedData };
+    StorageService.setCurrentUser(mergedUser);
+    
+    // Also update in the users array
+    const users = StorageService.getAllUsers();
+    const updatedUsers = users.map(u => u.id === currentUser.id ? mergedUser : u);
+    localStorage.setItem("users", JSON.stringify(updatedUsers));
+    return mergedUser;
   },
 
   // Save login status
@@ -26,11 +69,13 @@ const StorageService = {
 
   // Wipe everything on logout or account deletion
   clearAll: () => {
-    localStorage.removeItem("userData");
+    localStorage.removeItem("users");
+    localStorage.removeItem("currentUser");
     localStorage.removeItem("isLoggedIn");
   },
   logout: () => {
     localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("currentUser");
   },
   getCustomers: () => {
     try {

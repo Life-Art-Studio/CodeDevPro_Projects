@@ -4,7 +4,7 @@ import StorageService from "../services/storageService";
 import { formatCurrency } from "./financeUtils";
 
 export const generateBeatPDF = (beat, customers, orders, visits, getOrderPaidAmount, getOrderOutstanding) => {
-  const user = StorageService.getUser() ?? { name: 'My Business' };
+  const user = StorageService.getCurrentUser() ?? { name: 'My Business' };
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
   const rightMargin = pageWidth - 14;

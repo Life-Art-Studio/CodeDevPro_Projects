@@ -3,14 +3,15 @@ import toast from "react-hot-toast";
 
 const AuthService = {
   login: (email, password) => {
-    const savedUser = StorageService.getUser();
+    const user = StorageService.getUserByEmail(email);
     
-    if (!savedUser) {
+    if (!user) {
       toast.error("User Not Found. Please sign up.");
       return false;
     }
 
-    if (email === savedUser.email && password === savedUser.password) {
+    if (password === user.password) {
+      StorageService.setCurrentUser(user);
       StorageService.setLoginStatus(true);
       return true;
     }
@@ -20,7 +21,13 @@ const AuthService = {
 
   // Handles registering a new user
   signUp: (userData) => {
-    StorageService.saveUser(userData);
+    const existing = StorageService.getUserByEmail(userData.email);
+    if (existing) {
+      toast.error("Email already in use.");
+      return false;
+    }
+    const newUser = StorageService.saveUser(userData);
+    StorageService.setCurrentUser(newUser);
     StorageService.setLoginStatus(true);
     return true; 
   },

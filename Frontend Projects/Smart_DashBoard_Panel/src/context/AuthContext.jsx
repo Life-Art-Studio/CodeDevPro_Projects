@@ -11,6 +11,9 @@ export const AuthProvider = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
     return StorageService.getLoginStatus();
   });
+  const [currentUser, setCurrentUser] = useState(() => {
+    return StorageService.getCurrentUser();
+  });
 
   // 2. UI States (No changes needed here)
   const [isSidebarOpen, setIsOpen] = useState(false);
@@ -25,21 +28,27 @@ export const AuthProvider = ({ children }) => {
     const isSuccess = AuthService.login(loginData.email, loginData.password);
     if (isSuccess) {
       setIsLoggedIn(true);
+      setCurrentUser(StorageService.getCurrentUser());
       return true;
     } else {
       setIsLoggedIn(false);
+      setCurrentUser(null);
       return false;
     }
   };
 
   const handleSignUp = (signUpData) => {
-    AuthService.signUp(signUpData);
-    setIsLoggedIn(true);
+    const isSuccess = AuthService.signUp(signUpData);
+    if (isSuccess) {
+      setIsLoggedIn(true);
+      setCurrentUser(StorageService.getCurrentUser());
+    }
   };
 
   const handleLogout = () => {
     AuthService.logout();
     setIsLoggedIn(false);
+    setCurrentUser(null);
   };
 
   const handleDeleteAccount = () => {
@@ -53,6 +62,7 @@ export const AuthProvider = ({ children }) => {
               AuthService.deleteAccount(); // Wipe the data
               setIsOpenSettings(false);    // Close the panel
               setIsLoggedIn(false);        // Kick them out
+              setCurrentUser(null);
               toast.success("Account deleted.");
             }}
             className="bg-red-500 text-white px-3 py-1 rounded-lg text-xs font-semibold hover:bg-red-600 transition-colors"
@@ -94,6 +104,7 @@ export const AuthProvider = ({ children }) => {
       value={{
         // Auth State & Actions
         isLoggedIn,
+        currentUser,
         handleLogin,
         handleLogout,
         handleSignUp,

@@ -1,64 +1,81 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import StorageService from "../services/storageService";
+import { useAuth } from "./AuthContext";
 
 const BeatContext = createContext();
 
 export const useBeatContext = () => useContext(BeatContext);
 
 export const BeatProvider = ({ children }) => {
-  const [beats, setBeats] = useState(() => {
-    return StorageService.getBeats() || [];
-  });
+  const { currentUser } = useAuth();
+  const [beats, setBeats] = useState([]);
 
   useEffect(() => {
-    StorageService.saveBeats(beats);
-  }, [beats]);
+    const allBeats = StorageService.getBeats() || [];
+    if (currentUser?.role === 'ADMIN') {
+      setBeats(allBeats);
+    } else if (currentUser?.role === 'SALES') {
+      setBeats(allBeats.filter(b => b.createdBy === currentUser.id));
+    } else {
+      setBeats([]);
+    }
+  }, [currentUser]);
 
   const addBeat = (beatData) => {
+    const allBeats = StorageService.getBeats() || [];
     const newBeat = {
       ...beatData,
       id: StorageService.getNextBeatId(),
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      createdBy: currentUser?.id
     };
+    const updatedAll = [...allBeats, newBeat];
+    StorageService.saveBeats(updatedAll);
     setBeats((prev) => [...prev, newBeat]);
   };
 
   const updateBeat = (id, updatedData) => {
-    setBeats((prev) =>
-      prev.map((beat) => (beat.id === id ? { ...beat, ...updatedData } : beat))
-    );
+    const allBeats = StorageService.getBeats() || [];
+    const updatedAll = allBeats.map((beat) => (beat.id === id ? { ...beat, ...updatedData } : beat));
+    StorageService.saveBeats(updatedAll);
+    setBeats((prev) => prev.map((beat) => (beat.id === id ? { ...beat, ...updatedData } : beat)));
   };
 
   const deleteBeat = (id) => {
+    const allBeats = StorageService.getBeats() || [];
+    const updatedAll = allBeats.filter((beat) => beat.id !== id);
+    StorageService.saveBeats(updatedAll);
     setBeats((prev) => prev.filter((beat) => beat.id !== id));
   };
 
   const addCustomerToBeat = (beatId, customerId) => {
-    setBeats((prev) => 
-      prev.map((beat) => {
-        if (beat.id === beatId) {
-          const assigned = beat.assignedCustomers || [];
-          if (!assigned.includes(customerId)) {
-            return { ...beat, assignedCustomers: [...assigned, customerId] };
-          }
+    const allBeats = StorageService.getBeats() || [];
+    const updatedAll = allBeats.map((beat) => {
+      if (beat.id === beatId) {
+        const assigned = beat.assignedCustomers || [];
+        if (!assigned.includes(customerId)) {
+          return { ...beat, assignedCustomers: [...assigned, customerId] };
         }
-        return beat;
-      })
-    );
+      }
+      return beat;
+    });
+    StorageService.saveBeats(updatedAll);
+    setBeats(updatedAll.filter(b => currentUser?.role === 'ADMIN' || b.createdBy === currentUser?.id));
   };
 
   const removeCustomerFromBeat = (beatId, customerId) => {
-    setBeats((prev) => 
-      prev.map((beat) => {
-        if (beat.id === beatId) {
-          return {
-            ...beat,
-            assignedCustomers: (beat.assignedCustomers || []).filter(c => c !== customerId)
-          };
-        }
-        return beat;
-      })
-    );
+    const allBeats = StorageService.getBeats() || [];
+    const updatedAll = allBeats.map((beat) => {
+      if (beat.id === beatId) {
+        return {
+          ...beat,
+          assignedCustomers: (beat.assignedCustomers || []).filter(c => c !== customerId)
+        };
+      }
+      return beat;
+    });
+    StorageService.saveBeats(updatedAll);
+    setBeats(updatedAll.filter(b => currentUser?.role === 'ADMIN' || b.createdBy === currentUser?.id));
   };
 
   return (

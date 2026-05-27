@@ -8,7 +8,7 @@ import { calculateOrderTotal, formatCurrency } from "./financeUtils";
 // MAIN REPORT GENERATOR
 // ==========================================
 export const generateDashboardReport = (orders, metrics) => {
-  const user = StorageService.getUser() ?? { name: 'My Business' };
+  const user = StorageService.getCurrentUser() ?? { name: 'My Business' };
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
 

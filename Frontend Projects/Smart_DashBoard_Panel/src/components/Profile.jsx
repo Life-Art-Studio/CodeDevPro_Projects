@@ -5,13 +5,13 @@ const ProfilePanel = () => {
   const { isProfileOpen, onOpenProfileHandler, handleLogout } = useAuth();
 
   // Safely grab user data for the display
-  const userData = StorageService.getUser() ?? { name: "Admin User", email: "admin@test.com" };
+  const userData = StorageService.getCurrentUser() ?? { name: "Admin User", email: "admin@test.com" };
   const userInitial = userData.name ? userData.name.charAt(0).toUpperCase() : "U";
 
   const [updateName, setUpdateName] = useState(userData.name)
 
   const save =()=>{
-    StorageService.saveUser({ name: updateName, email: userData.email });
+    StorageService.updateCurrentUser({ name: updateName });
     onOpenProfileHandler();
   }
 

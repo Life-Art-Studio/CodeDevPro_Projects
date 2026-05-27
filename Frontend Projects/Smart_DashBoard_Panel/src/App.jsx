@@ -20,6 +20,7 @@ const Customers = lazy(() => import('./pages/Customers'));
 const Beats = lazy(() => import('./pages/Beats'));
 const MapPage = lazy(() => import('./pages/MapPage'));
 const Catalogue = lazy(() => import('./pages/Catalogue'));
+const Users = lazy(() => import('./pages/Users'));
 
 // Auth Gate
 import { useAuth } from "./context/AuthContext";
@@ -31,9 +32,11 @@ import { BeatProvider } from "./context/BeatContext";
 import { VisitProvider } from "./context/VisitContext";
 import { ProductProvider } from "./context/ProductContext";
 
-const ProtectedRoute = ({ children }) => {
-  const { isLoggedIn } = useAuth();
-  return isLoggedIn ? children : <Navigate to="/auth/login" replace />;
+const ProtectedRoute = ({ children, adminOnly = false }) => {
+  const { isLoggedIn, currentUser } = useAuth();
+  if (!isLoggedIn) return <Navigate to="/auth/login" replace />;
+  if (adminOnly && currentUser?.role !== 'ADMIN') return <Navigate to="/dashboard/customers" replace />;
+  return children;
 };
 
 const App = () => {
@@ -62,7 +65,7 @@ const App = () => {
                           <Route
                             index
                             element={
-                              <ProtectedRoute>
+                              <ProtectedRoute adminOnly>
                                 <Dashboard />
                               </ProtectedRoute>
                             }
@@ -70,8 +73,16 @@ const App = () => {
                           <Route
                             path="sales"
                             element={
-                              <ProtectedRoute>
+                              <ProtectedRoute adminOnly>
                                 <Sales />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="users"
+                            element={
+                              <ProtectedRoute adminOnly>
+                                <Users />
                               </ProtectedRoute>
                             }
                           />

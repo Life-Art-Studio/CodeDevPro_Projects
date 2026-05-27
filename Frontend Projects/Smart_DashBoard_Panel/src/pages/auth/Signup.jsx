@@ -7,18 +7,19 @@ const Signup = () => {
    const navigate = useNavigate();
 
    // Form State
-   const [formData, setFormData] = useState({
-     name: "",
-     email: "",
-     password: "",
-   });
+    const [formData, setFormData] = useState({
+      name: "",
+      email: "",
+      password: "",
+      role: "ADMIN", // Default role
+    });
 
-   const handleSubmit = (e) => {
-     e.preventDefault();
-     // Pass the form data to the context handler
-     handleSignUp(formData);
-     navigate("/dashboard"); // Redirect to dashboard
-   };
+    const handleSubmit = (e) => {
+      e.preventDefault();
+      // Pass the form data to the context handler
+      handleSignUp(formData);
+      navigate("/dashboard"); // Redirect to dashboard
+    };
   return (
     <div className="w-full max-w-md glass-panel rounded-3xl p-8 border border-white/20 transition-colors animate-in fade-in duration-500 relative overflow-hidden group">
       
@@ -27,8 +28,8 @@ const Signup = () => {
 
       {/* Header Section */}
       <div className="text-center mb-8 relative z-10">
-        <h2 className="text-3xl font-bold text-gray-800 dark:text-slate-100 transition-colors tracking-tight">Create an Account</h2>
-        <p className="text-gray-500 dark:text-slate-400 mt-2 text-sm transition-colors">Join us to manage your business smartly</p>
+        <h2 className="text-3xl font-bold text-gray-800 dark:text-slate-100 transition-colors tracking-tight">Admin Registration</h2>
+        <p className="text-gray-500 dark:text-slate-400 mt-2 text-sm transition-colors">Register a new admin account</p>
       </div>
 
       {/* The Form */}

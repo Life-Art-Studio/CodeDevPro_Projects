@@ -9,7 +9,7 @@ import { calculateRowTotal, formatCurrency, getOrderPaidAmount, getOrderOutstand
 // ==========================================
 
 export const generateInvoicePDF = (order, customer) => {
-  const user = StorageService.getUser() ?? { name: 'My Business' };
+  const user = StorageService.getCurrentUser() ?? { name: 'My Business' };
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
   const rightMargin = pageWidth - 14;

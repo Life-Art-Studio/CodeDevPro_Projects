@@ -41,7 +41,7 @@ const Topbar = () => { // Make sure to accept the prop!
   }, []);
 
   // Safely get user data
-  const userData = StorageService.getUser() ?? { name: "User", email: "" };
+  const userData = StorageService.getCurrentUser() ?? { name: "User", email: "" };
   // Get the first initial for the avatar
   const userInitial = userData.name ? userData.name.charAt(0).toUpperCase() : "U";
 
