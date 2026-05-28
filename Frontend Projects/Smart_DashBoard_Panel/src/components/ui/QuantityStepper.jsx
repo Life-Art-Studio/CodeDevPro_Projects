@@ -48,9 +48,9 @@ export default function QuantityStepper({ value, min = 1, max = 9999, onChange }
         onPointerUp={endPress}
         onPointerLeave={endPress}
         disabled={value <= min}
-        className="w-9 h-9 lg:w-11 lg:h-11 flex items-center justify-center text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 disabled:opacity-30 transition-colors"
+        className="w-8 h-8 flex items-center justify-center text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 disabled:opacity-30 transition-colors shrink-0"
       >
-        <Minus className="w-4 h-4 lg:w-5 lg:h-5" />
+        <Minus className="w-4 h-4" />
       </button>
       
       {isEditing ? (
@@ -62,12 +62,12 @@ export default function QuantityStepper({ value, min = 1, max = 9999, onChange }
           onChange={(e) => setInputValue(e.target.value)}
           onBlur={handleInputBlur}
           onKeyDown={(e) => { if (e.key === 'Enter') handleInputBlur(); }}
-          className="w-10 lg:w-14 h-9 lg:h-11 text-center text-sm lg:text-base font-semibold text-zinc-900 dark:text-zinc-100 bg-transparent focus:outline-none tabular-nums"
+          className="w-10 h-8 text-center text-sm font-semibold text-zinc-900 dark:text-zinc-100 bg-transparent focus:outline-none tabular-nums"
         />
       ) : (
         <div 
           onClick={() => setIsEditing(true)}
-          className="w-10 lg:w-14 h-9 lg:h-11 flex items-center justify-center text-sm lg:text-base font-semibold text-zinc-900 dark:text-zinc-100 cursor-text tabular-nums"
+          className="w-10 h-8 flex items-center justify-center text-sm font-semibold text-zinc-900 dark:text-zinc-100 cursor-text tabular-nums"
         >
           {value}
         </div>
@@ -79,9 +79,9 @@ export default function QuantityStepper({ value, min = 1, max = 9999, onChange }
         onPointerUp={endPress}
         onPointerLeave={endPress}
         disabled={value >= max}
-        className="w-9 h-9 lg:w-11 lg:h-11 flex items-center justify-center text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 disabled:opacity-30 transition-colors"
+        className="w-8 h-8 flex items-center justify-center text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 disabled:opacity-30 transition-colors shrink-0"
       >
-        <Plus className="w-4 h-4 lg:w-5 lg:h-5" />
+        <Plus className="w-4 h-4" />
       </button>
     </div>
   );
