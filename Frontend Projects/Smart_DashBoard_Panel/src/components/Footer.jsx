@@ -11,7 +11,9 @@ const Footer = () => {
         <p className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex items-center gap-2 text-center md:text-right">
           Powered by{' '}
           <a
-            href="#"
+            href="https://github.com/Life-Art-Studio/CodeDevPro_Projects"
+            target="_blank"
+            rel="noopener noreferrer"
             className="bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-blue-500 hover:from-pink-500 hover:to-orange-400 transition-all font-bold"
           >
             CodeDevPro
