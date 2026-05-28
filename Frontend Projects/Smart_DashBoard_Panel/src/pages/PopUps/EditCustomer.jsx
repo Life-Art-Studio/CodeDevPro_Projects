@@ -56,6 +56,7 @@ const EditCustomerModal = ({ isOpen, onClose, customer }) => {
     
     // Format the data back into our nice table structure
     const updatedCustomerData = {
+      ...customer,
       ...formData,
       spend: `₹${parseFloat(formData.spend || 0).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`,
       tags: formData.tags ? formData.tags.split(',').map(t => t.trim()).filter(Boolean) : []

@@ -20,7 +20,8 @@ const Beats = () => {
   const { orders } = useOrderContext();
   const navigate = useNavigate();
 
-  const [selectedBeat, setSelectedBeat] = useState(null);
+  const [selectedBeatId, setSelectedBeatId] = useState(null);
+  const selectedBeat = beats.find(b => b.id === selectedBeatId) || null;
   const [activeTab, setActiveTab] = useState('info');
   const [isLogVisitModalOpen, setIsLogVisitModalOpen] = useState(false);
   const [isCreateBeatModalOpen, setIsCreateBeatModalOpen] = useState(false);
@@ -352,7 +353,7 @@ const Beats = () => {
               return (
                 <div 
                   key={beat.id}
-                  onClick={() => { setSelectedBeat(beat); setActiveTab('info'); }}
+                  onClick={() => { setSelectedBeatId(beat.id); setActiveTab('info'); }}
                   className={`p-4 rounded-xl cursor-pointer transition-all border ${
                     selectedBeat?.id === beat.id 
                       ? 'border-purple-500 bg-purple-50 dark:bg-purple-500/10 shadow-[0_0_15px_rgba(168,85,247,0.15)]' 
@@ -393,7 +394,7 @@ const Beats = () => {
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                   <div className="flex items-center gap-3">
                     <button 
-                      onClick={() => setSelectedBeat(null)}
+                      onClick={() => setSelectedBeatId(null)}
                       className="md:hidden p-2 -ml-2 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white rounded-lg transition-colors shrink-0"
                       title="Close Details"
                     >
@@ -413,7 +414,7 @@ const Beats = () => {
                                   onClick={() => {
                                     toast.dismiss(t.id);
                                     deleteBeat(selectedBeat.id);
-                                    setSelectedBeat(null);
+                                    setSelectedBeatId(null);
                                     toast.success("Beat deleted successfully.");
                                   }}
                                   className="bg-red-500 text-white px-3 py-1 rounded-lg text-xs font-semibold hover:bg-red-600 transition-colors"
@@ -437,7 +438,7 @@ const Beats = () => {
                       Export Report
                     </button>
                     <button 
-                      onClick={() => setSelectedBeat(null)}
+                      onClick={() => setSelectedBeatId(null)}
                       className="hidden md:flex justify-center px-3 py-2 bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-lg transition-colors"
                       title="Close Details"
                     >
