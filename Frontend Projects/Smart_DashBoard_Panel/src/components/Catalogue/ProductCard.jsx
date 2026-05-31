@@ -17,7 +17,11 @@ const ProductCard = ({ product, onEdit, onDelete, hideEdit }) => {
     product.dbDivisor,
     product.ssDivisor,
     product.scheme?.buy,
-    product.scheme?.free
+    product.scheme?.free,
+    product.pricingMode,
+    product.retailerMargin,
+    product.dbMargin,
+    product.ssMargin
   );
 
   const isSchemeActive = () => {
@@ -39,6 +43,29 @@ const ProductCard = ({ product, onEdit, onDelete, hideEdit }) => {
     if (diffDays < 0) return <span className="text-red-500 text-[10px] font-bold">Expired</span>;
     if (diffDays <= 7) return <span className="text-amber-500 text-[10px] font-bold">Expires in {diffDays} days</span>;
     return null;
+  };
+
+  const renderSourceBadge = () => {
+    const src = product.source || "manual";
+    if (src === "ai") {
+      return (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-600 border border-indigo-200 dark:bg-indigo-500/10 dark:text-indigo-400 dark:border-indigo-500/20 shadow-sm">
+          🤖 AI
+        </span>
+      );
+    }
+    if (src === "ai-edited") {
+      return (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-700 border border-purple-200 dark:bg-purple-500/20 dark:text-purple-300 dark:border-purple-500/30 shadow-sm">
+          ✏️ Edited
+        </span>
+      );
+    }
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20 shadow-sm">
+        👤 Custom
+      </span>
+    );
   };
 
   return (
@@ -63,41 +90,42 @@ const ProductCard = ({ product, onEdit, onDelete, hideEdit }) => {
           </button>
         </div>
       )}
-
-      {/* Image & Badges */}
-      <div className="relative w-full h-40 rounded-xl overflow-hidden mb-4 bg-zinc-100 dark:bg-[#0f1117] shrink-0 border border-zinc-200 dark:border-zinc-800">
-        {product.image ? (
-          <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-zinc-300 dark:text-zinc-700">
-            <Package className="w-12 h-12" />
-          </div>
-        )}
-        
-        {/* Out of Stock Badge */}
-        {!product.inStock && (
-          <div className="absolute inset-0 bg-zinc-900/50 flex items-center justify-center backdrop-blur-sm">
-            <span className="bg-red-600 text-white px-3 py-1 rounded-md text-xs font-bold shadow-lg uppercase tracking-wider">Out of Stock</span>
-          </div>
-        )}
-
-        {/* Scheme Badge */}
-        {active && (
-          <div className="absolute bottom-2 left-2 right-2">
-             <div className="bg-indigo-600 text-white text-[10px] font-bold px-2 py-1.5 rounded-md shadow-lg flex justify-between items-center">
-                <span>🎁 {product.scheme.buy}+{product.scheme.free} {product.schemeLabel}</span>
-                {getExpiryWarning()}
-             </div>
-          </div>
-        )}
-      </div>
-
-      {/* Header Info */}
-      <div className="flex-1">
-        <div className="flex justify-between items-start mb-1">
-          <h3 className="font-bold text-zinc-900 dark:text-zinc-100 text-base leading-tight truncate pr-4">{product.name}</h3>
-        </div>
-        <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-3 font-medium uppercase tracking-wider">{product.sku} • {product.category}</p>
+ 
+       {/* Image & Badges */}
+       <div className="relative w-full h-40 rounded-xl overflow-hidden mb-4 bg-zinc-100 dark:bg-[#0f1117] shrink-0 border border-zinc-200 dark:border-zinc-800">
+         {product.image ? (
+           <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+         ) : (
+           <div className="w-full h-full flex items-center justify-center text-zinc-300 dark:text-zinc-700">
+             <Package className="w-12 h-12" />
+           </div>
+         )}
+         
+         {/* Out of Stock Badge */}
+         {!product.inStock && (
+           <div className="absolute inset-0 bg-zinc-900/50 flex items-center justify-center backdrop-blur-sm">
+             <span className="bg-red-600 text-white px-3 py-1 rounded-md text-xs font-bold shadow-lg uppercase tracking-wider">Out of Stock</span>
+           </div>
+         )}
+ 
+         {/* Scheme Badge */}
+         {active && (
+           <div className="absolute bottom-2 left-2 right-2">
+              <div className="bg-indigo-600 text-white text-[10px] font-bold px-2 py-1.5 rounded-md shadow-lg flex justify-between items-center">
+                 <span>🎁 {product.scheme.buy}+{product.scheme.free} {product.schemeLabel}</span>
+                 {getExpiryWarning()}
+              </div>
+           </div>
+         )}
+       </div>
+ 
+       {/* Header Info */}
+       <div className="flex-1">
+         <div className="flex justify-between items-start mb-1 gap-2">
+           <h3 className="font-bold text-zinc-900 dark:text-zinc-100 text-base leading-tight truncate">{product.name}</h3>
+           <div className="shrink-0">{renderSourceBadge()}</div>
+         </div>
+         <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-3 font-medium uppercase tracking-wider">{product.sku} • {product.category}</p>
         
         {/* Pricing Table */}
         <div className="bg-zinc-50 dark:bg-[#0f1117] rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden">

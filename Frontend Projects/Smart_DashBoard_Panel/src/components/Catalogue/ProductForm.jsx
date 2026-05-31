@@ -5,8 +5,8 @@ import { Camera, Save, X, Trash2 } from 'lucide-react';
 import CustomSelect from '../ui/CustomSelect';
 
 const ProductForm = ({ initialData, onSave, onCancel, onDelete }) => {
-  const [formData, setFormData] = useState(
-    initialData || {
+  const [formData, setFormData] = useState(() => {
+    const defaults = {
       id: `PROD-${Date.now()}`,
       name: "",
       sku: "",
@@ -17,12 +17,25 @@ const ProductForm = ({ initialData, onSave, onCancel, onDelete }) => {
       retailerDivisor: 1.20,
       dbDivisor: 1.10,
       ssDivisor: 1.08,
+      pricingMode: "divisor",
+      retailerMargin: 20,
+      dbMargin: 10,
+      ssMargin: 8,
       scheme: { buy: 0, free: 0 },
       schemeLabel: "",
       schemeEndDate: "",
-      inStock: true
-    }
-  );
+      inStock: true,
+      source: "manual",
+      tags: [],
+      description: ""
+    };
+    if (!initialData) return defaults;
+    return {
+      ...defaults,
+      ...initialData,
+      scheme: { ...defaults.scheme, ...initialData.scheme }
+    };
+  });
 
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [preview, setPreview] = useState(null);
@@ -35,7 +48,11 @@ const ProductForm = ({ initialData, onSave, onCancel, onDelete }) => {
     formData.dbDivisor,
     formData.ssDivisor,
     formData.scheme.buy,
-    formData.scheme.free
+    formData.scheme.free,
+    formData.pricingMode,
+    formData.retailerMargin,
+    formData.dbMargin,
+    formData.ssMargin
   );
 
   const handleChange = (field, value) => {
@@ -51,11 +68,34 @@ const ProductForm = ({ initialData, onSave, onCancel, onDelete }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (formData.retailerDivisor < 1.01 || formData.dbDivisor < 1.01 || formData.ssDivisor < 1.01) {
-      alert("Price Chain Error: Divisors must be at least 1.01 to ensure a valid margin chain.");
-      return;
+    if (formData.pricingMode === "divisor") {
+      if (formData.retailerDivisor < 1.01 || formData.dbDivisor < 1.01 || formData.ssDivisor < 1.01) {
+        alert("Price Chain Error: Divisors must be at least 1.01 to ensure a valid margin chain.");
+        return;
+      }
+    } else {
+      if (
+        formData.retailerMargin < 0 || formData.retailerMargin >= 100 ||
+        formData.dbMargin < 0 || formData.dbMargin >= 100 ||
+        formData.ssMargin < 0 || formData.ssMargin >= 100
+      ) {
+        alert("Price Margin Error: Margins must be between 0% and 99.9% to ensure a valid margin chain.");
+        return;
+      }
     }
-    onSave(formData);
+
+    // Synchronize calculated equivalent values before saving
+    const finalData = {
+      ...formData,
+      retailerDivisor: calcResults.retailerDivisor,
+      dbDivisor: calcResults.dbDivisor,
+      ssDivisor: calcResults.ssDivisor,
+      retailerMargin: calcResults.retailerMarginPercent,
+      dbMargin: calcResults.dbMarginPercent,
+      ssMargin: calcResults.ssMarginPercent
+    };
+
+    onSave(finalData);
   };
 
   return (
@@ -63,14 +103,25 @@ const ProductForm = ({ initialData, onSave, onCancel, onDelete }) => {
       {/* LEFT: Calculator Form */}
       <div className="w-full lg:w-2/3 bg-white dark:bg-[#1a1d27] p-4 lg:p-6 rounded-3xl border border-zinc-200 dark:border-zinc-800 overflow-y-auto custom-scrollbar h-full shadow-sm">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 mb-4 lg:mb-6">
-          <h2 className="text-lg lg:text-xl font-bold text-zinc-900 dark:text-zinc-100">
-            {initialData ? "Edit Product Pricing" : "Create New Product"}
-          </h2>
+          <div className="flex items-center gap-3 flex-wrap">
+            <h2 className="text-lg lg:text-xl font-bold text-zinc-900 dark:text-zinc-100">
+              {initialData ? "Edit Product Pricing" : "Create New Product"}
+            </h2>
+            {initialData && (
+              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border ${
+                formData.source === "ai" ? "bg-indigo-50 text-indigo-600 border-indigo-200 dark:bg-indigo-500/10 dark:text-indigo-400 dark:border-indigo-500/20" :
+                formData.source === "ai-edited" ? "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-500/10 dark:text-purple-400 dark:border-purple-500/20" :
+                "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20"
+              }`}>
+                {formData.source === "ai" ? "🤖 AI Sourced" : formData.source === "ai-edited" ? "✏️ AI Sourced (Edited)" : "👤 Custom Product"}
+              </span>
+            )}
+          </div>
           <div className="flex flex-wrap gap-2 w-full sm:w-auto">
              {initialData && onDelete && (
-               <button onClick={() => { onDelete(initialData.id); onCancel(); }} type="button" className="px-3 py-1.5 lg:px-4 lg:py-2 bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400 rounded-xl text-xs lg:text-sm font-semibold hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors flex items-center gap-1.5 lg:gap-2 min-h-[36px] lg:min-h-[44px] flex-1 sm:flex-none justify-center">
-                 <Trash2 className="w-3.5 h-3.5 lg:w-4 lg:h-4" /> Delete
-               </button>
+                <button onClick={() => { onDelete(initialData.id); onCancel(); }} type="button" className="px-3 py-1.5 lg:px-4 lg:py-2 bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400 rounded-xl text-xs lg:text-sm font-semibold hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors flex items-center gap-1.5 lg:gap-2 min-h-[36px] lg:min-h-[44px] flex-1 sm:flex-none justify-center">
+                  <Trash2 className="w-3.5 h-3.5 lg:w-4 lg:h-4" /> Delete
+                </button>
              )}
              <button onClick={onCancel} type="button" className="px-3 py-1.5 lg:px-4 lg:py-2 border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 rounded-xl text-xs lg:text-sm font-semibold hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors flex items-center gap-1.5 lg:gap-2 min-h-[36px] lg:min-h-[44px] flex-1 sm:flex-none justify-center">
                <X className="w-3.5 h-3.5 lg:w-4 lg:h-4" /> Cancel
@@ -129,24 +180,65 @@ const ProductForm = ({ initialData, onSave, onCancel, onDelete }) => {
 
           {/* Pricing & Margins */}
           <div>
-            <h3 className="text-sm font-bold text-indigo-600 dark:text-indigo-400 mb-3 lg:mb-4 uppercase tracking-wider">Pricing & Margins</h3>
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-3 lg:mb-4">
+              <h3 className="text-sm font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">Pricing & Margins</h3>
+              
+              {/* Calculation Mode Select */}
+              <div className="bg-zinc-100 dark:bg-zinc-900/60 p-1 rounded-xl flex items-center border border-zinc-200/50 dark:border-zinc-800/50 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => handleChange('pricingMode', 'divisor')}
+                  className={`px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-bold transition-all min-h-[28px] ${formData.pricingMode === 'divisor' ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'}`}
+                >
+                  Divisors (Default)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleChange('pricingMode', 'marketing')}
+                  className={`px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-bold transition-all min-h-[28px] ${formData.pricingMode === 'marketing' ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'}`}
+                >
+                  Marketing Mode (%)
+                </button>
+              </div>
+            </div>
+
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 lg:gap-4">
               <div>
                 <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">MRP (₹)</label>
                 <input type="number" required min="0" step="0.01" value={formData.mrp} onChange={e => handleChange('mrp', Number(e.target.value))} className="w-full px-3 py-2 lg:px-4 lg:py-2.5 bg-white dark:bg-[#0f1117] border-2 border-zinc-200 dark:border-zinc-700 rounded-xl focus:border-indigo-500 focus:ring-0 focus:outline-none transition-all dark:text-zinc-100 font-bold text-base lg:text-lg min-h-[40px] lg:min-h-[44px]" />
               </div>
-              <div>
-                <label className="block text-xs font-bold text-emerald-700 dark:text-emerald-400 mb-1">Retailer Divisor</label>
-                <input type="number" required min="1.01" step="0.01" value={formData.retailerDivisor} onChange={e => handleChange('retailerDivisor', Number(e.target.value))} className="w-full px-3 py-2 lg:px-4 lg:py-2.5 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all dark:text-emerald-100 text-sm font-bold min-h-[40px] lg:min-h-[44px]" />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-blue-700 dark:text-blue-400 mb-1">DB Divisor</label>
-                <input type="number" required min="1.01" step="0.01" value={formData.dbDivisor} onChange={e => handleChange('dbDivisor', Number(e.target.value))} className="w-full px-3 py-2 lg:px-4 lg:py-2.5 bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/30 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all dark:text-blue-100 text-sm font-bold min-h-[40px] lg:min-h-[44px]" />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-indigo-700 dark:text-indigo-400 mb-1">SS Divisor</label>
-                <input type="number" required min="1.01" step="0.01" value={formData.ssDivisor} onChange={e => handleChange('ssDivisor', Number(e.target.value))} className="w-full px-3 py-2 lg:px-4 lg:py-2.5 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/30 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all dark:text-indigo-100 text-sm font-bold min-h-[40px] lg:min-h-[44px]" />
-              </div>
+
+              {formData.pricingMode === 'divisor' ? (
+                <>
+                  <div>
+                    <label className="block text-xs font-bold text-emerald-700 dark:text-emerald-400 mb-1">Retailer Divisor</label>
+                    <input type="number" required min="1.01" step="0.01" value={formData.retailerDivisor} onChange={e => handleChange('retailerDivisor', Number(e.target.value))} className="w-full px-3 py-2 lg:px-4 lg:py-2.5 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all dark:text-emerald-100 text-sm font-bold min-h-[40px] lg:min-h-[44px]" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-blue-700 dark:text-blue-400 mb-1">DB Divisor</label>
+                    <input type="number" required min="1.01" step="0.01" value={formData.dbDivisor} onChange={e => handleChange('dbDivisor', Number(e.target.value))} className="w-full px-3 py-2 lg:px-4 lg:py-2.5 bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/30 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all dark:text-blue-100 text-sm font-bold min-h-[40px] lg:min-h-[44px]" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-indigo-700 dark:text-indigo-400 mb-1">SS Divisor</label>
+                    <input type="number" required min="1.01" step="0.01" value={formData.ssDivisor} onChange={e => handleChange('ssDivisor', Number(e.target.value))} className="w-full px-3 py-2 lg:px-4 lg:py-2.5 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/30 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all dark:text-indigo-100 text-sm font-bold min-h-[40px] lg:min-h-[44px]" />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <label className="block text-xs font-bold text-emerald-700 dark:text-emerald-400 mb-1">Retailer Margin (%)</label>
+                    <input type="number" required min="0" max="99.9" step="0.1" value={formData.retailerMargin} onChange={e => handleChange('retailerMargin', Number(e.target.value))} className="w-full px-3 py-2 lg:px-4 lg:py-2.5 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all dark:text-emerald-100 text-sm font-bold min-h-[40px] lg:min-h-[44px]" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-blue-700 dark:text-blue-400 mb-1">DB Margin (%)</label>
+                    <input type="number" required min="0" max="99.9" step="0.1" value={formData.dbMargin} onChange={e => handleChange('dbMargin', Number(e.target.value))} className="w-full px-3 py-2 lg:px-4 lg:py-2.5 bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/30 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all dark:text-blue-100 text-sm font-bold min-h-[40px] lg:min-h-[44px]" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-indigo-700 dark:text-indigo-400 mb-1">SS Margin (%)</label>
+                    <input type="number" required min="0" max="99.9" step="0.1" value={formData.ssMargin} onChange={e => handleChange('ssMargin', Number(e.target.value))} className="w-full px-3 py-2 lg:px-4 lg:py-2.5 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/30 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all dark:text-indigo-100 text-sm font-bold min-h-[40px] lg:min-h-[44px]" />
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
@@ -214,7 +306,11 @@ const ProductForm = ({ initialData, onSave, onCancel, onDelete }) => {
            <div className="flex justify-between items-center p-3 lg:p-4 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20">
               <div>
                 <p className="text-[10px] lg:text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase">Retailer</p>
-                <p className="text-[9px] lg:text-[10px] text-emerald-600 dark:text-emerald-500">Margin: {calcResults.retailerMarginPercent.toFixed(1)}%</p>
+                <p className="text-[9px] lg:text-[10px] text-emerald-600 dark:text-emerald-500">
+                  {formData.pricingMode === 'divisor' 
+                    ? `Margin: ${calcResults.retailerMarginPercent.toFixed(1)}%` 
+                    : `Divisor: ${calcResults.retailerDivisor.toFixed(2)}`}
+                </p>
               </div>
               <span className="text-lg lg:text-xl font-black text-zinc-900 dark:text-zinc-100">₹{calcResults.retailerCost.toFixed(2)}</span>
            </div>
@@ -222,7 +318,11 @@ const ProductForm = ({ initialData, onSave, onCancel, onDelete }) => {
            <div className="flex justify-between items-center p-3 lg:p-4 rounded-xl bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20">
               <div>
                 <p className="text-[10px] lg:text-xs font-bold text-blue-700 dark:text-blue-400 uppercase">Distributor (DB)</p>
-                <p className="text-[9px] lg:text-[10px] text-blue-600 dark:text-blue-500">Margin: {calcResults.dbMarginPercent.toFixed(1)}%</p>
+                <p className="text-[9px] lg:text-[10px] text-blue-600 dark:text-blue-500">
+                  {formData.pricingMode === 'divisor' 
+                    ? `Margin: ${calcResults.dbMarginPercent.toFixed(1)}%` 
+                    : `Divisor: ${calcResults.dbDivisor.toFixed(2)}`}
+                </p>
               </div>
               <span className="text-lg lg:text-xl font-black text-zinc-900 dark:text-zinc-100">₹{calcResults.dbCost.toFixed(2)}</span>
            </div>
@@ -230,7 +330,11 @@ const ProductForm = ({ initialData, onSave, onCancel, onDelete }) => {
            <div className="flex justify-between items-center p-3 lg:p-4 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20">
               <div>
                 <p className="text-[10px] lg:text-xs font-bold text-indigo-700 dark:text-indigo-400 uppercase">Super Stockist (SS)</p>
-                <p className="text-[9px] lg:text-[10px] text-indigo-600 dark:text-indigo-500">Margin: {calcResults.ssMarginPercent.toFixed(1)}%</p>
+                <p className="text-[9px] lg:text-[10px] text-indigo-600 dark:text-indigo-500">
+                  {formData.pricingMode === 'divisor' 
+                    ? `Margin: ${calcResults.ssMarginPercent.toFixed(1)}%` 
+                    : `Divisor: ${calcResults.ssDivisor.toFixed(2)}`}
+                </p>
               </div>
               <span className="text-lg lg:text-xl font-black text-zinc-900 dark:text-zinc-100">₹{calcResults.ssCost.toFixed(2)}</span>
            </div>
