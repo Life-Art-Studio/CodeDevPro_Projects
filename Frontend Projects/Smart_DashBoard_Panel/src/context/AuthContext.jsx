@@ -104,6 +104,13 @@ export const AuthProvider = ({ children }) => {
     ), { duration: Infinity });
   };
 
+  const updateCurrentUser = (updatedData) => {
+    const updated = StorageService.updateCurrentUser(updatedData);
+    if (updated) {
+      setCurrentUser(updated);
+    }
+  };
+
   // --- UI TOGGLE HANDLERS --- //
 
   const onOpenSidebarHandler = () => setIsOpen(!isSidebarOpen);
@@ -124,6 +131,7 @@ export const AuthProvider = ({ children }) => {
         handleSignUp,
         handleResetData,
         handleDeleteAccount,
+        updateCurrentUser,
         
         // UI State & Actions
         isSidebarOpen,

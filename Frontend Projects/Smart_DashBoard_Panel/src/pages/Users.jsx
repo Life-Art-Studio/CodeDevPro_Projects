@@ -153,9 +153,17 @@ const Users = () => {
       ),
       user: (
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold border border-indigo-200 dark:border-indigo-500/30">
-            {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
-          </div>
+          {user.profilePic ? (
+            <img 
+              src={user.profilePic} 
+              alt={user.name} 
+              className="w-10 h-10 rounded-full object-cover border border-indigo-200 dark:border-indigo-500/30"
+            />
+          ) : (
+            <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold border border-indigo-200 dark:border-indigo-500/30">
+              {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+            </div>
+          )}
           <div>
             <p className="font-semibold text-zinc-900 dark:text-zinc-100">{user.name}</p>
             <p className="text-xs text-zinc-500 dark:text-zinc-400">{user.email}</p>
@@ -234,9 +242,17 @@ const Users = () => {
       <div key={row.id} className="bg-white dark:bg-[#1a1d27] p-3 lg:p-4 border-b border-zinc-200 dark:border-zinc-800 space-y-2 lg:space-y-3 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
         <div className="flex justify-between items-start">
            <div className="flex items-center gap-2.5 lg:gap-3">
-              <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-xs lg:text-sm shrink-0 border border-indigo-200 dark:border-indigo-500/30 shadow-sm">
-                {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
-              </div>
+              {user.profilePic ? (
+                <img 
+                  src={user.profilePic} 
+                  alt={user.name} 
+                  className="w-8 h-8 lg:w-10 lg:h-10 rounded-full object-cover shrink-0 border border-indigo-200 dark:border-indigo-500/30 shadow-sm"
+                />
+              ) : (
+                <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-xs lg:text-sm shrink-0 border border-indigo-200 dark:border-indigo-500/30 shadow-sm">
+                  {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                </div>
+              )}
               <div>
                 <span className="font-bold text-zinc-900 dark:text-zinc-100 text-sm lg:text-base">{user.name}</span>
                 <div className="flex gap-1.5 mt-0.5 lg:mt-1 items-center scale-90 origin-left lg:scale-100">
