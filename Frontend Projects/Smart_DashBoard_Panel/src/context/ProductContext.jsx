@@ -64,22 +64,121 @@ export const ProductProvider = ({ children }) => {
 
   const addProduct = (product) => {
     const allProducts = StorageService.getProducts() ?? defaultProducts;
+    const nowStr = new Date().toISOString();
+    
+    // Auto-fill back-compat fields
     const newProduct = {
       ...product,
+      uom: product.uom || product.unit || "Piece",
+      unit: product.unit || product.uom || "Piece",
+      mrp: Number(product.mrp || product.price || 0),
+      price: Number(product.price || product.mrp || 0),
+      source: product.source || "manual",
+      createdAt: product.createdAt || nowStr,
+      updatedAt: nowStr,
       createdBy: viewAsUserId || currentUser?.id,
     };
+    
     const updatedAll = [newProduct, ...allProducts];
     setProducts([newProduct, ...products]);
     StorageService.saveProducts(updatedAll);
     toast.success("Product added to catalogue.");
   };
 
-  const updateProduct = (updatedProduct) => {
+  const addMultipleProducts = (newProductsArray) => {
     const allProducts = StorageService.getProducts() ?? defaultProducts;
-    const updatedAll = allProducts.map(p => (p.id === updatedProduct.id ? updatedProduct : p));
+    const nowStr = new Date().toISOString();
+    
+    const formattedProducts = newProductsArray.map(product => ({
+      ...product,
+      uom: product.uom || product.unit || "Piece",
+      unit: product.unit || product.uom || "Piece",
+      mrp: Number(product.mrp || product.price || 0),
+      price: Number(product.price || product.mrp || 0),
+      source: product.source || "ai",
+      createdAt: product.createdAt || nowStr,
+      updatedAt: nowStr,
+      createdBy: viewAsUserId || currentUser?.id,
+    }));
+
+    // Filter out duplicates based on name to prevent clutter
+    const existingNames = new Set(allProducts.map(p => p.name.toLowerCase()));
+    const finalToInsert = formattedProducts.filter(p => !existingNames.has(p.name.toLowerCase()));
+
+    if (finalToInsert.length === 0) {
+      toast.error("Selected products already exist in catalogue.");
+      return;
+    }
+
+    const updatedAll = [...finalToInsert, ...allProducts];
+    
+    // Update local state (taking into account viewAsUserId/current salesperson filter)
+    const activeUserId = viewAsUserId || currentUser?.id;
+    const filteredToInsert = currentUser?.role === 'ADMIN' && !viewAsUserId 
+      ? finalToInsert 
+      : finalToInsert.filter(p => p.createdBy === activeUserId);
+      
+    setProducts(prev => [...filteredToInsert, ...prev]);
+    StorageService.saveProducts(updatedAll);
+    toast.success(`Added ${finalToInsert.length} products to catalogue.`);
+  };
+
+  const replaceAISuggestions = (sectorId, newAIProducts) => {
+    const allProducts = StorageService.getProducts() ?? defaultProducts;
+    const nowStr = new Date().toISOString();
+    
+    // Remove only items from this sector that carry 'source === "ai"'
+    // Keep 'source === "manual"' and 'source === "ai-edited"' items safe!
+    const preservedProducts = allProducts.filter(p => !(p.sector === sectorId && p.source === "ai"));
+    
+    const formattedNew = newAIProducts.map(p => ({
+      ...p,
+      uom: p.uom || p.unit || "Piece",
+      unit: p.unit || p.uom || "Piece",
+      mrp: Number(p.mrp || p.price || 0),
+      price: Number(p.price || p.mrp || 0),
+      source: "ai",
+      createdAt: p.createdAt || nowStr,
+      updatedAt: nowStr,
+      createdBy: viewAsUserId || currentUser?.id,
+    }));
+
+    const updatedAll = [...formattedNew, ...preservedProducts];
     StorageService.saveProducts(updatedAll);
 
-    const updatedLocal = products.map(p => (p.id === updatedProduct.id ? updatedProduct : p));
+    // Synchronize local view state
+    const activeUserId = viewAsUserId || currentUser?.id;
+    let filteredLocal = currentUser?.role === 'ADMIN' && !viewAsUserId
+      ? updatedAll
+      : updatedAll.filter(p => p.createdBy === activeUserId);
+      
+    setProducts(filteredLocal);
+  };
+
+  const updateProduct = (updatedProduct) => {
+    const allProducts = StorageService.getProducts() ?? defaultProducts;
+    const nowStr = new Date().toISOString();
+
+    // Auto-transition source flag if an AI suggestion was modified
+    let finalSource = updatedProduct.source;
+    if (updatedProduct.source === "ai") {
+      finalSource = "ai-edited";
+    }
+
+    const mergedProduct = {
+      ...updatedProduct,
+      uom: updatedProduct.uom || updatedProduct.unit || "Piece",
+      unit: updatedProduct.unit || updatedProduct.uom || "Piece",
+      mrp: Number(updatedProduct.mrp || updatedProduct.price || 0),
+      price: Number(updatedProduct.price || updatedProduct.mrp || 0),
+      source: finalSource,
+      updatedAt: nowStr
+    };
+
+    const updatedAll = allProducts.map(p => (p.id === mergedProduct.id ? mergedProduct : p));
+    StorageService.saveProducts(updatedAll);
+
+    const updatedLocal = products.map(p => (p.id === mergedProduct.id ? mergedProduct : p));
     setProducts(updatedLocal);
     toast.success("Product updated.");
   };
@@ -109,7 +208,7 @@ export const ProductProvider = ({ children }) => {
   };
 
   return (
-    <ProductContext.Provider value={{ products, addProduct, updateProduct, deleteProduct }}>
+    <ProductContext.Provider value={{ products, addProduct, updateProduct, deleteProduct, addMultipleProducts, replaceAISuggestions }}>
       {children}
     </ProductContext.Provider>
   );
