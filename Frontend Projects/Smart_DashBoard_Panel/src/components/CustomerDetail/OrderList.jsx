@@ -93,15 +93,13 @@ const OrderList = ({ orders, customer, onCreateNew, onEdit, onDelete, onStatusCh
               <CreditCard className="w-3.5 h-3.5 lg:w-4 lg:h-4" />
             </button>
           )}
-          {currentUser?.role === 'ADMIN' && (
-            <button 
-              onClick={(e) => { e.stopPropagation(); generateInvoicePDF(order, customer); }}
-              className="p-1 lg:p-2 text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-500/10 rounded-lg transition-colors min-h-[32px] min-w-[32px] lg:min-h-[44px] lg:min-w-[44px] flex items-center justify-center"
-              title="Download PDF"
-            >
-              <FileText className="w-3.5 h-3.5 lg:w-4 lg:h-4" />
-            </button>
-          )}
+          <button 
+            onClick={(e) => { e.stopPropagation(); generateInvoicePDF(order, customer); }}
+            className="p-1 lg:p-2 text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-500/10 rounded-lg transition-colors min-h-[32px] min-w-[32px] lg:min-h-[44px] lg:min-w-[44px] flex items-center justify-center"
+            title="Download PDF"
+          >
+            <FileText className="w-3.5 h-3.5 lg:w-4 lg:h-4" />
+          </button>
           
           {/* View/Edit Button */}
           <button 

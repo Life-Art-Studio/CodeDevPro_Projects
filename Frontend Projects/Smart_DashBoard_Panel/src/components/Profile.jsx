@@ -1,8 +1,9 @@
 import { useAuth } from "../context/AuthContext";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import StorageService from "../services/storageService";
+
 const ProfilePanel = () => {
-  const { isProfileOpen, onOpenProfileHandler, handleLogout } = useAuth();
+  const { isProfileOpen, onOpenProfileHandler, handleLogout, updateCurrentUser } = useAuth();
 
   // Safely grab user data for the display
   const userData = StorageService.getCurrentUser() ?? { name: "Admin User", email: "admin@test.com" };
@@ -11,6 +12,33 @@ const ProfilePanel = () => {
   const [updateName, setUpdateName] = useState(userData.name || "");
   const [updateEmail, setUpdateEmail] = useState(userData.email || "");
   const [updatePassword, setUpdatePassword] = useState("");
+  const [profilePic, setProfilePic] = useState(userData.profilePic || "");
+
+  // Sync state whenever profile drawer is opened or currentUser changes
+  useEffect(() => {
+    if (isProfileOpen) {
+      const user = StorageService.getCurrentUser() ?? { name: "", email: "" };
+      setUpdateName(user.name || "");
+      setUpdateEmail(user.email || "");
+      setProfilePic(user.profilePic || "");
+      setUpdatePassword("");
+    }
+  }, [isProfileOpen]);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        alert("Image size should be less than 2MB to optimize storage.");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfilePic(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const save = () => {
     if (!updateName || !updateEmail) {
@@ -27,12 +55,12 @@ const ProfilePanel = () => {
       }
     }
 
-    const updatedData = { name: updateName, email: updateEmail };
+    const updatedData = { name: updateName, email: updateEmail, profilePic: profilePic };
     if (updatePassword.trim() !== "") {
       updatedData.password = updatePassword;
     }
     
-    StorageService.updateCurrentUser(updatedData);
+    updateCurrentUser(updatedData);
     alert("Profile updated successfully!");
     onOpenProfileHandler();
   }
@@ -72,9 +100,45 @@ const ProfilePanel = () => {
           {/* Avatar Section */}
           <div className="flex flex-col items-center justify-center mb-8 relative">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-purple-500/20 rounded-full blur-xl -z-10"></div>
-            <div className="h-24 w-24 rounded-full bg-gradient-to-tr from-purple-600 to-pink-500 text-white flex items-center justify-center text-4xl font-bold shadow-[0_0_15px_rgba(236,72,153,0.4)] border-2 border-white/20 mb-4 transition-transform hover:scale-105 duration-300">
-              {userInitial}
+            
+            <div 
+              onClick={() => document.getElementById("profile-pic-input").click()}
+              className="relative group h-24 w-24 rounded-full cursor-pointer overflow-hidden border-2 border-white/20 mb-3 shadow-[0_0_15px_rgba(236,72,153,0.4)] transition-transform hover:scale-105 duration-300"
+            >
+              {profilePic ? (
+                <img 
+                  src={profilePic} 
+                  alt="Profile" 
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <div className="h-full w-full bg-gradient-to-tr from-purple-600 to-pink-500 text-white flex items-center justify-center text-4xl font-bold">
+                  {userInitial}
+                </div>
+              )}
+              <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <span className="text-[10px] text-white font-bold uppercase tracking-wider text-center px-1">Change Photo</span>
+              </div>
             </div>
+            
+            <input 
+              id="profile-pic-input" 
+              type="file" 
+              accept="image/*" 
+              className="hidden" 
+              onChange={handleFileChange} 
+            />
+
+            {profilePic && (
+              <button 
+                type="button" 
+                onClick={(e) => { e.stopPropagation(); setProfilePic(""); }}
+                className="text-xs text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 font-semibold mb-3 transition-colors flex items-center gap-1"
+              >
+                🗑️ Remove Photo
+              </button>
+            )}
+
             <h3 className="text-xl font-bold text-zinc-800 dark:text-zinc-100 transition-colors tracking-tight">{userData.name}</h3>
             <p className="text-zinc-500 dark:text-zinc-400 text-sm transition-colors">{userData.email}</p>
             <span className="mt-2 inline-flex items-center rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-medium text-emerald-400 border border-emerald-500/20 shadow-[0_0_10px_rgba(16,185,129,0.2)]">

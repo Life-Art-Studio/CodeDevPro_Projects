@@ -18,11 +18,24 @@ export const generateInvoicePDF = (order, customer) => {
   // 1. TOP HEADER
   // ------------------------------------------
   
-  // Left Side: Company Branding
-  doc.setFontSize(24);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(30, 58, 138); 
-  doc.text(user.name, 14, 24);
+  // Left Side: Company Branding (Profile Picture OR User Name)
+  if (user.profilePic) {
+    try {
+      doc.addImage(user.profilePic, "PNG", 14, 12, 20, 20);
+    } catch (e) {
+      console.error("Failed to add profile picture to invoice PDF", e);
+      // Fallback to text name if image addition fails
+      doc.setFontSize(24);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(30, 58, 138); 
+      doc.text(user.name, 14, 24);
+    }
+  } else {
+    doc.setFontSize(24);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(30, 58, 138); 
+    doc.text(user.name, 14, 24);
+  }
 
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
@@ -106,10 +119,10 @@ export const generateInvoicePDF = (order, customer) => {
       (index + 1).toString(),
       item.name || "Unnamed Item",
       item.qty.toString(),
-      `₹${formatCurrency(item.price)}`,
+      `Rs. ${formatCurrency(item.price)}`,
       `${item.discount}%`,
       `${item.gst}%`,
-      `₹${formatCurrency(rowTotal)}`
+      `Rs. ${formatCurrency(rowTotal)}`
     ]);
   });
 
@@ -159,7 +172,7 @@ export const generateInvoicePDF = (order, customer) => {
   // Subtotal
   doc.text("Subtotal:", rightMargin - 40, finalY, { align: "right" });
   doc.setTextColor(15, 23, 42);
-  doc.text(`₹${formatCurrency(subtotal)}`, rightMargin, finalY, { align: "right" });
+  doc.text(`Rs. ${formatCurrency(subtotal)}`, rightMargin, finalY, { align: "right" });
 
   // Discount
   if (globalDiscountAmt > 0) {
@@ -167,7 +180,7 @@ export const generateInvoicePDF = (order, customer) => {
     doc.text(`Global Discount (${globalDiscountPct}%):`, rightMargin - 40, finalY + 8, { align: "right" });
 
     doc.setTextColor(220, 38, 38);
-    doc.text(`- ₹${formatCurrency(globalDiscountAmt)}`, rightMargin, finalY + 8, { align: "right" });
+    doc.text(`- Rs. ${formatCurrency(globalDiscountAmt)}`, rightMargin, finalY + 8, { align: "right" });
   }
 
   // Final Total Box
@@ -181,7 +194,7 @@ export const generateInvoicePDF = (order, customer) => {
   doc.text("Total Due:", rightMargin - 40, totalY, { align: "right" });
 
   doc.setTextColor(37, 99, 235);
-  doc.text(`₹${formatCurrency(finalTotal)}`, rightMargin - 2, totalY, { align: "right" });
+  doc.text(`Rs. ${formatCurrency(finalTotal)}`, rightMargin - 2, totalY, { align: "right" });
 
   let nextY = totalY + 15;
 
@@ -194,7 +207,7 @@ export const generateInvoicePDF = (order, customer) => {
     const paymentRows = order.payments.map(p => [
       p.date,
       p.method,
-      `₹${formatCurrency(p.amount)}`,
+      `Rs. ${formatCurrency(p.amount)}`,
       p.note || "-"
     ]);
 
@@ -226,7 +239,7 @@ export const generateInvoicePDF = (order, customer) => {
     doc.setFont("helvetica", "bold");
     doc.setTextColor(220, 38, 38);
     doc.text("Outstanding Balance:", rightMargin - 40, nextY, { align: "right" });
-    doc.text(`₹${formatCurrency(outstanding)}`, rightMargin - 2, nextY, { align: "right" });
+    doc.text(`Rs. ${formatCurrency(outstanding)}`, rightMargin - 2, nextY, { align: "right" });
   }
 
   // ------------------------------------------

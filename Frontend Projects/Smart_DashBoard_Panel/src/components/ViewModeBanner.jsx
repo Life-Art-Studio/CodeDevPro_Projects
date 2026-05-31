@@ -65,9 +65,17 @@ const ViewModeBanner = ({ viewAsUser }) => {
       <div className="relative px-2 sm:px-4 py-1.5 flex justify-between items-center gap-2">
         {/* Left Side: Avatar & Name */}
         <div className="flex items-center gap-2 min-w-0">
-          <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-purple-500 to-pink-500 text-white flex items-center justify-center font-bold text-[9px] shadow-md ring-1 ring-white/10 shrink-0">
-            {viewAsUser.name.charAt(0)}
-          </div>
+          {viewAsUser.profilePic ? (
+            <img 
+              src={viewAsUser.profilePic} 
+              alt={viewAsUser.name} 
+              className="w-5 h-5 rounded-full object-cover shadow-md ring-1 ring-white/10 shrink-0"
+            />
+          ) : (
+            <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-purple-500 to-pink-500 text-white flex items-center justify-center font-bold text-[9px] shadow-md ring-1 ring-white/10 shrink-0">
+              {viewAsUser.name.charAt(0)}
+            </div>
+          )}
           <div className="flex items-center gap-1.5 min-w-0">
             <h3 className="font-bold text-[10px] sm:text-xs truncate whitespace-nowrap">Viewing as {viewAsUser.name}</h3>
             <span className="flex items-center gap-1 text-[9px] text-emerald-400 font-medium whitespace-nowrap">

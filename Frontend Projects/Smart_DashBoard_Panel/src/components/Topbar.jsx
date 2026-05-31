@@ -10,7 +10,7 @@ import { useBeatContext } from "../context/BeatContext";
 import { getOrderOutstanding } from "../utils/financeUtils";
 
 const Topbar = () => { // Make sure to accept the prop!
-  const { handleLogout,onOpenSidebarHandler,onOpenProfileHandler,onOpenSettingsHandler, onOpenNotificationsHandler} = useAuth();
+  const { currentUser, handleLogout,onOpenSidebarHandler,onOpenProfileHandler,onOpenSettingsHandler, onOpenNotificationsHandler} = useAuth();
   const { isDarkMode, toggleTheme } = useTheme();
   const { customers } = useCustomerContext();
   const { orders } = useOrderContext();
@@ -41,7 +41,7 @@ const Topbar = () => { // Make sure to accept the prop!
   }, []);
 
   // Safely get user data
-  const userData = StorageService.getCurrentUser() ?? { name: "User", email: "" };
+  const userData = currentUser ?? { name: "User", email: "" };
   // Get the first initial for the avatar
   const userInitial = userData.name ? userData.name.charAt(0).toUpperCase() : "U";
 
@@ -251,9 +251,17 @@ const Topbar = () => { // Make sure to accept the prop!
             </div>
             
             {/* Avatar Circle */}
-            <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-full bg-gradient-to-tr from-purple-600 to-pink-500 text-white flex items-center justify-center font-bold shadow-[0_0_10px_rgba(236,72,153,0.3)] border border-white/20">
-              {userInitial}
-            </div>
+            {userData.profilePic ? (
+              <img 
+                src={userData.profilePic} 
+                alt={userData.name} 
+                className="h-8 w-8 sm:h-9 sm:w-9 rounded-full object-cover shadow-[0_0_10px_rgba(236,72,153,0.3)] border border-white/20"
+              />
+            ) : (
+              <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-full bg-gradient-to-tr from-purple-600 to-pink-500 text-white flex items-center justify-center font-bold shadow-[0_0_10px_rgba(236,72,153,0.3)] border border-white/20">
+                {userInitial}
+              </div>
+            )}
             
             {/* Tiny arrow */}
             <span className={`text-[10px] text-zinc-400 transition-transform duration-300 hidden sm:block ${isDropdownOpen ? "rotate-180" : ""}`}>
