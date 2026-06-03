@@ -133,16 +133,25 @@ const generatePDF = (invoice, { superStockists = [], distributors = [], customer
 
     const tsy = Math.max(iy, ry) + 12;
     autoTable(doc, {
-      head: [["#", "Item Description", "Qty", "Unit Price (₹)", "Total (₹)"]],
+      head: [["#", "Item Description", "Qty", "Unit Price (₹)", "Disc %", "GST %", "Total (₹)"]],
       body: (invoice.lineItems || []).map((item, i) => [
         i + 1, item.description, item.quantity,
         Number(item.price).toLocaleString("en-IN", { minimumFractionDigits: 2 }),
+        item.discount ? `${item.discount}%` : "—",
+        item.gstRate ? `${item.gstRate}%` : "18%",
         Number(item.total).toLocaleString("en-IN", { minimumFractionDigits: 2 }),
       ]),
       startY: tsy, theme: "grid",
       styles: { fontSize: 9, cellPadding: 3 },
       headStyles: { fillColor: [22, 40, 100], textColor: [255, 255, 255], fontStyle: "bold", halign: "left" },
-      columnStyles: { 0: { cellWidth: 10, halign: "center" }, 2: { cellWidth: 18, halign: "center" }, 3: { cellWidth: 35, halign: "right" }, 4: { cellWidth: 38, halign: "right" } },
+      columnStyles: { 
+        0: { cellWidth: 8, halign: "center" }, 
+        2: { cellWidth: 12, halign: "center" }, 
+        3: { cellWidth: 26, halign: "right" }, 
+        4: { cellWidth: 16, halign: "center" }, 
+        5: { cellWidth: 16, halign: "center" }, 
+        6: { cellWidth: 28, halign: "right" } 
+      },
       alternateRowStyles: { fillColor: [245, 247, 255] },
     });
 
@@ -153,38 +162,54 @@ const generatePDF = (invoice, { superStockists = [], distributors = [], customer
     const sgst = Number(invoice.tax) / 2;
     const fmt = (n) => `\u20b9${Number(n).toLocaleString("en-IN", { minimumFractionDigits: 2 })}`;
 
+    let currentY = fy + 7;
     // Subtotal row
     doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(100, 116, 139);
-    doc.text("Subtotal (Taxable Value)", tx + 2, fy + 7);
+    doc.text("Subtotal (Taxable Value)", tx + 2, currentY);
     doc.setFont("helvetica", "bold"); doc.setTextColor(15, 23, 42);
-    doc.text(fmt(invoice.subTotal), rm, fy + 7, { align: "right" });
+    doc.text(fmt(invoice.subTotal), rm, currentY, { align: "right" });
 
     // CGST row — blue tint background
+    currentY += 8.5;
     doc.setFillColor(235, 245, 255);
-    doc.roundedRect(tx, fy + 10, rm - tx, 8, 1, 1, "F");
+    doc.roundedRect(tx, currentY - 5.5, rm - tx, 8, 1, 1, "F");
     doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(37, 99, 235);
-    doc.text("CGST (Central GST @ 50%)", tx + 4, fy + 15.5);
+    doc.text("CGST (Central GST @ 50%)", tx + 4, currentY);
     doc.setFont("helvetica", "bold");
-    doc.text(fmt(cgst), rm - 2, fy + 15.5, { align: "right" });
+    doc.text(fmt(cgst), rm - 2, currentY, { align: "right" });
 
     // SGST row — orange tint background
+    currentY += 9;
     doc.setFillColor(255, 247, 235);
-    doc.roundedRect(tx, fy + 19, rm - tx, 8, 1, 1, "F");
+    doc.roundedRect(tx, currentY - 5.5, rm - tx, 8, 1, 1, "F");
     doc.setFont("helvetica", "normal"); doc.setTextColor(234, 88, 12);
-    doc.text("SGST (State GST @ 50%)", tx + 4, fy + 24.5);
+    doc.text("SGST (State GST @ 50%)", tx + 4, currentY);
     doc.setFont("helvetica", "bold");
-    doc.text(fmt(sgst), rm - 2, fy + 24.5, { align: "right" });
+    doc.text(fmt(sgst), rm - 2, currentY, { align: "right" });
 
     // Total GST summary
+    currentY += 9.5;
     doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(100, 116, 139);
-    doc.text("Total GST", tx + 2, fy + 34);
+    doc.text("Total GST", tx + 2, currentY);
     doc.setFont("helvetica", "bold"); doc.setTextColor(15, 23, 42);
-    doc.text(fmt(invoice.tax), rm, fy + 34, { align: "right" });
+    doc.text(fmt(invoice.tax), rm, currentY, { align: "right" });
+
+    // Global Discount (if any)
+    if (Number(invoice.globalDiscount) > 0) {
+      currentY += 8.5;
+      doc.setFillColor(255, 248, 230);
+      doc.roundedRect(tx, currentY - 5.5, rm - tx, 8, 1, 1, "F");
+      doc.setFont("helvetica", "normal"); doc.setTextColor(180, 100, 10);
+      doc.text(`Global Discount (${invoice.globalDiscount}%)`, tx + 4, currentY);
+      doc.setFont("helvetica", "bold");
+      doc.text(`-${fmt(invoice.globalDiscountAmount)}`, rm - 2, currentY, { align: "right" });
+    }
 
     // Separator line before Grand Total
-    doc.setDrawColor(200, 210, 230); doc.setLineWidth(0.3); doc.line(tx, fy + 37, rm, fy + 37);
+    currentY += 4.5;
+    doc.setDrawColor(200, 210, 230); doc.setLineWidth(0.3); doc.line(tx, currentY, rm, currentY);
 
-    const gty = fy + 43;
+    const gty = currentY + 6;
     doc.setFillColor(22, 40, 100); doc.rect(tx, gty - 4, rm - tx, 11, "F");
     doc.setFont("helvetica", "bold"); doc.setFontSize(10); doc.setTextColor(255, 255, 255);
     doc.text("GRAND TOTAL", tx + 2, gty + 3.5);
@@ -314,7 +339,8 @@ const BillingSystem = () => {
   const [dueDateInput, setDueDateInput] = useState("");
   const [invoiceNotes, setInvoiceNotes] = useState("");
   const [invoiceTerms, setInvoiceTerms] = useState("Payment due within 30 days. Late fees may apply.");
-  const [formItems, setFormItems] = useState([{ id: "1", sku: "", description: "", quantity: 1, price: 0, gstRate: 18 }]);
+  const [globalDiscount, setGlobalDiscount] = useState(0);
+  const [formItems, setFormItems] = useState([{ id: "1", sku: "", description: "", quantity: 1, price: 0, discount: 0, gstRate: 18 }]);
 
   // ── Filter State ───────────────────────────────────────────────────────────
   const [statusFilter, setStatusFilter] = useState("All");
@@ -377,6 +403,12 @@ const BillingSystem = () => {
   // ── Filtered invoices ──────────────────────────────────────────────────────
   const getRoleFilteredInvoices = () => {
     let result = [...invoices];
+    const formalInvoicesOrderIds = result
+      .filter(inv => !inv.id.startsWith("BILL-"))
+      .map(inv => inv.sourceOrderId)
+      .filter(Boolean);
+    result = result.filter(inv => !inv.id.startsWith("BILL-") || !formalInvoicesOrderIds.includes(inv.sourceOrderId));
+
     if (activeRole === "ss") {
       result = result.filter(inv => inv.issuerId === selectedSSId && inv.tier === "SS_to_DB");
     } else if (activeRole === "db") {
@@ -474,7 +506,8 @@ const BillingSystem = () => {
   const handleSelectOrder = (orderId) => {
     setSelectedOrderId(orderId);
     if (!orderId) {
-      setFormItems([{ id: "1", sku: "", description: "", quantity: 1, price: 0, gstRate: 18 }]);
+      setFormItems([{ id: "1", sku: "", description: "", quantity: 1, price: 0, discount: 0, gstRate: 18 }]);
+      setGlobalDiscount(0);
       setDueDateInput("");
       setInvoiceNotes("");
       return;
@@ -490,10 +523,12 @@ const BillingSystem = () => {
         description: item.name || item.description || "Product",
         quantity: Number(item.qty || 1),
         price: Number(item.price || 0),
+        discount: Number(item.discount || 0),
         gstRate: Number(item.gst || 18),
       };
     });
-    setFormItems(mappedItems.length > 0 ? mappedItems : [{ id: "1", sku: "", description: "", quantity: 1, price: 0, gstRate: 18 }]);
+    setFormItems(mappedItems.length > 0 ? mappedItems : [{ id: "1", sku: "", description: "", quantity: 1, price: 0, discount: 0, gstRate: 18 }]);
+    setGlobalDiscount(Number(order.globalDiscount || 0));
     setDueDateInput(order.dueDate || "");
     setInvoiceNotes(`Auto-generated from Order #${order.id}`);
     // Set recipient to this order's customer
@@ -502,7 +537,7 @@ const BillingSystem = () => {
 
   // ── Form Handlers ──────────────────────────────────────────────────────────
   const handleAddFormItem = () =>
-    setFormItems([...formItems, { id: String(Date.now()), sku: "", description: "", quantity: 1, price: 0, gstRate: 18 }]);
+    setFormItems([...formItems, { id: String(Date.now()), sku: "", description: "", quantity: 1, price: 0, discount: 0, gstRate: 18 }]);
 
   const handleFormItemChange = (idx, field, value) => {
     const updated = [...formItems];
@@ -515,12 +550,22 @@ const BillingSystem = () => {
     setFormItems(formItems.filter((_, i) => i !== idx));
   };
 
-  const formSubTotal = formItems.reduce((s, item) => s + Number(item.quantity) * Number(item.price), 0);
-  const formTax = formItems.reduce((s, item) => {
-    const lineTotal = Number(item.quantity) * Number(item.price);
-    return s + lineTotal * ((Number(item.gstRate) || 18) / 100);
+  const formSubTotal = formItems.reduce((s, item) => {
+    const base = Number(item.quantity || 0) * Number(item.price || 0);
+    const disc = base * (Number(item.discount || 0) / 100);
+    return s + (base - disc);
   }, 0);
-  const formTotal = formSubTotal + formTax;
+
+  const formTax = formItems.reduce((s, item) => {
+    const base = Number(item.quantity || 0) * Number(item.price || 0);
+    const disc = base * (Number(item.discount || 0) / 100);
+    const taxable = base - disc;
+    return s + taxable * (Number(item.gstRate || 18) / 100);
+  }, 0);
+
+  const formPreDiscountTotal = formSubTotal + formTax;
+  const formGlobalDiscountAmount = formPreDiscountTotal * (Number(globalDiscount || 0) / 100);
+  const formTotal = formPreDiscountTotal - formGlobalDiscountAmount;
 
   const handleCreateInvoiceSubmit = async (e) => {
     e.preventDefault();
@@ -553,15 +598,28 @@ const BillingSystem = () => {
     }
 
     const lineItems = formItems.map((item, idx) => {
-      const baseTotal = Number(item.quantity) * Number(item.price);
+      const qty = Number(item.quantity);
+      const price = Number(item.price);
+      const discount = Number(item.discount || 0);
+      const gstRate = Number(item.gstRate || 18);
+
+      const baseTotal = qty * price;
+      const discountAmount = baseTotal * (discount / 100);
+      const taxableValue = baseTotal - discountAmount;
+      const taxAmount = taxableValue * (gstRate / 100);
+      const itemTotal = taxableValue + taxAmount;
+
       return {
         id: String(idx + 1),
         sku: item.sku || (item.description?.toLowerCase().includes("fluid") ? "BRK-FL-500" : "LUB-10W30-1L"),
         description: item.description,
-        quantity: Number(item.quantity),
-        price: Number(item.price),
-        gstRate: Number(item.gstRate) || 18,
-        total: baseTotal + baseTotal * ((Number(item.gstRate) || 18) / 100),
+        quantity: qty,
+        price: price,
+        discount: discount,
+        gstRate: gstRate,
+        taxableValue: taxableValue,
+        taxAmount: taxAmount,
+        total: itemTotal,
       };
     });
 
@@ -584,7 +642,11 @@ const BillingSystem = () => {
 
     const payload = {
       issuerId, issuerName, recipientId, recipientName, tier, lineItems,
-      subTotal: formSubTotal, tax: formTax, total: formTotal,
+      subTotal: formSubTotal,
+      tax: formTax,
+      globalDiscount: Number(globalDiscount || 0),
+      globalDiscountAmount: formGlobalDiscountAmount,
+      total: formTotal,
       dueDate: dueDateInput || new Date(Date.now() + 30 * 86400000).toISOString().split("T")[0],
       status, amountPaid, paymentHistory,
       notes: invoiceNotes, terms: invoiceTerms,
@@ -594,7 +656,8 @@ const BillingSystem = () => {
     const newInv = await addInvoice(payload);
     if (newInv) {
       setShowInvoiceModal(false);
-      setFormItems([{ id: "1", sku: "", description: "", quantity: 1, price: 0, gstRate: 18 }]);
+      setFormItems([{ id: "1", sku: "", description: "", quantity: 1, price: 0, discount: 0, gstRate: 18 }]);
+      setGlobalDiscount(0);
       setDueDateInput(""); setInvoiceNotes("");
       setInvoiceTerms("Payment due within 30 days. Late fees may apply.");
       setInvoiceSource("manual");
@@ -680,6 +743,7 @@ const BillingSystem = () => {
           <span className="font-bold text-slate-800 dark:text-slate-200">₹{row.total.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</span>
           <span className="text-[9px] text-slate-500 dark:text-slate-400">
             Sub: ₹{(row.subTotal || 0).toLocaleString("en-IN")} | Tax: ₹{(row.tax || 0).toLocaleString("en-IN")}
+            {row.globalDiscount > 0 && ` | Disc: ${row.globalDiscount}%`}
           </span>
           <span className="text-[9px] text-indigo-500/80 font-medium">
             (CGST: ₹{cgst.toLocaleString("en-IN")} | SGST: ₹{sgst.toLocaleString("en-IN")})
@@ -1400,13 +1464,13 @@ const BillingSystem = () => {
                       </button>
                     </div>
                     {/* Header */}
-                    <div className="grid grid-cols-[1fr_56px_80px_56px_32px] gap-1 text-[10px] font-semibold text-slate-400 px-1">
+                    <div className="grid grid-cols-[1.2fr_52px_76px_52px_56px_32px] gap-1 text-[10px] font-semibold text-slate-400 px-1">
                       <span>Description</span><span className="text-center">Qty</span>
-                      <span className="text-right">Price (₹)</span><span className="text-center">GST%</span><span />
+                      <span className="text-right">Price (₹)</span><span className="text-center">Disc%</span><span className="text-center">GST%</span><span />
                     </div>
                     <div className="flex flex-col gap-1.5 max-h-[200px] overflow-y-auto custom-scrollbar pr-1">
                       {formItems.map((item, idx) => (
-                        <div key={item.id} className="grid grid-cols-[1fr_56px_80px_56px_32px] gap-1 items-center">
+                        <div key={item.id} className="grid grid-cols-[1.2fr_52px_76px_52px_56px_32px] gap-1 items-center">
                           <select
                             required
                             value={item.sku || ""}
@@ -1423,7 +1487,7 @@ const BillingSystem = () => {
                                 setFormItems(updated);
                               }
                             }}
-                            className="text-xs px-2.5 py-1.5 border border-slate-200/40 dark:border-slate-800/60 rounded-lg bg-white dark:bg-slate-900 focus:outline-none w-full"
+                            className="text-xs px-2 py-1.5 border border-slate-200/40 dark:border-slate-800/60 rounded-lg bg-white dark:bg-slate-900 focus:outline-none w-full text-ellipsis overflow-hidden whitespace-nowrap"
                           >
                             <option value="">-- Choose Product --</option>
                             {products.map(p => (
@@ -1432,15 +1496,18 @@ const BillingSystem = () => {
                           </select>
                           <input type="number" required min="1" placeholder="Qty"
                             value={item.quantity} onChange={e => handleFormItemChange(idx, "quantity", e.target.value)}
-                            className="text-center text-xs px-1.5 py-1.5 border border-slate-200/40 dark:border-slate-800/60 rounded-lg bg-white dark:bg-slate-900 focus:outline-none" />
+                            className="text-center text-xs px-1 py-1.5 border border-slate-200/40 dark:border-slate-800/60 rounded-lg bg-white dark:bg-slate-900 focus:outline-none" />
                           <input type="number" required min="0.01" step="0.01" placeholder="Price"
                             value={item.price} onChange={e => handleFormItemChange(idx, "price", e.target.value)}
-                            className="text-right text-xs px-2 py-1.5 border border-slate-200/40 dark:border-slate-800/60 rounded-lg bg-white dark:bg-slate-900 focus:outline-none" />
+                            className="text-right text-xs px-1 py-1.5 border border-slate-200/40 dark:border-slate-800/60 rounded-lg bg-white dark:bg-slate-900 focus:outline-none" />
+                          <input type="number" min="0" max="100" placeholder="0"
+                            value={item.discount} onChange={e => handleFormItemChange(idx, "discount", e.target.value)}
+                            className="text-center text-xs px-1 py-1.5 border border-slate-200/40 dark:border-slate-800/60 rounded-lg bg-white dark:bg-slate-900 focus:outline-none text-amber-600 font-bold" />
                           <select value={item.gstRate} onChange={e => handleFormItemChange(idx, "gstRate", e.target.value)}
                             className="text-[10px] px-1 py-1.5 border border-slate-200/40 dark:border-slate-800/60 rounded-lg bg-white dark:bg-slate-900 focus:outline-none">
                             {[0, 5, 12, 18, 28].map(r => <option key={r} value={r}>{r}%</option>)}
                           </select>
-                          <button type="button" onClick={() => handleRemoveFormItem(idx)} className="p-1 text-red-500 hover:bg-red-500/10 rounded">
+                          <button type="button" onClick={() => handleRemoveFormItem(idx)} className="p-1 text-red-500 hover:bg-red-500/10 rounded justify-self-center">
                             <Trash2 className="h-3.5 w-3.5" />
                           </button>
                         </div>
@@ -1449,7 +1516,7 @@ const BillingSystem = () => {
                     {/* Running Total — CGST / SGST breakdown */}
                     <div className="mt-2 border border-slate-200/30 dark:border-slate-800/50 rounded-xl overflow-hidden">
                       <div className="flex justify-between text-xs px-3 py-1.5 bg-slate-50 dark:bg-slate-800/20">
-                        <span className="text-slate-500">Subtotal (Taxable)</span>
+                        <span className="text-slate-500">Subtotal (Taxable Value)</span>
                         <span className="font-semibold text-slate-700 dark:text-slate-300">₹{formSubTotal.toFixed(2)}</span>
                       </div>
                       <div className="flex justify-between text-xs px-3 py-1.5 bg-blue-50 dark:bg-blue-950/20 border-t border-blue-100 dark:border-blue-900/30">
@@ -1469,6 +1536,20 @@ const BillingSystem = () => {
                       <div className="flex justify-between text-xs px-3 py-1.5 bg-slate-50 dark:bg-slate-800/20 border-t border-slate-200/30 dark:border-slate-800/50">
                         <span className="text-slate-500">Total GST</span>
                         <span className="font-semibold text-slate-700 dark:text-slate-300">₹{formTax.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between items-center text-xs px-3 py-1.5 bg-amber-500/5 border-t border-slate-200/30 dark:border-slate-800/50">
+                        <span className="text-amber-600 dark:text-amber-500 font-semibold">Global Discount (%)</span>
+                        <div className="flex items-center gap-1.5">
+                          <input
+                            type="number"
+                            min="0"
+                            max="100"
+                            value={globalDiscount}
+                            onChange={e => setGlobalDiscount(Math.max(0, Math.min(100, Number(e.target.value) || 0)))}
+                            className="w-12 text-center text-xs py-0.5 border border-slate-200/40 dark:border-slate-800/60 rounded bg-white dark:bg-slate-900 focus:outline-none text-amber-600 font-bold"
+                          />
+                          <span className="text-slate-400 font-semibold">-₹{formGlobalDiscountAmount.toFixed(2)}</span>
+                        </div>
                       </div>
                       <div className="flex justify-between text-sm px-3 py-2 bg-[#162864] text-white font-bold border-t border-indigo-900">
                         <span>Grand Total</span>

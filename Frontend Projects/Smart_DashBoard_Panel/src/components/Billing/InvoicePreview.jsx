@@ -183,9 +183,11 @@ const InvoicePreview = ({ invoice, onClose, onDownloadPDF, superStockists = [], 
                   <tr className="bg-[#162864] text-white">
                     <th className="text-left px-3 py-2.5 rounded-tl-lg w-8">#</th>
                     <th className="text-left px-3 py-2.5">Description</th>
-                    <th className="text-center px-3 py-2.5 w-14">Qty</th>
-                    <th className="text-right px-3 py-2.5 w-28">Unit Price</th>
-                    <th className="text-right px-3 py-2.5 rounded-tr-lg w-28">Total</th>
+                    <th className="text-center px-3 py-2.5 w-12">Qty</th>
+                    <th className="text-right px-3 py-2.5 w-24">Unit Price</th>
+                    <th className="text-center px-3 py-2.5 w-16">Disc %</th>
+                    <th className="text-center px-3 py-2.5 w-16">GST %</th>
+                    <th className="text-right px-3 py-2.5 rounded-tr-lg w-24">Total</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -199,6 +201,12 @@ const InvoicePreview = ({ invoice, onClose, onDownloadPDF, superStockists = [], 
                       <td className="px-3 py-2.5 text-center text-slate-600 dark:text-slate-400">{item.quantity}</td>
                       <td className="px-3 py-2.5 text-right text-slate-600 dark:text-slate-400">
                         ₹{Number(item.price).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+                      </td>
+                      <td className="px-3 py-2.5 text-center text-slate-600 dark:text-slate-400">
+                        {item.discount ? `${item.discount}%` : "—"}
+                      </td>
+                      <td className="px-3 py-2.5 text-center text-slate-600 dark:text-slate-400">
+                        {item.gstRate ? `${item.gstRate}%` : "18%"}
                       </td>
                       <td className="px-3 py-2.5 text-right font-semibold text-slate-800 dark:text-slate-200">
                         ₹{Number(item.total).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
@@ -248,6 +256,16 @@ const InvoicePreview = ({ invoice, onClose, onDownloadPDF, superStockists = [], 
                       ₹{Number(invoice.tax).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
                     </span>
                   </div>
+
+                  {/* Global Discount */}
+                  {Number(invoice.globalDiscount) > 0 && (
+                    <div className="flex justify-between text-xs bg-amber-500/5 border border-amber-200/40 text-amber-700 dark:text-amber-400 px-3 py-1.5 rounded-lg">
+                      <span className="font-semibold">Global Discount ({invoice.globalDiscount}%)</span>
+                      <span className="font-bold text-amber-700 dark:text-amber-400">
+                        -₹{Number(invoice.globalDiscountAmount).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+                      </span>
+                    </div>
+                  )}
 
                   {/* Grand Total */}
                   <div className="flex justify-between text-sm font-bold bg-[#162864] text-white px-3 py-2 rounded-lg mt-1">

@@ -10,21 +10,37 @@ const OrderContext = createContext([]);
 const orderToBillingInvoice = (order, customer, issuerDB = null) => {
   // Build billing line items from order items
   const lineItems = (order.items || []).map((item, idx) => {
-    const baseTotal = Number(item.qty || 1) * Number(item.price || 0);
-    const afterDiscount = baseTotal - baseTotal * ((Number(item.discount) || 0) / 100);
-    const itemTotal = afterDiscount + afterDiscount * ((Number(item.gst) || 18) / 100);
+    const qty = Number(item.qty || 1);
+    const price = Number(item.price || 0);
+    const discount = Number(item.discount || 0);
+    const gstRate = Number(item.gst || 18);
+
+    const baseTotal = qty * price;
+    const discountAmount = baseTotal * (discount / 100);
+    const taxableValue = baseTotal - discountAmount;
+    const taxAmount = taxableValue * (gstRate / 100);
+    const itemTotal = taxableValue + taxAmount;
+
     return {
       id: String(idx + 1),
+      sku: item.sku || "LUB-10W30-1L",
       description: item.name || item.description || "Product",
-      quantity: Number(item.qty || 1),
-      price: Number(item.price || 0),
+      quantity: qty,
+      price: price,
+      discount: discount,
+      gstRate: gstRate,
+      taxableValue: taxableValue,
+      taxAmount: taxAmount,
       total: itemTotal,
     };
   });
 
-  const subTotal = lineItems.reduce((s, i) => s + i.price * i.quantity, 0);
-  const tax = lineItems.reduce((s, i) => s + (i.total - i.price * i.quantity), 0);
-  const total = subTotal + tax;
+  const subTotal = lineItems.reduce((s, i) => s + i.taxableValue, 0);
+  const tax = lineItems.reduce((s, i) => s + i.taxAmount, 0);
+  const preGlobalTotal = subTotal + tax;
+  const globalDiscount = Number(order.globalDiscount || 0);
+  const globalDiscountAmount = preGlobalTotal * (globalDiscount / 100);
+  const total = preGlobalTotal - globalDiscountAmount;
 
   // Map order payment status → billing status
   let status = "Unpaid";
@@ -42,6 +58,8 @@ const orderToBillingInvoice = (order, customer, issuerDB = null) => {
     lineItems,
     subTotal,
     tax,
+    globalDiscount,
+    globalDiscountAmount,
     total,
     status,
     amountPaid: Number(order.paidAmount || 0),
@@ -125,8 +143,27 @@ export const OrderProvider = ({ children }) => {
     handleOrdersUpdate();
 
     window.addEventListener("orders:updated", handleOrdersUpdate);
+
+    const handleStorageChange = (e) => {
+      if (e.key === "orders") {
+        handleOrdersUpdate();
+      }
+    };
+    window.addEventListener("storage", handleStorageChange);
+    window.addEventListener("focus", handleOrdersUpdate);
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        handleOrdersUpdate();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
     return () => {
       window.removeEventListener("orders:updated", handleOrdersUpdate);
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("focus", handleOrdersUpdate);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [currentUser, viewAsUserId]);
 
@@ -137,8 +174,8 @@ export const OrderProvider = ({ children }) => {
     StorageService.saveOrders(updatedAll);
     setOrders([newOrder, ...orders]);
     logAction("Create Order", "Orders", `Created order ${newOrder.id}`);
-    // Auto-create matching billing invoice disabled to prevent duplicate invoices for retailer
-    // syncOrderToBilling(newOrder);
+    // Auto-create matching billing invoice
+    syncOrderToBilling(newOrder);
   };
 
   const deleteOrder = (id) => {
@@ -148,24 +185,27 @@ export const OrderProvider = ({ children }) => {
     setOrders(orders.filter((order) => order.id !== id));
     logAction("Delete Order", "Orders", `Deleted order ${id}`);
     // Remove the matching billing invoice too
-    // removeOrderFromBilling(id);
+    removeOrderFromBilling(id);
   };
 
   const updateOrder = (id, updatedOrder) => {
     const allOrders = StorageService.getOrders() ?? [];
+    const original = allOrders.find((o) => o.id === id) || {};
+    const mergedOrder = { ...original, ...updatedOrder };
+
     const updatedAll = allOrders.map((o) =>
-      o.id === id ? { ...o, ...updatedOrder } : o
+      o.id === id ? mergedOrder : o
     );
     StorageService.saveOrders(updatedAll);
     setOrders(
       orders.map((order) =>
-        order.id === id ? { ...order, ...updatedOrder } : order
+        order.id === id ? mergedOrder : order
       )
     );
     logAction(
       "Update Order",
       "Orders",
-      `Updated order ${id} (Status: ${updatedOrder.status})`
+      `Updated order ${id} (Status: ${mergedOrder.status})`
     );
 
     // Sync payment details to any matching invoice in the billing system
@@ -175,14 +215,27 @@ export const OrderProvider = ({ children }) => {
       const updatedInvoices = existingInvoices.map((inv) => {
         if (inv.sourceOrderId === id || inv.id === `BILL-${id}`) {
           invoicesUpdated = true;
-          const totalPaid = Number(updatedOrder.paidAmount || 0);
-          const newInvStatus = updatedOrder.status === "Paid" ? "Paid" : (totalPaid > 0 ? "Partial" : "Unpaid");
+          const totalPaid = getOrderPaidAmount(mergedOrder);
+          const newInvStatus = mergedOrder.status === "Paid" ? "Paid" : (totalPaid > 0 ? "Partial" : "Unpaid");
           
+          const allCustomers = StorageService.getCustomers() || [];
+          const customer = allCustomers.find((c) => c.id === mergedOrder.customerId);
+          const allDistributors = StorageService.getDistributors() || [];
+          const issuerDB = allDistributors.find((d) => d.userId === mergedOrder.createdBy) || allDistributors[0] || null;
+          
+          const freshInvoice = orderToBillingInvoice(mergedOrder, customer, issuerDB);
+
           return {
             ...inv,
+            lineItems: freshInvoice.lineItems,
+            subTotal: freshInvoice.subTotal,
+            tax: freshInvoice.tax,
+            globalDiscount: freshInvoice.globalDiscount,
+            globalDiscountAmount: freshInvoice.globalDiscountAmount,
+            total: freshInvoice.total,
             amountPaid: totalPaid,
             status: newInvStatus,
-            paymentHistory: (updatedOrder.payments || []).map(p => ({
+            paymentHistory: (mergedOrder.payments || []).map(p => ({
               amount: p.amount,
               method: p.method || "Cash",
               reference: p.id || "",
@@ -196,6 +249,8 @@ export const OrderProvider = ({ children }) => {
       if (invoicesUpdated) {
         StorageService.saveInvoices(updatedInvoices);
         window.dispatchEvent(new CustomEvent("billing:invoices:updated"));
+      } else {
+        syncOrderToBilling(mergedOrder);
       }
     } catch (e) {
       console.error("Failed to sync order payment update to billing:", e);
