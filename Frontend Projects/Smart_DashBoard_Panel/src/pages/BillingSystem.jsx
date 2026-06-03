@@ -269,6 +269,24 @@ const BillingSystem = () => {
   });
   const [dbSubTab, setDbSubTab] = useState("receivables");
 
+  // Selected Entity state variables
+  const [selectedSSId, setSelectedSSId] = useState("");
+  const [selectedDBId, setSelectedDBId] = useState("");
+  const [selectedRetailerId, setSelectedRetailerId] = useState("");
+
+  // Initialize selected entity defaults
+  useEffect(() => {
+    if (superStockists.length > 0 && !selectedSSId) {
+      setSelectedSSId(mySSEntity?.id || superStockists[0].id);
+    }
+  }, [superStockists, mySSEntity, selectedSSId]);
+
+  useEffect(() => {
+    if (distributors.length > 0 && !selectedDBId) {
+      setSelectedDBId(myDBEntity?.id || distributors[0].id);
+    }
+  }, [distributors, myDBEntity, selectedDBId]);
+
   // ── Modal State ────────────────────────────────────────────────────────────
   const [showScanner, setShowScanner] = useState(false);
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
@@ -360,15 +378,18 @@ const BillingSystem = () => {
   const getRoleFilteredInvoices = () => {
     let result = [...invoices];
     if (activeRole === "ss") {
-      const ssId = mySSEntity?.id;
-      result = ssId ? result.filter(inv => inv.issuerId === ssId && inv.tier === "SS_to_DB")
-                    : result.filter(inv => inv.tier === "SS_to_DB");
+      result = result.filter(inv => inv.issuerId === selectedSSId && inv.tier === "SS_to_DB");
     } else if (activeRole === "db") {
-      const dbIds = distributors.map(d => d.id);
-      if (dbSubTab === "receivables") result = result.filter(inv => dbIds.includes(inv.issuerId) && inv.tier === "DB_to_Retailer");
-      else result = result.filter(inv => dbIds.includes(inv.recipientId) && inv.tier === "SS_to_DB");
+      if (dbSubTab === "receivables") {
+        result = result.filter(inv => inv.issuerId === selectedDBId && inv.tier === "DB_to_Retailer");
+      } else {
+        result = result.filter(inv => inv.recipientId === selectedDBId && inv.tier === "SS_to_DB");
+      }
     } else {
       result = result.filter(inv => inv.tier === "DB_to_Retailer");
+      if (selectedRetailerId) {
+        result = result.filter(inv => inv.recipientId === selectedRetailerId);
+      }
     }
     if (statusFilter !== "All") result = result.filter(inv => inv.status === statusFilter);
     if (searchQuery) {
@@ -508,7 +529,7 @@ const BillingSystem = () => {
 
     let issuerId = "", issuerName = "", recipientId = "", recipientName = "", tier = "";
     if (activeRole === "ss") {
-      const ssEntity = mySSEntity || superStockists[0];
+      const ssEntity = superStockists.find(s => s.id === selectedSSId) || mySSEntity || superStockists[0];
       issuerId = ssEntity?.id || "SS-001";
       issuerName = ssEntity?.name || currentUser?.name || "Super Stockist";
       const db = distributors.find(d => d.id === selectedRecipientId);
@@ -516,7 +537,7 @@ const BillingSystem = () => {
       recipientName = db?.name || "Distributor";
       tier = "SS_to_DB";
     } else {
-      const dbEntity = distributors.find(d => d.id === (myDBEntity?.id || distributors[0]?.id));
+      const dbEntity = distributors.find(d => d.id === selectedDBId) || myDBEntity || distributors[0];
       issuerId = dbEntity?.id || "DB-001";
       issuerName = dbEntity?.name || currentUser?.name || "Distributor";
       if (recipientType === "customer") {
@@ -737,21 +758,58 @@ const BillingSystem = () => {
           {/* ── Top HUD ──────────────────────────────────────────────────────── */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/40 dark:bg-[#1a1d27]/40 p-4 rounded-2xl border border-slate-200/20 dark:border-slate-800/40 backdrop-blur-md">
             <div className="flex flex-wrap items-center gap-4">
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <span className="text-xs font-semibold text-slate-500">Role View:</span>
                 <select
                   value={activeRole}
                   onChange={e => { setActiveRole(e.target.value); setSelectedIds([]); }}
-                  className="text-xs font-bold px-3 py-1.5 rounded-lg border border-slate-200/40 dark:border-slate-800/60 bg-white dark:bg-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="text-xs font-bold px-3 py-1.5 rounded-lg border border-slate-200/40 dark:border-slate-800/60 bg-white dark:bg-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer"
                 >
                   {superStockists.length > 0 && (
-                    <option value="ss">Super Stockist — {mySSEntity?.name || superStockists[0]?.name}</option>
+                    <option value="ss">Super Stockist</option>
                   )}
                   {distributors.length > 0 && (
-                    <option value="db">Distributor — {myDBEntity?.name || distributors[0]?.name}</option>
+                    <option value="db">Distributor</option>
                   )}
                   <option value="retailer">Retailer View</option>
                 </select>
+
+                {activeRole === "ss" && superStockists.length > 0 && (
+                  <select
+                    value={selectedSSId}
+                    onChange={e => { setSelectedSSId(e.target.value); setSelectedIds([]); }}
+                    className="text-xs font-bold px-3 py-1.5 rounded-lg border border-slate-200/40 dark:border-slate-800/60 bg-white dark:bg-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer animate-in fade-in duration-200"
+                  >
+                    {superStockists.map(ss => (
+                      <option key={ss.id} value={ss.id}>{ss.name} ({ss.id})</option>
+                    ))}
+                  </select>
+                )}
+
+                {activeRole === "db" && distributors.length > 0 && (
+                  <select
+                    value={selectedDBId}
+                    onChange={e => { setSelectedDBId(e.target.value); setSelectedIds([]); }}
+                    className="text-xs font-bold px-3 py-1.5 rounded-lg border border-slate-200/40 dark:border-slate-800/60 bg-white dark:bg-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer animate-in fade-in duration-200"
+                  >
+                    {distributors.map(db => (
+                      <option key={db.id} value={db.id}>{db.name} ({db.id})</option>
+                    ))}
+                  </select>
+                )}
+
+                {activeRole === "retailer" && customers.length > 0 && (
+                  <select
+                    value={selectedRetailerId}
+                    onChange={e => { setSelectedRetailerId(e.target.value); setSelectedIds([]); }}
+                    className="text-xs font-bold px-3 py-1.5 rounded-lg border border-slate-200/40 dark:border-slate-800/60 bg-white dark:bg-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer animate-in fade-in duration-200"
+                  >
+                    <option value="">All Retailers</option>
+                    {customers.map(c => (
+                      <option key={c.id} value={c.id}>{c.name} ({c.id})</option>
+                    ))}
+                  </select>
+                )}
               </div>
               <div className="flex items-center gap-2 border-l border-slate-200/30 dark:border-slate-800/40 pl-4">
                 <span className="text-xs font-semibold text-slate-500 flex items-center gap-1">
