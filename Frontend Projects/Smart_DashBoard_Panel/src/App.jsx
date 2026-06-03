@@ -137,7 +137,7 @@ const App = () => {
                             <Route
                               path="supply-chain"
                               element={
-                                <ProtectedRoute adminOnly>
+                                <ProtectedRoute>
                                   <SupplyChain />
                                 </ProtectedRoute>
                               }
