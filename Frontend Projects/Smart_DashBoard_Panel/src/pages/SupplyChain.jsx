@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useSupplyChainContext } from "../context/SupplyChainContext";
 import { useBeatContext } from "../context/BeatContext";
 import { useProductContext } from "../context/ProductContext";
+import { useAuth } from "../context/AuthContext";
 import BottomSheet from "../components/ui/BottomSheet";
 import FormField from "../components/ui/FormField";
 import StatusBadge from "../components/ui/StatusBadge";
@@ -44,6 +45,7 @@ export default function SupplyChain() {
 
   const { beats } = useBeatContext();
   const { products } = useProductContext();
+  const { currentUser } = useAuth();
 
   const [activeTab, setActiveTab] = useState("ss"); // 'ss' or 'dist'
   const [searchTerm, setSearchTerm] = useState("");
@@ -817,12 +819,14 @@ export default function SupplyChain() {
                                   </span>
                                 )}
                               </button>
-                              <button
-                                onClick={() => startAssignBeats(db)}
-                                className="px-3 py-1.5 bg-purple-50 hover:bg-purple-100 dark:bg-purple-500/10 dark:hover:bg-purple-500/20 text-purple-700 dark:text-purple-400 rounded-lg text-xs font-bold border border-purple-100 dark:border-purple-500/20 transition-all flex items-center gap-1 min-h-[36px] mr-2"
-                              >
-                                <MapPin className="w-3.5 h-3.5" /> Assign Beats
-                              </button>
+                              {currentUser?.role !== 'ADMIN' && (
+                                <button
+                                  onClick={() => startAssignBeats(db)}
+                                  className="px-3 py-1.5 bg-purple-50 hover:bg-purple-100 dark:bg-purple-500/10 dark:hover:bg-purple-500/20 text-purple-700 dark:text-purple-400 rounded-lg text-xs font-bold border border-purple-100 dark:border-purple-500/20 transition-all flex items-center gap-1 min-h-[36px] mr-2"
+                                >
+                                  <MapPin className="w-3.5 h-3.5" /> Assign Beats
+                                </button>
+                              )}
                               <button
                                 onClick={() => startDistEdit(db)}
                                 className="p-2 text-zinc-500 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
@@ -1064,46 +1068,48 @@ export default function SupplyChain() {
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5 font-semibold">Assign Beats</label>
-                  {beats.length === 0 ? (
-                    <p className="text-xs text-zinc-500 italic">No beats available. Create beats in the Beats page first.</p>
-                  ) : (
-                    <div className="grid grid-cols-1 gap-2 max-h-[160px] overflow-y-auto border border-zinc-200 dark:border-zinc-800 rounded-xl p-3 bg-zinc-50 dark:bg-zinc-900 custom-scrollbar">
-                      {beats.map((beat) => {
-                        const isChecked = distForm.assignedBeats?.includes(beat.id);
-                        const owningDb = getDistributorOwningBeat(beat.id);
-                        const isAssignedToOther = owningDb && owningDb.id !== (editingEntity?.type === "dist" ? editingEntity.data.id : null);
-                        return (
-                          <label key={beat.id} className={`flex items-center gap-3 p-2 rounded-lg transition-colors ${
-                            isAssignedToOther 
-                              ? "opacity-50 cursor-not-allowed bg-zinc-100 dark:bg-zinc-800/40" 
-                              : "hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer select-none"
-                          }`}>
-                            <input
-                              type="checkbox"
-                              checked={isChecked || false}
-                              disabled={isAssignedToOther}
-                              onChange={(e) => {
-                                const newBeats = e.target.checked
-                                  ? [...(distForm.assignedBeats || []), beat.id]
-                                  : (distForm.assignedBeats || []).filter(id => id !== beat.id);
-                                setDistForm({ ...distForm, assignedBeats: newBeats });
-                              }}
-                              className={`rounded border-zinc-300 dark:border-zinc-700 text-indigo-600 focus:ring-indigo-500 h-4 w-4 ${isAssignedToOther ? "cursor-not-allowed" : ""}`}
-                            />
-                            <div className="text-left">
-                              <p className="text-xs font-bold text-zinc-800 dark:text-zinc-200">
-                                {beat.name} {isAssignedToOther && <span className="text-[10px] text-red-500 font-semibold ml-1">({owningDb.name})</span>}
-                              </p>
-                              <p className="text-[10px] text-zinc-400 font-mono">{beat.id}</p>
-                            </div>
-                          </label>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
+                {currentUser?.role !== 'ADMIN' && (
+                  <div>
+                    <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5 font-semibold">Assign Beats</label>
+                    {beats.length === 0 ? (
+                      <p className="text-xs text-zinc-500 italic">No beats available. Create beats in the Beats page first.</p>
+                    ) : (
+                      <div className="grid grid-cols-1 gap-2 max-h-[160px] overflow-y-auto border border-zinc-200 dark:border-zinc-800 rounded-xl p-3 bg-zinc-50 dark:bg-zinc-900 custom-scrollbar">
+                        {beats.map((beat) => {
+                          const isChecked = distForm.assignedBeats?.includes(beat.id);
+                          const owningDb = getDistributorOwningBeat(beat.id);
+                          const isAssignedToOther = owningDb && owningDb.id !== (editingEntity?.type === "dist" ? editingEntity.data.id : null);
+                          return (
+                            <label key={beat.id} className={`flex items-center gap-3 p-2 rounded-lg transition-colors ${
+                              isAssignedToOther 
+                                ? "opacity-50 cursor-not-allowed bg-zinc-100 dark:bg-zinc-800/40" 
+                                : "hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer select-none"
+                            }`}>
+                              <input
+                                type="checkbox"
+                                checked={isChecked || false}
+                                disabled={isAssignedToOther}
+                                onChange={(e) => {
+                                  const newBeats = e.target.checked
+                                    ? [...(distForm.assignedBeats || []), beat.id]
+                                    : (distForm.assignedBeats || []).filter(id => id !== beat.id);
+                                  setDistForm({ ...distForm, assignedBeats: newBeats });
+                                }}
+                                className={`rounded border-zinc-300 dark:border-zinc-700 text-indigo-600 focus:ring-indigo-500 h-4 w-4 ${isAssignedToOther ? "cursor-not-allowed" : ""}`}
+                              />
+                              <div className="text-left">
+                                <p className="text-xs font-bold text-zinc-800 dark:text-zinc-200">
+                                  {beat.name} {isAssignedToOther && <span className="text-[10px] text-red-500 font-semibold ml-1">({owningDb.name})</span>}
+                                </p>
+                                <p className="text-[10px] text-zinc-400 font-mono">{beat.id}</p>
+                              </div>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">Status</label>
