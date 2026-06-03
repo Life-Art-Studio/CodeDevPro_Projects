@@ -176,7 +176,7 @@ export const BillingProvider = ({ children }) => {
       
       const updatedOrders = allOrders.map(o => {
         const matchingInv = updatedInvoicesList.find(
-          inv => inv.id && updatedInvoiceIds.includes(inv.id) && inv.sourceOrderId === o.id
+          inv => inv.id && updatedInvoiceIds.includes(inv.id) && (inv.sourceOrderId === o.id || inv.id === `BILL-${o.id}`)
         );
         if (matchingInv) {
           ordersUpdated = true;
