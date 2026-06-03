@@ -21,6 +21,8 @@ const MapPage = lazy(() => import('./pages/MapPage'));
 const Catalogue = lazy(() => import('./pages/Catalogue'));
 const Users = lazy(() => import('./pages/Users'));
 const AuditLogs = lazy(() => import('./pages/AuditLogs'));
+const SupplyChain = lazy(() => import('./pages/SupplyChain'));
+const BillingSystem = lazy(() => import('./pages/BillingSystem'));
 
 // Auth Gate
 import { useAuth } from "./context/AuthContext";
@@ -32,6 +34,8 @@ import { ThemeProvider } from "./context/ThemeContext";
 import { BeatProvider } from "./context/BeatContext";
 import { VisitProvider } from "./context/VisitContext";
 import { ProductProvider } from "./context/ProductContext";
+import { SupplyChainProvider } from "./context/SupplyChainContext";
+import { BillingProvider } from "./context/BillingContext";
 
 const ProtectedRoute = ({ children, adminOnly = false }) => {
   const { isLoggedIn, currentUser } = useAuth();
@@ -50,9 +54,11 @@ const App = () => {
             <BeatProvider>
               <VisitProvider>
                 <ProductProvider>
-                  <HashRouter>
-                    <Suspense fallback={<LoadingSpinner />}>
-                      <Routes>
+                  <SupplyChainProvider>
+                    <BillingProvider>
+                      <HashRouter>
+                      <Suspense fallback={<LoadingSpinner />}>
+                        <Routes>
                         {/* Default Redirect: If they just type yourwebsite.com, send them to login */}
                         <Route path="/" element={<Navigate to="/auth/login" replace />} />
 
@@ -128,13 +134,31 @@ const App = () => {
                                 </ProtectedRoute>
                               }
                             />
+                            <Route
+                              path="supply-chain"
+                              element={
+                                <ProtectedRoute adminOnly>
+                                  <SupplyChain />
+                                </ProtectedRoute>
+                              }
+                            />
+                            <Route
+                              path="billing"
+                              element={
+                                <ProtectedRoute adminOnly>
+                                  <BillingSystem />
+                                </ProtectedRoute>
+                              }
+                            />
                           
                         </Route>
                       </Routes>
                     </Suspense>
 
                     <NotificationPanel />
-                  </HashRouter>
+                    </HashRouter>
+                    </BillingProvider>
+                  </SupplyChainProvider>
                 </ProductProvider>
               </VisitProvider>
             </BeatProvider>

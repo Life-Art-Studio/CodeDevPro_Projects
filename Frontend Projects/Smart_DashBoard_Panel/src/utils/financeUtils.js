@@ -39,6 +39,7 @@ export const deriveOrderStatus = (order) => {
   const paid = getOrderPaidAmount(order);
   
   if (paid === 0 && order.status === 'Cancelled') return 'Cancelled';
+  if (paid === 0 && order.status === 'Backordered') return 'Backordered';
   if (paid === 0) return 'Pending';
   if (paid >= total) return 'Paid';
   return 'Partially Paid';

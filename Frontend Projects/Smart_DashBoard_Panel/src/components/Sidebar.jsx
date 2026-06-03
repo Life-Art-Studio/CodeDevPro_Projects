@@ -3,7 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { useState, useEffect, useRef } from "react";
 import useCustomerContext from "../context/CustomerContext";
 import useOrderContext from "../context/OrderContext";
-import { LayoutDashboard, Users, Map, Package, BarChart, FileText, Wallet, PackageSearch, X, Search } from "lucide-react";
+import { LayoutDashboard, Users, Map, Package, BarChart, FileText, Wallet, PackageSearch, X, Search, Truck } from "lucide-react";
 
 const Sidebar = ({ menuItems }) => {
   const { isSidebarOpen, onOpenSidebarHandler } = useAuth();
@@ -64,6 +64,8 @@ const Sidebar = ({ menuItems }) => {
       case 'Catalogue': return <Package className="w-5 h-5" />;
       case 'Users': return <Users className="w-5 h-5" />;
       case 'Audit Trail': return <FileText className="w-5 h-5" />;
+      case 'Supply Chain': return <Truck className="w-5 h-5" />;
+      case 'Billing': return <Wallet className="w-5 h-5" />;
       default: return <FileText className="w-5 h-5" />;
     }
   };

@@ -6,6 +6,8 @@ import { useVisitContext } from '../context/VisitContext';
 import { useBeatContext } from '../context/BeatContext';
 import { getOrderOutstanding } from '../utils/financeUtils';
 import { useNavigate } from 'react-router-dom';
+import { useSupplyChainContext } from '../context/SupplyChainContext';
+import { useProductContext } from '../context/ProductContext';
 
 const NotificationsPanel = () => {
   const { isNotificationsOpen, onOpenNotificationsHandler } = useAuth();
@@ -13,6 +15,8 @@ const NotificationsPanel = () => {
   const { orders } = useOrderContext();
   const { visits } = useVisitContext();
   const { beats } = useBeatContext();
+  const { superStockists, distributors, inventoryLedger } = useSupplyChainContext();
+  const { products } = useProductContext();
   const navigate = useNavigate();
 
   const [dismissedIds, setDismissedIds] = useState(new Set());
@@ -140,11 +144,49 @@ const NotificationsPanel = () => {
       }
     });
 
+    // 7. Supply Chain Low Stock Alerts
+    inventoryLedger.forEach(item => {
+      if (item.currentStock <= item.reorderLevel) {
+        const product = products.find(p => p.sku === item.sku);
+        if (!product) return;
+
+        if (item.distributorId) {
+          const distributor = distributors.find(d => d.id === item.distributorId);
+          if (distributor) {
+            notifs.push({
+              id: `lowstock-db-${distributor.id}-${item.sku}`,
+              type: 'Urgent',
+              icon: '📦',
+              color: 'text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-500/20',
+              title: 'Low Inventory Alert (Distributor)',
+              message: `${distributor.name} (${distributor.district}) is running low on ${product.name} (${item.currentStock} / ${item.reorderLevel} units).`,
+              date: todayStr,
+              action: () => navigate('/dashboard/supply-chain')
+            });
+          }
+        } else if (item.superStockistId) {
+          const ss = superStockists.find(s => s.id === item.superStockistId);
+          if (ss) {
+            notifs.push({
+              id: `lowstock-ss-${ss.id}-${item.sku}`,
+              type: 'Urgent',
+              icon: '📦',
+              color: 'text-purple-600 bg-purple-100 dark:text-purple-400 dark:bg-purple-500/20',
+              title: 'Low Inventory Alert (Super Stockist)',
+              message: `Super Stockist ${ss.name} (${ss.state}) is running low on ${product.name} (${item.currentStock} / ${item.reorderLevel} units).`,
+              date: todayStr,
+              action: () => navigate('/dashboard/supply-chain')
+            });
+          }
+        }
+      }
+    });
+
     // Filter out dismissed
     return notifs
       .filter(n => !dismissedIds.has(n.id))
       .sort((a, b) => new Date(b.date) - new Date(a.date));
-  }, [orders, visits, customers, beats, dismissedIds, navigate]);
+  }, [orders, visits, customers, beats, dismissedIds, navigate, inventoryLedger, distributors, products]);
 
   const filteredNotifs = notifications.filter(n => filter === 'All' || n.type === filter);
 

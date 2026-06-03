@@ -24,16 +24,20 @@ const DashBoardLayout = () => {
     ...(viewAsUserId ? [
       { name: "Customers", path: "/dashboard/customers" },
       { name: "Beats", path: "/dashboard/beats" },
-      { name: "Map View", path: "/dashboard/map" }
+      { name: "Map View", path: "/dashboard/map" },
+      { name: "Supply Chain", path: "/dashboard/supply-chain" },
+      { name: "Billing", path: "/dashboard/billing" }
     ] : [
       { name: "Users", path: "/dashboard/users" },
       { name: "Audit Trail", path: "/dashboard/audit-logs" },
+      { name: "Supply Chain", path: "/dashboard/supply-chain" },
+      { name: "Billing", path: "/dashboard/billing" }
     ])
   ] : [
     { name: "Customers", path: "/dashboard/customers" },
     { name: "Beats", path: "/dashboard/beats" },
     { name: "Map View", path: "/dashboard/map" },
-    { name: "Catalogue", path: "/dashboard/catalogue" },
+    { name: "Catalogue", path: "/dashboard/catalogue" }
   ];
 
   return (

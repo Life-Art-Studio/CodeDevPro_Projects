@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { generateInvoicePDF } from '../../utils/generatePdf'; 
 import { calculateOrderTotal, getOrderPaidAmount } from '../../utils/financeUtils';
 import PaymentModal from './PaymentModal';
@@ -6,10 +7,11 @@ import { useAuth } from '../../context/AuthContext';
 import ResponsiveTable from '../ui/ResponsiveTable';
 import StatusBadge from '../ui/StatusBadge';
 import CustomSelect from '../ui/CustomSelect';
-import { Plus, CreditCard, FileText, Edit2, Trash2, PackageSearch, Eye } from 'lucide-react';
+import { Plus, CreditCard, FileText, Edit2, Trash2, PackageSearch, Eye, Receipt } from 'lucide-react';
 
 const OrderList = ({ orders, customer, onCreateNew, onEdit, onDelete, onStatusChange, defaultFilter, onRecordPayment }) => {
   const { currentUser } = useAuth();
+  const navigate = useNavigate();
   
   const [filterStatus, setFilterStatus] = useState(defaultFilter || "All");
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
@@ -91,6 +93,18 @@ const OrderList = ({ orders, customer, onCreateNew, onEdit, onDelete, onStatusCh
               title="Record Payment"
             >
               <CreditCard className="w-3.5 h-3.5 lg:w-4 lg:h-4" />
+            </button>
+          )}
+          {currentUser?.role === 'ADMIN' && (
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/dashboard/billing?action=create-invoice&customerId=${customer.id}&orderId=${order.id}`);
+              }}
+              className="p-1 lg:p-2 text-purple-600 hover:bg-purple-50 dark:text-purple-400 dark:hover:bg-purple-500/10 rounded-lg transition-colors min-h-[32px] min-w-[32px] lg:min-h-[44px] lg:min-w-[44px] flex items-center justify-center"
+              title="Generate Invoice from Order"
+            >
+              <Receipt className="w-3.5 h-3.5 lg:w-4 lg:h-4" />
             </button>
           )}
           <button 

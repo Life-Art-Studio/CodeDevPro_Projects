@@ -216,6 +216,86 @@ const StorageService = {
     const updated = updaterFn(parsed);
     localStorage.setItem(key, JSON.stringify(updated));
     return updated;
+  },
+  getSuperStockists: () => {
+    try {
+      return JSON.parse(localStorage.getItem("superStockists")) ?? null;
+    } catch {
+      return null;
+    }
+  },
+  saveSuperStockists: (ss) => {
+    localStorage.setItem("superStockists", JSON.stringify(ss));
+  },
+  getDistributors: () => {
+    try {
+      return JSON.parse(localStorage.getItem("distributors")) ?? null;
+    } catch {
+      return null;
+    }
+  },
+  saveDistributors: (distributors) => {
+    localStorage.setItem("distributors", JSON.stringify(distributors));
+  },
+  getInventoryLedger: () => {
+    try {
+      return JSON.parse(localStorage.getItem("inventoryLedger")) ?? null;
+    } catch {
+      return null;
+    }
+  },
+  saveInventoryLedger: (ledger) => {
+    localStorage.setItem("inventoryLedger", JSON.stringify(ledger));
+  },
+  getInvoices: () => {
+    try {
+      return JSON.parse(localStorage.getItem("invoices")) ?? null;
+    } catch {
+      return null;
+    }
+  },
+  saveInvoices: (invoices) => {
+    localStorage.setItem("invoices", JSON.stringify(invoices));
+  },
+  getReceiptCaptures: () => {
+    try {
+      return JSON.parse(localStorage.getItem("receiptCaptures")) ?? null;
+    } catch {
+      return null;
+    }
+  },
+  saveReceiptCaptures: (receipts) => {
+    try {
+      const limitBytes = 4 * 1024 * 1024; // 4MB safe limit
+      let serialized = JSON.stringify(receipts);
+      
+      let totalSize = 0;
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key !== "receiptCaptures") {
+          totalSize += (localStorage.getItem(key) || "").length;
+        }
+      }
+      totalSize += serialized.length;
+
+      if (totalSize > limitBytes) {
+        console.warn("Storage limit approaching. Purging older receipt images to free up space...");
+        const prunedReceipts = receipts.map((rec, idx) => {
+          if (idx < receipts.length - 3) {
+            return { ...rec, rawImageBase64: "" };
+          }
+          return rec;
+        });
+        localStorage.setItem("receiptCaptures", JSON.stringify(prunedReceipts));
+        return true;
+      }
+
+      localStorage.setItem("receiptCaptures", serialized);
+      return false;
+    } catch (e) {
+      console.error("Storage failed or quota exceeded", e);
+      return false;
+    }
   }
 };
 
