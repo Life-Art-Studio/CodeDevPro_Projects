@@ -39,16 +39,10 @@ export const BillingProvider = ({ children }) => {
   // ─── Load from Storage ──────────────────────────────────────────────────────
   useEffect(() => {
     const storedInvoices = StorageService.getInvoices() || [];
-    // Clean up any invoice starting with "BILL-" so that we immediately remove duplicates from storage
-    const cleanedInvoices = storedInvoices.filter(inv => !inv.id.startsWith("BILL-"));
-    if (cleanedInvoices.length !== storedInvoices.length) {
-      StorageService.saveInvoices(cleanedInvoices);
-    }
-
     const storedReceipts = StorageService.getReceiptCaptures();
     const storedCreditNotes = JSON.parse(localStorage.getItem("creditNotes") || "[]");
 
-    setInvoices(cleanedInvoices);
+    setInvoices(storedInvoices);
     setReceiptCaptures(storedReceipts || []);
     setCreditNotes(storedCreditNotes);
 
@@ -60,15 +54,32 @@ export const BillingProvider = ({ children }) => {
 
     const handleInvoiceUpdate = () => {
       const refreshed = StorageService.getInvoices() || [];
-      const cleaned = refreshed.filter(inv => !inv.id.startsWith("BILL-"));
-      setInvoices(cleaned);
+      setInvoices(refreshed);
     };
     window.addEventListener("billing:invoices:updated", handleInvoiceUpdate);
+
+    const handleStorageChange = (e) => {
+      if (e.key === "invoices") {
+        handleInvoiceUpdate();
+      }
+    };
+    window.addEventListener("storage", handleStorageChange);
+    window.addEventListener("focus", handleInvoiceUpdate);
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        handleInvoiceUpdate();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
       window.removeEventListener("online", updateOnlineStatus);
       window.removeEventListener("offline", updateOnlineStatus);
       window.removeEventListener("billing:invoices:updated", handleInvoiceUpdate);
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("focus", handleInvoiceUpdate);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, []);
 
@@ -145,7 +156,7 @@ export const BillingProvider = ({ children }) => {
         createdAt: invoiceData.createdAt || new Date().toISOString().split("T")[0],
         status: invoiceData.status || "Unpaid",
         amountPaid: Number(invoiceData.amountPaid || 0),
-        paymentHistory: [],
+        paymentHistory: invoiceData.paymentHistory || [],
         reminderCount: 0,
         lastReminderAt: null,
         notes: invoiceData.notes || "",
@@ -158,6 +169,9 @@ export const BillingProvider = ({ children }) => {
       
       // Sync stock adjustments to supply chain
       adjustInventoryForInvoice(newInvoice, 1);
+
+      // Sync invoice status/payments back to matching order
+      syncInvoicesToOrders(updated, [newId]);
 
       toast.success(`Invoice ${newId} created successfully!`);
       return newInvoice;
