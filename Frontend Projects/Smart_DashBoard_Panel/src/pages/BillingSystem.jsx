@@ -565,11 +565,28 @@ const BillingSystem = () => {
       };
     });
 
+    let amountPaid = 0;
+    let status = "Unpaid";
+    let paymentHistory = [];
+    if (invoiceSource === "from_order" && selectedOrderId) {
+      const order = allOrders.find(o => o.id === selectedOrderId);
+      if (order) {
+        amountPaid = order.status === "Paid" ? formTotal : Number(order.paidAmount || 0);
+        status = order.status === "Paid" ? "Paid" : (amountPaid > 0 ? "Partial" : "Unpaid");
+        paymentHistory = (order.payments || []).map(p => ({
+          amount: p.amount,
+          method: p.method || "Cash",
+          reference: p.id || "",
+          date: p.date || new Date().toISOString()
+        }));
+      }
+    }
+
     const payload = {
       issuerId, issuerName, recipientId, recipientName, tier, lineItems,
       subTotal: formSubTotal, tax: formTax, total: formTotal,
       dueDate: dueDateInput || new Date(Date.now() + 30 * 86400000).toISOString().split("T")[0],
-      status: "Unpaid", amountPaid: 0,
+      status, amountPaid, paymentHistory,
       notes: invoiceNotes, terms: invoiceTerms,
       ...(invoiceSource === "from_order" && selectedOrderId ? { sourceOrderId: selectedOrderId } : {}),
     };

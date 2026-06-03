@@ -169,12 +169,57 @@ export const BillingProvider = ({ children }) => {
     }
   };
 
+  const syncInvoicesToOrders = (updatedInvoicesList, updatedInvoiceIds) => {
+    try {
+      const allOrders = StorageService.getOrders() || [];
+      let ordersUpdated = false;
+      
+      const updatedOrders = allOrders.map(o => {
+        const matchingInv = updatedInvoicesList.find(
+          inv => inv.id && updatedInvoiceIds.includes(inv.id) && inv.sourceOrderId === o.id
+        );
+        if (matchingInv) {
+          ordersUpdated = true;
+          let newStatus = o.status;
+          if (matchingInv.status === "Paid") {
+            newStatus = "Paid";
+          } else if (matchingInv.status === "Partial") {
+            newStatus = "Partially Paid";
+          } else if (matchingInv.status === "Unpaid") {
+            newStatus = o.status === "Cancelled" || o.status === "Backordered" ? o.status : "Pending";
+          }
+          return {
+            ...o,
+            paidAmount: matchingInv.amountPaid,
+            status: newStatus,
+            payments: (matchingInv.paymentHistory || []).map(p => ({
+              id: p.reference || 'PAY-' + Date.now(),
+              amount: p.amount,
+              method: p.method || "Cash",
+              note: `Sync from Invoice payment ${matchingInv.id}`,
+              date: p.date || new Date().toISOString()
+            }))
+          };
+        }
+        return o;
+      });
+      
+      if (ordersUpdated) {
+        StorageService.saveOrders(updatedOrders);
+        window.dispatchEvent(new CustomEvent("orders:updated"));
+      }
+    } catch (err) {
+      console.error("Failed to sync invoice payments to orders:", err);
+    }
+  };
+
   const updateInvoice = (id, updatedData) => {
     const updated = invoices.map(inv =>
       inv.id === id ? { ...inv, ...updatedData } : inv
     );
     setInvoices(updated);
     StorageService.saveInvoices(updated);
+    syncInvoicesToOrders(updated, [id]);
   };
 
   const deleteInvoice = (id) => {
@@ -226,6 +271,7 @@ export const BillingProvider = ({ children }) => {
     });
     setInvoices(updated);
     StorageService.saveInvoices(updated);
+    syncInvoicesToOrders(updated, ids);
     toast.success(`${ids.length} invoice(s) marked as paid.`);
   };
 
@@ -257,6 +303,7 @@ export const BillingProvider = ({ children }) => {
 
     setInvoices(updated);
     StorageService.saveInvoices(updated);
+    syncInvoicesToOrders(updated, [id]);
     toast.success(`Recorded ₹${payment.toLocaleString()} via ${method} for ${id}`);
   };
 
