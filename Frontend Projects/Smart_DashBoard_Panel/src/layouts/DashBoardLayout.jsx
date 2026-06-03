@@ -37,7 +37,8 @@ const DashBoardLayout = () => {
     { name: "Customers", path: "/dashboard/customers" },
     { name: "Beats", path: "/dashboard/beats" },
     { name: "Map View", path: "/dashboard/map" },
-    { name: "Catalogue", path: "/dashboard/catalogue" }
+    { name: "Catalogue", path: "/dashboard/catalogue" },
+    { name: "Supply Chain", path: "/dashboard/supply-chain" }
   ];
 
   return (
