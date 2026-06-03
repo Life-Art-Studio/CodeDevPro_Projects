@@ -2,6 +2,7 @@ import { createContext, useState, useContext, useEffect } from "react";
 import StorageService from "../services/storageService";
 import { useAuth } from "./AuthContext";
 import { useAudit } from "./AuditContext";
+import { getOrderPaidAmount } from "../utils/financeUtils";
 
 const OrderContext = createContext([]);
 
@@ -106,18 +107,27 @@ export const OrderProvider = ({ children }) => {
   const [orders, setOrders] = useState([]);
 
   useEffect(() => {
-    const allOrders = StorageService.getOrders() ?? [];
-    if (currentUser?.role === "ADMIN") {
-      if (viewAsUserId) {
-        setOrders(allOrders.filter((o) => o.createdBy === viewAsUserId));
+    const handleOrdersUpdate = () => {
+      const allOrders = StorageService.getOrders() ?? [];
+      if (currentUser?.role === "ADMIN") {
+        if (viewAsUserId) {
+          setOrders(allOrders.filter((o) => o.createdBy === viewAsUserId));
+        } else {
+          setOrders(allOrders);
+        }
+      } else if (currentUser?.role === "SALES") {
+        setOrders(allOrders.filter((o) => o.createdBy === currentUser.id));
       } else {
-        setOrders(allOrders);
+        setOrders([]);
       }
-    } else if (currentUser?.role === "SALES") {
-      setOrders(allOrders.filter((o) => o.createdBy === currentUser.id));
-    } else {
-      setOrders([]);
-    }
+    };
+
+    handleOrdersUpdate();
+
+    window.addEventListener("orders:updated", handleOrdersUpdate);
+    return () => {
+      window.removeEventListener("orders:updated", handleOrdersUpdate);
+    };
   }, [currentUser, viewAsUserId]);
 
   const addOrder = (order) => {
@@ -157,9 +167,39 @@ export const OrderProvider = ({ children }) => {
       "Orders",
       `Updated order ${id} (Status: ${updatedOrder.status})`
     );
-    // Sync the merged order back to billing disabled to prevent duplicate invoices for retailer
-    // const original = allOrders.find((o) => o.id === id) || {};
-    // syncOrderToBilling({ ...original, ...updatedOrder });
+
+    // Sync payment details to any matching invoice in the billing system
+    try {
+      const existingInvoices = StorageService.getInvoices() || [];
+      let invoicesUpdated = false;
+      const updatedInvoices = existingInvoices.map((inv) => {
+        if (inv.sourceOrderId === id || inv.id === `BILL-${id}`) {
+          invoicesUpdated = true;
+          const totalPaid = Number(updatedOrder.paidAmount || 0);
+          const newInvStatus = updatedOrder.status === "Paid" ? "Paid" : (totalPaid > 0 ? "Partial" : "Unpaid");
+          
+          return {
+            ...inv,
+            amountPaid: totalPaid,
+            status: newInvStatus,
+            paymentHistory: (updatedOrder.payments || []).map(p => ({
+              amount: p.amount,
+              method: p.method || "Cash",
+              reference: p.id || "",
+              date: p.date || new Date().toISOString()
+            }))
+          };
+        }
+        return inv;
+      });
+
+      if (invoicesUpdated) {
+        StorageService.saveInvoices(updatedInvoices);
+        window.dispatchEvent(new CustomEvent("billing:invoices:updated"));
+      }
+    } catch (e) {
+      console.error("Failed to sync order payment update to billing:", e);
+    }
   };
 
   const clearAllOrders = () => {
