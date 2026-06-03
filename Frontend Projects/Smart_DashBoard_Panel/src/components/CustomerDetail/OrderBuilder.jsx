@@ -5,13 +5,69 @@ import BottomSheet from '../ui/BottomSheet';
 import { Plus, Trash2, Tag, ChevronDown, Package, Search } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import CustomSelect from '../ui/CustomSelect';
+import { useSupplyChainContext } from '../../context/SupplyChainContext';
+import { useProductContext } from '../../context/ProductContext';
+import toast from 'react-hot-toast';
 
 const OrderBuilder = ({ initialOrder, onSave, onCancel }) => {
   const { currentUser } = useAuth();
   const isReadOnly = currentUser?.role === 'ADMIN';
 
+  const { distributors, inventoryLedger } = useSupplyChainContext();
+  const { products } = useProductContext();
+
   const [activeOrder, setActiveOrder] = useState(initialOrder);
   const [isProductSheetOpen, setIsProductSheetOpen] = useState(false);
+
+  const getItemStockInfo = (item) => {
+    if (!activeOrder.distributorId) return null;
+    
+    let sku = item.sku;
+    if (!sku && item.name) {
+      const match = products.find(p => p.name.toLowerCase() === item.name.trim().toLowerCase());
+      if (match) sku = match.sku;
+    }
+    
+    if (!sku) return null;
+    
+    return inventoryLedger.find(
+      (entry) => entry.distributorId === activeOrder.distributorId && entry.sku === sku
+    ) || null;
+  };
+
+  const handleConfirmOrder = () => {
+    let finalOrder = { ...activeOrder };
+    let hasInsufficientStock = false;
+    let outOfStockNames = [];
+
+    finalOrder.items.forEach(item => {
+      if (finalOrder.distributorId) {
+        const stockInfo = getItemStockInfo(item);
+        const currentStock = stockInfo ? stockInfo.currentStock : 0;
+        if (item.qty > currentStock) {
+          hasInsufficientStock = true;
+          outOfStockNames.push(item.name || "Unnamed Product");
+        }
+      }
+    });
+
+    if (hasInsufficientStock) {
+      finalOrder.status = "Backordered";
+      const urgentNote = `URGENT: Quick restock required for [${outOfStockNames.join(", ")}] to fulfill order.`;
+      finalOrder.notes = finalOrder.notes 
+        ? `${finalOrder.notes}\n${urgentNote}` 
+        : urgentNote;
+
+      toast.error(
+        `⚠️ Order saved as BACKORDERED! Requires quick restock of: ${outOfStockNames.join(", ")}`,
+        { duration: 6000 }
+      );
+    } else {
+      toast.success("Order saved successfully.");
+    }
+
+    onSave(finalOrder);
+  };
 
   // --- Handlers ---
   const handleAddItem = () => {
@@ -32,6 +88,7 @@ const OrderBuilder = ({ initialOrder, onSave, onCancel }) => {
         ...prev.items,
         {
           id: Date.now(),
+          sku: product.sku,
           name: product.name,
           qty: 1,
           price: Number(pricing.retailerCost.toFixed(2)),
@@ -84,6 +141,32 @@ const OrderBuilder = ({ initialOrder, onSave, onCancel }) => {
         <div className="flex-1 min-w-0 min-h-0 overflow-y-auto pb-[240px] lg:pb-0 custom-scrollbar relative">
         <div className="p-3 lg:p-4 space-y-3 lg:space-y-4 min-w-0">
           
+          {/* Fulfilling Distributor Selection */}
+          <div className="bg-white dark:bg-[#1a1d27] border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-zinc-400 mb-1">
+                Fulfilling Distributor
+              </label>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                Select the distributor supplying stock for this billing order.
+              </p>
+            </div>
+            <div className="w-full md:w-64">
+              <CustomSelect
+                value={activeOrder.distributorId || ""}
+                onChange={(val) => {
+                  setActiveOrder(prev => ({ ...prev, distributorId: val }));
+                }}
+                disabled={isReadOnly}
+                className="w-full border border-zinc-200 dark:border-zinc-800 dark:bg-zinc-900 rounded-xl p-2.5 flex items-center justify-between outline-none cursor-pointer text-sm"
+                options={[
+                  { value: "", label: "-- Direct Corporate / None --" },
+                  ...distributors.map(db => ({ value: db.id, label: `${db.name} (${db.district})` }))
+                ]}
+              />
+            </div>
+          </div>
+          
           {activeOrder.items.length > 0 && (
             <>
             {/* Desktop Table View */}
@@ -113,6 +196,21 @@ const OrderBuilder = ({ initialOrder, onSave, onCancel }) => {
                           className="w-full text-sm font-semibold bg-transparent border-b border-transparent hover:border-dashed hover:border-zinc-300 dark:hover:border-zinc-700 focus:outline-none focus:border-indigo-500 pb-1 rounded-none text-zinc-900 dark:text-zinc-100 read-only:focus:border-transparent read-only:hover:border-transparent" 
                         />
                         {item.schemeInfo && <p className="text-[10px] text-indigo-600 dark:text-indigo-400 mt-1 font-medium">{item.schemeInfo}</p>}
+                        {(() => {
+                          if (activeOrder.distributorId) {
+                            const stockInfo = getItemStockInfo(item);
+                            const currentStock = stockInfo ? stockInfo.currentStock : 0;
+                            if (item.qty > currentStock) {
+                              const dbName = distributors.find(d => d.id === activeOrder.distributorId)?.name || "Distributor";
+                              return (
+                                <p className="text-[10px] text-red-500 dark:text-red-400 mt-1.5 font-bold flex items-center gap-1 bg-red-50 dark:bg-red-500/10 px-2 py-0.5 rounded border border-red-200 dark:border-red-500/20 w-fit">
+                                  ⚠️ Insufficient Stock at {dbName} (Available: {currentStock})
+                                </p>
+                              );
+                            }
+                          }
+                          return null;
+                        })()}
                       </td>
                       <td className="px-4 py-3">
                         <QuantityStepper value={item.qty} min={1} max={9999} onChange={(val) => handleItemChange(item.id, "qty", val)} disabled={isReadOnly} />
@@ -195,6 +293,21 @@ const OrderBuilder = ({ initialOrder, onSave, onCancel }) => {
                     className="w-full text-sm lg:text-base font-semibold bg-transparent border-b border-dashed border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-indigo-500 pb-1 rounded-none read-only:focus:border-transparent read-only:hover:border-transparent read-only:border-transparent" 
                   />
                   {item.schemeInfo && <p className="text-xs text-indigo-600 dark:text-indigo-400 mt-1 font-medium">{item.schemeInfo}</p>}
+                  {(() => {
+                    if (activeOrder.distributorId) {
+                      const stockInfo = getItemStockInfo(item);
+                      const currentStock = stockInfo ? stockInfo.currentStock : 0;
+                      if (item.qty > currentStock) {
+                        const dbName = distributors.find(d => d.id === activeOrder.distributorId)?.name || "Distributor";
+                        return (
+                          <p className="text-xs text-red-500 dark:text-red-400 mt-1.5 font-bold flex items-center gap-1 bg-red-50 dark:bg-red-500/10 px-2 py-0.5 rounded border border-red-200 dark:border-red-500/20 w-fit">
+                            ⚠️ Insufficient Stock at {dbName} (Available: {currentStock})
+                          </p>
+                        );
+                      }
+                    }
+                    return null;
+                  })()}
                 </div>
 
                 <div className="grid grid-cols-2 gap-3 lg:gap-4 mb-3 lg:mb-4">
@@ -296,7 +409,7 @@ const OrderBuilder = ({ initialOrder, onSave, onCancel }) => {
           <div className="hidden lg:flex flex-1 overflow-hidden flex-col mb-4">
              <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 mb-3 flex items-center gap-2 shrink-0"><Search className="w-4 h-4"/> Browse Catalogue</h3>
              <div className="flex-1 overflow-y-auto">
-               <ProductSuggestionPanel onAddProduct={handleAddProductFromCatalogue} />
+               <ProductSuggestionPanel onAddProduct={handleAddProductFromCatalogue} distributorId={activeOrder.distributorId} />
              </div>
           </div>
         )}
@@ -345,7 +458,7 @@ const OrderBuilder = ({ initialOrder, onSave, onCancel }) => {
 
           {!isReadOnly && (
             <button 
-              onClick={() => onSave(activeOrder)} 
+              onClick={handleConfirmOrder} 
               disabled={activeOrder.items.length === 0 || activeOrder.items.some(i => !i.name.trim())}
               className="flex-1 shrink-0 bg-indigo-600 text-white rounded-lg lg:rounded-xl py-2 lg:py-3.5 text-xs lg:text-base font-semibold hover:bg-indigo-700 shadow-[0_4px_12px_rgba(79,70,229,0.2)] transition-all min-h-[36px] lg:min-h-[52px] disabled:opacity-50 disabled:cursor-not-allowed"
             >
@@ -363,7 +476,7 @@ const OrderBuilder = ({ initialOrder, onSave, onCancel }) => {
           title="Catalogue"
           height="85vh"
         >
-          <ProductSuggestionPanel onAddProduct={handleAddProductFromCatalogue} />
+          <ProductSuggestionPanel onAddProduct={handleAddProductFromCatalogue} distributorId={activeOrder.distributorId} />
         </BottomSheet>
       </div>
 

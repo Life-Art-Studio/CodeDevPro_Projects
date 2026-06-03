@@ -1,6 +1,6 @@
 import BottomSheet from './ui/BottomSheet';
 import { NavLink } from 'react-router-dom';
-import { Users, FileText, BarChart, LogOut, MapPin, Wallet } from 'lucide-react';
+import { Users, FileText, BarChart, LogOut, MapPin, Wallet, Truck } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export default function MoreMenuSheet({ isOpen, onClose, menuItems }) {
@@ -18,6 +18,8 @@ export default function MoreMenuSheet({ isOpen, onClose, menuItems }) {
       case 'Sales': return <BarChart className="w-5 h-5" />;
       case 'Map View': return <MapPin className="w-5 h-5" />;
       case 'Collections': return <Wallet className="w-5 h-5" />;
+      case 'Supply Chain': return <Truck className="w-5 h-5" />;
+      case 'Billing': return <Wallet className="w-5 h-5" />;
       default: return <FileText className="w-5 h-5" />;
     }
   };

@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import CreateBeatModal from '../components/Beats/CreateBeatModal';
 import { useAuth } from '../context/AuthContext';
 import { MapPin, Route, Crosshair, X, Search, Navigation } from 'lucide-react';
+import { useSupplyChainContext } from '../context/SupplyChainContext';
 
 // Fix for default marker icons in React-Leaflet
 import L from 'leaflet';
@@ -20,6 +21,23 @@ let DefaultIcon = L.icon({
     iconAnchor: [12, 41]
 });
 L.Marker.prototype.options.icon = DefaultIcon;
+
+// Premium custom CSS DivIcons for Super Stockist and Distributor
+const superStockistDivIcon = L.divIcon({
+  className: 'custom-ss-marker',
+  html: `<div class="w-8 h-8 rounded-full bg-purple-600 border-2 border-white flex items-center justify-center shadow-lg text-white font-extrabold text-[10px] transform hover:scale-110 transition-transform">SS</div>`,
+  iconSize: [32, 32],
+  iconAnchor: [16, 16],
+  popupAnchor: [0, -16]
+});
+
+const distributorDivIcon = L.divIcon({
+  className: 'custom-db-marker',
+  html: `<div class="w-8 h-8 rounded-full bg-blue-500 border-2 border-white flex items-center justify-center shadow-lg text-white font-extrabold text-[10px] transform hover:scale-110 transition-transform">DB</div>`,
+  iconSize: [32, 32],
+  iconAnchor: [16, 16],
+  popupAnchor: [0, -16]
+});
 
 // Haversine formula to calculate distance in km
 const calculateDistance = (lat1, lon1, lat2, lon2) => {
@@ -72,6 +90,7 @@ const MapPage = () => {
   const { customers, updateCustomer } = useCustomerContext();
   const { addBeat } = useBeatContext();
   const { currentUser } = useAuth();
+  const { superStockists, distributors } = useSupplyChainContext();
   const navigate = useNavigate();
   const [mapCenter] = useState([20.5937, 78.9629]); // Default India center
   const [zoom] = useState(5);
@@ -279,6 +298,69 @@ const MapPage = () => {
           {polylinePositions.length >= 2 && (
             <Polyline positions={polylinePositions} pathOptions={{ color: '#4f46e5', dashArray: '10, 10', weight: 4 }} />
           )}
+
+          {/* Plot Super Stockists */}
+          {superStockists.map(ss => {
+            if (ss.lat && ss.lng) {
+              return (
+                <Marker 
+                  key={ss.id} 
+                  position={[ss.lat, ss.lng]} 
+                  icon={superStockistDivIcon}
+                >
+                  <Popup>
+                    <div className="p-1">
+                      <h3 className="font-bold text-purple-700">{ss.name}</h3>
+                      <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Super Stockist</p>
+                      <p className="text-xs text-zinc-600 mt-1">Region: {ss.state}</p>
+                      <p className="text-xs text-zinc-600 font-medium">Phone: {ss.contactPhone}</p>
+                      <p className="text-xs text-zinc-600 font-medium">Email: {ss.email}</p>
+                      <div className="border-t border-zinc-100 dark:border-zinc-800 pt-2 mt-2 space-y-1">
+                        <div className="flex justify-between text-xs text-zinc-600 dark:text-zinc-400"><span>Total Billed:</span><span className="font-bold text-zinc-950 dark:text-zinc-100">₹{ss.totalBilled?.toLocaleString()}</span></div>
+                        <div className="flex justify-between text-xs text-amber-600"><span>Outstanding:</span><span className="font-bold">₹{ss.outstandingBalance?.toLocaleString()}</span></div>
+                      </div>
+                    </div>
+                  </Popup>
+                </Marker>
+              );
+            }
+            return null;
+          })}
+
+          {/* Plot Distributors & Mapped Polylines */}
+          {distributors.map(db => {
+            if (db.lat && db.lng) {
+              const parentSS = superStockists.find(ss => ss.id === db.superStockistId);
+              const ssPosition = parentSS && parentSS.lat && parentSS.lng ? [parentSS.lat, parentSS.lng] : null;
+
+              return (
+                <React.Fragment key={db.id}>
+                  <Marker 
+                    position={[db.lat, db.lng]} 
+                    icon={distributorDivIcon}
+                  >
+                    <Popup>
+                      <div className="p-1">
+                        <h3 className="font-bold text-blue-600">{db.name}</h3>
+                        <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Distributor ({db.district})</p>
+                        <p className="text-xs text-zinc-600 mt-1">Parent SS: {parentSS ? parentSS.name : "None"}</p>
+                        <p className="text-xs text-zinc-600">Phone: {db.contactPhone}</p>
+                      </div>
+                    </Popup>
+                  </Marker>
+                  
+                  {/* Faint dashed connecting polyline to parent Super Stockist */}
+                  {ssPosition && (
+                    <Polyline 
+                      positions={[[db.lat, db.lng], ssPosition]} 
+                      pathOptions={{ color: '#8b5cf6', dashArray: '5, 5', weight: 2, opacity: 0.6 }} 
+                    />
+                  )}
+                </React.Fragment>
+              );
+            }
+            return null;
+          })}
 
           {customers.map(customer => {
             // Only render if customer has valid lat/lng

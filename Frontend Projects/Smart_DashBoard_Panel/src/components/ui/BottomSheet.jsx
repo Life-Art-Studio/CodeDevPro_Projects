@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 export default function BottomSheet({ isOpen, onClose, title, children, height = '70vh' }) {
   const sheetRef = useRef(null);
@@ -44,8 +45,8 @@ export default function BottomSheet({ isOpen, onClose, title, children, height =
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-60 flex flex-col justify-end">
+  return createPortal(
+    <div className="fixed inset-0 z-[120] flex flex-col justify-end">
       {/* Backdrop */}
       <div 
         className="absolute inset-0 bg-black/40 transition-opacity"
@@ -55,7 +56,7 @@ export default function BottomSheet({ isOpen, onClose, title, children, height =
       {/* Sheet */}
       <div 
         ref={sheetRef}
-        className="relative bg-white dark:bg-[#1a1d27] w-full rounded-t-2xl shadow-[0_-16px_40px_rgba(0,0,0,0.12)] flex flex-col animate-slide-up-sheet border-t border-zinc-200 dark:border-zinc-800"
+        className="relative bg-white dark:bg-[#1a1d27] w-full md:w-[calc(100%-16rem)] md:ml-64 rounded-t-2xl shadow-[0_-16px_40px_rgba(0,0,0,0.12)] flex flex-col animate-slide-up-sheet border-t border-zinc-200 dark:border-zinc-800"
         style={{ 
           maxHeight: height,
           transform: `translateY(${currentY}px)`,
@@ -84,6 +85,7 @@ export default function BottomSheet({ isOpen, onClose, title, children, height =
           {children}
         </div>
       </div>
-    </div>
+    </div>,
+    document.getElementById("PopModal")
   );
 }
