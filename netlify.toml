@@ -4,6 +4,12 @@
   command = "npm run build"
 
 [[redirects]]
+  from = "/Frontend%20Projects/Smart_DashBoard_Panel/dist/index.html"
+  to = "/"
+  status = 301
+  force = true
+
+[[redirects]]
   from = "/Frontend Projects/Smart_DashBoard_Panel/dist/index.html"
   to = "/"
   status = 301
