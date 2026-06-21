@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Search Users</title>
+</head>
+
+<body>
+    <div class="container">
+
+        <!-- Search Bar -->
+        <div class="search-wrapper">
+            <input type="text" id="searchInput" placeholder="Search users..." class="search-input" />
+        </div>
+
+        <!-- Cards Container -->
+        <div id="usersContainer" class="cards-container">
+
+            <!-- User Card -->
+            <div class="user-card">
+
+                <!-- Card Header (Always Visible) -->
+                <div class="card-header">
+
+                    <div class="user-basic">
+                        <img src="https://randomuser.me/api/portraits/men/1.jpg" class="avatar" />
+
+                        <div class="user-info">
+                            <h3 class="user-name">Aarav Sharma</h3>
+                            <p class="user-role">Frontend Developer</p>
+                        </div>
+                    </div>
+
+                    <button class="toggle-btn">
+                        ▼
+                    </button>
+
+                </div>
+
+                <!-- Collapsible Section -->
+                <div class="card-body">
+
+                    <p class="company">
+                        <strong>Company:</strong> TechNova
+                    </p>
+
+                    <p class="location">
+                        <strong>Location:</strong> Delhi, India
+                    </p>
+
+                    <div class="stats">
+                        <span>Followers: 1200</span>
+                        <span>Following: 300</span>
+                        <span>Posts: 45</span>
+                    </div>
+
+                    <button class="view-profile">
+                        View Profile
+                    </button>
+
+                </div>
+
+            </div>
+            <!-- End User Card -->
+
+        </div>
+
+    </div>
+    <footer class="footer">
+        <div class="footer-content">
+
+            <!-- Brand / Logo -->
+            <div class="brand">
+                <h2>CodeDevPro</h2>
+                <p>&copy; 2026 CodeDevPro. All Rights Reserved.</p>
+            </div>
+
+
+
+            <!-- Social Icons -->
+            <div class="footer-social">
+                <a href="#"><i class="fab fa-facebook-f"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+            </div>
+
+        </div>
+    </footer>
+</body>
+
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+    <script src="app.js" defer></script>
+    <title>Bill Splitter</title>
+  </head>
+  <body>
+    <div class="app-container">
+      <div class="input-container">
+        <h3>Bill</h3>
+        <div class="input">
+          <span id="symbol">&#8377;</span>
+          <input type="number" id="input-bill"/>
+        </div>
+        <div class="tip-selector">
+          <div class="defined">
+            <span>5%</span>
+            <span>10%</span>
+            <span>15%</span>
+            <span>25%</span>
+            <span>50%</span>
+            <span>75%</span>
+          </div>
+          <div class="custom-tip">
+            <input type="number" placeholder="Custom Tip" id="custom-tip" />
+          </div>
+        </div>
+        <div class="people-selector">
+          <h3>Number Of People</h3>
+          <input type="number" placeholder="No. of people"  id="people"/>
+        </div>
+        <div class="generate-btn">
+          <button id="bill-btn">Generate Bill</button>
+        </div>
+      </div>
+      <div class="output-container">
+        <div>
+          <h3>Tip Amount</h3>
+          <span id="tip-amount">₹ 0</span>
+        </div>
+        <div>
+          <h3>Total</h3>
+          <span id="total">₹ 1000</span>
+        </div>
+        <div>
+          <h3>Each Person Bill</h3>
+          <span id="each-bill">₹ 100</span>
+        </div>
+        <div><button id="reset">Reset</button></div>
+      </div>
+    </div>
+  </body>
+</html>

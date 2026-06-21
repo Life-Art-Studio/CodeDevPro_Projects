@@ -1,0 +1,9 @@
+ALTER TABLE public.customers ALTER COLUMN id SET DEFAULT gen_random_uuid();
+ALTER TABLE public.orders ALTER COLUMN id SET DEFAULT gen_random_uuid();
+ALTER TABLE public.products ALTER COLUMN id SET DEFAULT gen_random_uuid();
+ALTER TABLE public.visits ALTER COLUMN id SET DEFAULT gen_random_uuid();
+ALTER TABLE public.beats ALTER COLUMN id SET DEFAULT gen_random_uuid();
+ALTER TABLE public.super_stockists ALTER COLUMN id SET DEFAULT gen_random_uuid();
+ALTER TABLE public.distributors ALTER COLUMN id SET DEFAULT gen_random_uuid();
+ALTER TABLE public.inventory_ledger ALTER COLUMN id SET DEFAULT gen_random_uuid();
+ALTER TABLE public.invoices ALTER COLUMN id SET DEFAULT gen_random_uuid();

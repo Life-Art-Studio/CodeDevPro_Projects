@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="app.css" />
+    <script src="app.js" defer></script>
+    <title>MoneyTracker By CodeDevPro</title>
+  </head>
+  <body>
+    <div id="forms-container" class="login-page">
+      <div class="heading">
+        <h1>
+          Welcome <span>to</span>
+          <h2>Money<span>Trackr</span></h2>
+        </h1>
+      </div>
+      <div class="details-section">
+        <form action="#dashboard" id="login-form">
+          <input id="login-user" type="text" placeholder="username" />
+          <input id="login-pass" type="password" placeholder="password" />
+          <button id="login-btn">Log In</button>
+        </form>
+
+        <span class="signup">Register Now</span>
+
+        <form action="index.html" id="signup-form">
+          <input id="signup-user" type="text" placeholder="username" />
+          <input
+            type="password"
+            name="password"
+            id="signup-pass"
+            placeholder="password"
+          />
+          <input
+            type="password"
+            name="password"
+            id="signup-confirm"
+            placeholder="confirm password"
+          />
+          <input id="cC" type="password" placeholder="company-code"  />
+          <button id="signup">Sign Up</button>
+        </form>
+        <span class="signin">Login Now</span>
+      </div>
+    </div>
+
+    <!-- login page end -->
+
+    <!-- main app here -->
+    <div id="dashboard">
+      <div class="sidebar">
+        <header>
+          <h1>Money<span>Trackr</span></h1>
+        </header>
+        <div class="nav">
+          <ul>
+            <li><img src="/Assets/dashboard.png" alt="" />Dashboard</li>
+            <li><img src="/Assets/add.png" alt="" />Add new</li>
+            <li><img src="/Assets/transaction.png" alt="" />Transactions</li>
+            <li><img src="/Assets/user.png" alt="" />Account</li>
+          </ul>
+        </div>
+        <div class="accounts">
+          <div class="logOut">
+            <span> <img src="/Assets/logout.png" alt="" /> Log out</span>
+          </div>
+        </div>
+      </div>
+      <div class="main-dash">
+        <header id="dash-header">
+          <h1>
+            Hi,
+            <span id="user-display-name">Adil khan</span>
+          </h1>
+        </header>
+        <div class="expenses-total">
+          <div class="expense">
+            <div class="heading">
+              <h4>Expenses Overview</h4>
+              <button id="change-budget">Change Budget</button>
+            </div>
+           <div class="details">
+             <div id="your-bal">
+              <h4>Your Balance</h4>
+              <h1>20000/-</h1>
+            </div>
+            <div id="last6month-spending">
+              <h4>Last 6 Months</h4>
+              <h1>40000/-</h1>
+            </div>
+            <div id="permonth">
+              <h4>Per Month</h4>
+              <h1>10000/-</h1>
+            </div>
+           </div>
+          </div>
+          <div class="total-pie-chart">
+            <h2>Total</h2>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

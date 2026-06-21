@@ -1,0 +1,119 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  overflow-x: hidden;
+}
+.app-container {
+  background: #000;
+  color: white;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: space-evenly;
+}
+.app-container header {
+  font-size: 28px;
+  background-color: #fff;
+  color: black;
+  padding: 10px 20px;
+  box-shadow: inset 0px 2px 4px;
+  border-radius: 10px 10px 0px 0px;
+}
+.app-container .select-list {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 0px 20px;
+  margin-block: 20px;
+  & > select {
+    width: 100%;
+    font-size: 20px;
+    padding: 10px 20px;
+    margin-block: 20px;
+    border-radius: 10px;
+    box-shadow: inset 0px 2px 4px;
+  }
+}
+.app-container input {
+  width: 100%;
+  padding: 10px 20px;
+  font-size: 20px;
+  border: none;
+  outline: none;
+  box-shadow: inset 0px 4px 4px;
+}
+.app-container button {
+  padding: 10px 20px;
+  margin: 20px;
+  font-size: 20px;
+  transition: ease-in-out all 0.2s;
+  outline: none;
+  border: none;
+  cursor: pointer;
+  -webkit-transition: ease-in-out all 0.2s;
+  -moz-transition: ease-in-out all 0.2s;
+  -ms-transition: ease-in-out all 0.2s;
+  -o-transition: ease-in-out all 0.2s;
+}
+.app-container button:hover {
+  background: #6b6b6b;
+  color: rgb(255, 255, 255);
+  transition: ease-in-out all 0.2s;
+  box-shadow: 0px 2px 4px white;
+}
+.app-container button:active {
+  scale: 0.8;
+}
+#toast-1,
+#toast-2,
+#toast-3,
+#toast-4 {
+  min-width: 200px;
+  background-color: whitesmoke;
+  box-shadow: #000 0px 2px 4px;
+  padding: 10px 20px;
+  border-radius: 10px;
+  transition: all ease-in-out 0.3s;
+}
+.top-left {
+  position: absolute;
+  top: 50px;
+  left: -250px;
+}
+
+.top-right {
+  position: absolute;
+  top: 50px;
+  right: -250px;
+}
+.top-right.active {
+  transform: translateX(-300px);
+}
+.bottom-left {
+  position: absolute;
+  bottom: 50px;
+  left: -250px;
+}
+.top-left.active {
+  transform: translateX(300px);
+}
+.bottom-left.active {
+  transform: translateX(300px);
+}
+.bottom-right{
+    position: absolute;
+  bottom: 50px;
+  right: -250px;
+}
+.bottom-right.active{
+     transform: translateX(-300px);
+}

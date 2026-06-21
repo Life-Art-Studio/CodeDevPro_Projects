@@ -1,0 +1,94 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+body{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: #f0f0f0;
+    font-family: Arial, sans-serif;
+}
+.app{
+    text-align: center;
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgb(255, 0, 0);
+    width: 100%;
+    margin: 0 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-self: center;
+    transition: all 0.3s ease-in-out;
+    -webkit-transition: all 0.3s ease-in-out;
+    -moz-transition: all 0.3s ease-in-out;
+    -ms-transition: all 0.3s ease-in-out;
+    -o-transition: all 0.3s ease-in-out;
+}
+header{
+    margin-bottom: 30px;
+    width: 100%;
+}
+h1{
+    margin-bottom: 30px;
+    color: #333;
+    font-size: clamp(12px, 3vw, 52px);
+    border-bottom: 1px solid #000000;
+    padding-bottom: 10px;
+}
+.progress-bar{
+    position: relative;
+    width: 600px;
+    height: 30px;
+    background: #e0e0e0;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: inset 2px 2px 6px 1px rgba(0, 0, 0, 0.998),
+                inset -2px -2px 6px 0px rgba(255, 255, 255, 0.998)
+}
+.progress{
+    height: 100%;
+    width: 0;
+    background: #76c7c0;
+    border-radius: 15px 0 0 15px;
+    transition: all 0.5s ease-in-out;
+    -webkit-transition: all 0.5s ease-in-out;
+    -moz-transition: all 0.5s ease-in-out;
+    -ms-transition: all 0.5s ease-in-out;
+    -o-transition: all 0.5s ease-in-out;
+    box-shadow: inset 2px 2px 6px 1px rgba(0, 0, 0, 0.998),
+                inset -2px -2px 6px 0px rgba(255, 255, 255, 0.998);
+}
+.btn{
+    display: flex;
+    gap: 30px;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn button{
+    background: #76c7c0;
+     margin-top: 20px;
+    padding: 10px 20px;
+    font-size: 20px;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+
+}
+.btn button:hover{
+    background: #5aa9a4;
+}
+.btn button:disabled{
+    background: #ccc;
+    cursor: not-allowed;
+}
+.btn button:active{
+    transform: scale(0.98);
+}

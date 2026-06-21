@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
+    />
+    <script src="script.js" defer></script>
+    <title>Advanced Form System</title>
+  </head>
+  <body>
+    <div class="container">
+      <div class="text-center">
+        <h1>Welcome Back</h1>
+        <p>
+          Please enter your details to
+          <span class="highlight">access the dashboard</span>.
+        </p>
+      </div>
+
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input
+            type="text"
+            id="username"
+            name="username"
+            placeholder="you@example.com"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            placeholder="••••••••"
+            required
+          />
+          <div class="text-right mt-1">
+            <a
+              id="forgot-password"
+              href="#"
+              style="
+                color: var(--primary-color);
+                font-size: 0.875rem;
+                text-decoration: none;
+              "
+              >Forgot password?</a
+            >
+            <div id="recover-popup">
+              <form action="">
+                <i id="close-popup" class="fa-solid fa-xmark"></i>
+                <input
+                  type="text"
+                  id="recover-username"
+                  placeholder="Username"
+                  required
+                />
+                <input
+                  type="password"
+                  id="recover-password"
+                  placeholder="Secret Key"
+                  required
+                />
+                <button type="submit" id="recover-btn">Recover</button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <button
+            type="submit"
+            id="main-login-btn"
+            class="btn btn-primary"
+            style="width: 100%"
+          >
+            Sign In
+          </button>
+        </div>
+
+        <div class="text-center mt-4" id="login-text">
+          <p class="text-sm">
+            Don't have an account?
+            <a
+              href="#"
+              id="register-a"
+              class="highlight"
+              style="text-decoration: none"
+              >Sign up</a
+            >
+          </p>
+        </div>
+      </form>
+      <form id="registerForm">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input
+            type="text"
+            id="username"
+            name="username"
+            placeholder="you@example.com"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            placeholder="••••••••"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <button
+            type="submit"
+            id="main-register-btn"
+            class="btn btn-primary"
+            style="width: 100%"
+          >
+            Sign Up
+          </button>
+        </div>
+        <div class="text-center mt-4">
+          <p class="text-sm">
+            Already have an account?
+            <a
+              href="#"
+              class="highlight"
+              id="login-a"
+              style="text-decoration: none"
+              >Sign in</a
+            >
+          </p>
+        </div>
+      </form>
+    </div>
+    <footer class="copyright">
+      &copy; 2026 CodeDevPro. All rights reserved.
+    </footer>
+  </body>
+</html>

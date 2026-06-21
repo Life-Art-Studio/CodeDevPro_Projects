@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
+  <script src="script.js" defer ></script>
+  <title>Advanced Weather By CodeDevPro</title>
+</head>
+
+<body>
+  <div class="app-container">
+    <div class="bg">
+      <img src="/assests/bg.png" alt="" />
+      <img class="house" src="/assests/House.png" alt="" />
+    </div>
+    <div class="temp">
+      <div id="temp-img"> </div>
+      <div class="temp-location"><span></span></div>
+      <div class="temp-value"><span></span></div>
+      <div class="temp-weather"><span></span></div>
+    </div>
+    <div class="bottom-container">
+      <button id="open-close"></button>
+      <div class="btns">
+        <button id="hourly-btn" class="selected">Hourly Forecast</button>
+        <button id="weekly-btn">Weekly Forecast</button>
+      </div>
+      <div class="forecast-corousal">
+        <!-- Hourly and Weekly Forecast will go here -->
+        <div id="hourly">
+
+          <div  class="hour9">
+            <h4 id="hour-1"></h4>
+            <img class="time-img" id="time-1" src="/assests/Moon cloud mid rain.png" alt="" />
+            <span id="temp-9pm"><span>°C</span></span>
+          </div>
+
+          <div class="hour12">
+            <h4 id="hour-2"></h4>
+            <img class="time-img" id="time-2" src="/assests/Moon cloud mid rain.png" alt="" />
+            <span id="temp-12am"><span>°C</span></span>
+          </div>
+
+          <div class="hour3">
+            <h4 id="hour-3"></h4>
+            <img class="time-img" id="time-3" src="/assests/Moon cloud mid rain.png" alt="" />
+            <span id="temp-3am"><span>°C</span></span>
+          </div>
+
+          <div class="hour6">
+            <h4 id="hour-4"></h4>
+            <img class="time-img" id="time-4" src="/assests/Moon cloud mid rain.png" alt="" />
+            <span id="temp-6am"><span>°C</span></span>
+          </div>
+
+          <div class="hour9">
+            <h4 id="hour-5"></h4>
+            <img class="time-img" id="time-5" src="/assests/Moon cloud mid rain.png" alt="" />
+            <span id="temp-9am"><span>°C</span></span>
+          </div>
+
+          <div class="hour12">
+            <h4 id="hour-6"></h4>
+            <img class="time-img" id="time-6" src="/assests/Moon cloud mid rain.png" alt="" />
+            <span id="temp-12pm"><span>°C</span></span>
+          </div>
+
+          <div class="hour3">
+            <h4 id="hour-7"></h4>
+            <img class="time-img" id="time-7" src="/assests/Moon cloud mid rain.png" alt="" />
+            <span id="temp-3pm"><span>°C</span></span>
+          </div>
+
+          <div class="hour6">
+            <h4 id="hour-8"></h4>
+            <img class="time-img" id="time-8" src="/assests/Moon cloud mid rain.png" alt="" />
+            <span id="temp-6pm"><span>°C</span></span>
+          </div>
+        </div>
+
+        <div id="weekly">
+          <div class="day2">
+            <h4 id="day-1"></h4>
+            <img src="/assests/Moon cloud mid rain.png" alt="" />
+            <span id="temp-day1"><span>°C</span></span>
+          </div>
+          <div class="day3">
+            <h4 id="day-2"></h4>
+            <img src="/assests/Moon cloud mid rain.png" alt="" />
+            <span id="temp-day2"><span>°C</span></span>
+          </div>
+          <div class="day4">
+            <h4 id="day-3"></h4>
+            <img src="/assests/Moon cloud mid rain.png" alt="" />
+            <span id="temp-day3"><span>°C</span></span>
+          </div>
+          <div class="day5">
+            <h4 id="day-4"></h4>
+            <img src="/assests/Moon cloud mid rain.png" alt="" />
+            <span id="temp-day4"><span>°C</span></span>
+          </div>
+          <div class="day6">
+            <h4 id="day-5"></h4>
+            <img src="/assests/Moon cloud mid rain.png" alt="" />
+            <span id="temp-day5"><span>°C</span></span>
+          </div>
+          <div class="day7">
+            <h4 id="day-6"></h4>
+            <img src="/assests/Moon cloud mid rain.png" alt="" />
+            <span id="temp-day6"><span>°C</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="add-section">
+        <button id="location-btn">&#128205;</button>
+        <button id="list-btn">&#9776;</button>
+      </div>
+    </div>
+    <div class="main-search-bar">
+      <form action="">
+        <input autocomplete="off" type="text" id="search-input" placeholder="Search for a city or location" />
+        <button id="search-btn">&#128269;</button>
+      </form>
+      <div id="suggestions"><ul></ul></div>
+    </div>
+    <div class="saved-weather-panel">
+      <header>
+        <div class="back-btn"><</div>
+            <h4>Saved Locations</h4>
+            <div id="remove"><span>&#10006;</span>
+           </div>
+            
+      </header>
+      <form id="saved-form" action="">
+        <input type="text" id="save-location-input" placeholder="Enter location to save" />
+        <button id="save-location-btn">&#128190;</button>
+      </form>
+      <!-- Saved locations will be added here -->
+      <div class="locations">
+        <!-- <div id="location">
+          <div class="card-bg"><img src="/assests/Rectangle.png" alt=""></div>
+          <span class="remove-btn">&#10006;</span>
+          <div class="location-info">
+            <h4>New York</h4>
+            <span id="location-temp">22°</span>
+            <div class="weather-img"><img src="/assests/Moon cloud mid rain big.png" alt=""></div>
+          </div>
+        </div> -->
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>

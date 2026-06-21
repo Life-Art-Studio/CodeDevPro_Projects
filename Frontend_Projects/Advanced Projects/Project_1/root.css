@@ -1,0 +1,53 @@
+:root {
+  /* Nebula Neon Theme - Cyber/Space Aesthetic */
+  --bg-gradient: linear-gradient(
+    135deg,
+    #0f0c29 0%,
+    #302b63 50%,
+    #24243e 100%
+  ); /* Deep Space Midnight */
+  --glass-bg: rgba(17, 25, 40, 0.75); /* Darker, richer glass */
+  --glass-border: rgba(255, 255, 255, 0.125); /* Crisp edge */
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5); /* Deeper shadow */
+
+  --text-glass: #ffffff;
+  --text-glass-secondary: #94a3b8; /* Slate-400 */
+  --text-main: #ffffff; /* Mapping for legacy support */
+  --text-secondary: #94a3b8; /* Mapping for legacy support */
+
+  --primary-gradient: linear-gradient(
+    90deg,
+    #00c6ff 0%,
+    #0072ff 100%
+  ); /* Electric Blue */
+  --primary-glow: rgba(0, 198, 255, 0.6);
+  --primary-color: #00c6ff; /* Mapping for legacy support */
+  --primary-hover: #0072ff; /* Mapping for legacy support */
+
+  --error-color: #ef4444;
+  --success-color: #10b981;
+  --focus-ring: rgba(0, 198, 255, 0.5);
+
+  --bg-body: #0f0c29; /* Fallback */
+  --bg-card: rgba(17, 25, 40, 0.75);
+  --border-color: rgba(255, 255, 255, 0.125);
+
+  --text-inverse: #000000;
+
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --inner-shadow-depth:
+    inset 0 2px 4px 0 rgb(0 0 0 / 0.15), inset 0 6px 12px 0 rgb(0 0 0 / 0.1);
+
+  --radius-md: 0.75rem; /* 12px */
+  --radius-lg: 1.25rem; /* 20px */
+}
+
+/* Reset & Base Styles */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
