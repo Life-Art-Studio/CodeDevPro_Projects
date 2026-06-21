@@ -3,7 +3,7 @@
 import { getFallbackProducts } from "../utils/sectorConfig";
 
 // Hardcoded OpenRouter API Key and Model as requested
-const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
+
 const OPENROUTER_MODEL = "google/gemma-4-31b-it:free";
 
 // Track last request time to enforce 5-second rate-limiting debounce
@@ -57,14 +57,11 @@ Return ONLY a valid JSON array. Do not return any introductory text, notes, mark
     let responseJson = null;
 
     try {
-      const endpoint = "https://openrouter.ai/api/v1/chat/completions";
+      const endpoint = "/.netlify/functions/openrouter-proxy";
       const response = await fetch(endpoint, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-          "HTTP-Referer": window.location.origin || "http://localhost:5173",
-          "X-Title": "Smart SaaS Dashboard"
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({
           model: OPENROUTER_MODEL,
@@ -165,14 +162,11 @@ Return ONLY the raw JSON array. No markdown blocks or explanations.`;
     const userPrompt = `Sector: ${sectorId}. Valid Sub-categories: ${subCategories.join(", ")}.\nProducts to categorize:\n${JSON.stringify(simpleProductData)}`;
 
     try {
-      const endpoint = "https://openrouter.ai/api/v1/chat/completions";
+      const endpoint = "/.netlify/functions/openrouter-proxy";
       const response = await fetch(endpoint, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-          "HTTP-Referer": window.location.origin || "http://localhost:5173",
-          "X-Title": "Smart SaaS Dashboard"
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({
           model: OPENROUTER_MODEL,
