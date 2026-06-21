@@ -3,7 +3,7 @@
 import { getFallbackProducts } from "../utils/sectorConfig";
 
 // Hardcoded OpenRouter API Key and Model as requested
-const OPENROUTER_API_KEY = atob("***REMOVED***");
+const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
 const OPENROUTER_MODEL = "google/gemma-4-31b-it:free";
 
 // Track last request time to enforce 5-second rate-limiting debounce
